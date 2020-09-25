@@ -143,7 +143,7 @@ async fn dispatch_error(ctx: &Context, msg: &Message, error: DispatchError) {
 async fn main() {
     // Configure the client with your Discord bot token in the environment.
     let token = env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
-    let prefix = env::var("MAID_PREFIX").unwrap_or("!");
+    let prefix = env::var("MAID_PREFIX").unwrap_or("!".into());
 
     let http = Http::new_with_token(&token);
 
@@ -166,7 +166,7 @@ async fn main() {
         .configure(|c| {
             c.with_whitespace(true)
                 .on_mention(Some(bot_id))
-                .prefix(prefix)
+                .prefix(&prefix)
                 // In this case, if "," would be first, a message would never
                 // be delimited at ", ", forcing you to trim your arguments if you
                 // want to avoid whitespaces at the start of each.
@@ -175,36 +175,13 @@ async fn main() {
                 // are owners only.
                 .owners(owners)
         })
-        // Set a function to be called prior to each command execution. This
-        // provides the context of the command, the message that was received,
-        // and the full name of the command that will be called.
-        //
-        // You can not use this to determine whether a command should be
-        // executed. Instead, the `#[check]` macro gives you this functionality.
-        //
-        // **Note**: Async closures are unstable, you may use them in your
-        // application if you are fine using nightly Rust.
-        // If not, we need to provide the function identifiers to the
-        // hook-functions (before, after, normal, ...).
         .before(before)
-        // Similar to `before`, except will be called directly _after_
-        // command execution.
         .after(after)
-        // Set a function that's called whenever an attempted command-call's
-        // command could not be found.
         .unrecognised_command(unknown_command)
-        // Set a function that's called whenever a message is not a command.
         .normal_message(normal_message)
-        // Set a function that's called whenever a command's execution didn't complete for one
-        // reason or another. For example, when a user has exceeded a rate-limit or a command
-        // can only be performed by the bot owner.
         .on_dispatch_error(dispatch_error)
-        // Can't be used more than 2 times per 30 seconds, with a 5 second delay:
         .bucket("complicated", |b| b.delay(5).time_span(30).limit(2))
         .await
-        // The `#[group]` macro generates `static` instances of the options set for the group.
-        // They're made in the pattern: `#name_GROUP` for the group instance and `#name_GROUP_OPTIONS`.
-        // #name is turned all uppercase
         .help(&MY_HELP)
         .group(&META_GROUP)
         .group(&RANDOM_GROUP);
