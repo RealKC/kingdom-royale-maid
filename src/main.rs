@@ -143,6 +143,7 @@ async fn dispatch_error(ctx: &Context, msg: &Message, error: DispatchError) {
 async fn main() {
     // Configure the client with your Discord bot token in the environment.
     let token = env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
+    let prefix = env::var("MAID_PREFIX").unwrap_or("!");
 
     let http = Http::new_with_token(&token);
 
@@ -165,7 +166,7 @@ async fn main() {
         .configure(|c| {
             c.with_whitespace(true)
                 .on_mention(Some(bot_id))
-                .prefix("~")
+                .prefix(prefix)
                 // In this case, if "," would be first, a message would never
                 // be delimited at ", ", forcing you to trim your arguments if you
                 // want to avoid whitespaces at the start of each.
