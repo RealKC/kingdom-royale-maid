@@ -1,13 +1,14 @@
 use serenity::prelude::*;
 use serenity::{
-    framework::standard::{macros::command, CommandResult},
-    utils::ContentSafeOptions,
+    framework::standard::{macros::command, Args, CommandResult},
+    model::channel::Message,
+    utils::{ContentSafeOptions, content_safe},
 };
 
 // Repeats what the user passed as argument but ensures that user and role
 // mentions are replaced with a safe textual alternative.
 #[command]
-async fn say(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
+pub async fn say(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let settings = if let Some(guild_id) = msg.guild_id {
         // By default roles, users, and channel mentions are cleaned.
         ContentSafeOptions::default()

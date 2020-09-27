@@ -37,7 +37,9 @@ use serenity::prelude::*;
 use tokio::sync::Mutex;
 
 mod commands;
-use commands::{random::*, stats::*};
+use commands::{meta::*, random::*, stats::*};
+
+mod game;
 
 // A container type is created for inserting into the Client's `data`, which
 // allows for data to be accessible across all events and framework commands, or
@@ -46,12 +48,6 @@ struct ShardManagerContainer;
 
 impl TypeMapKey for ShardManagerContainer {
     type Value = Arc<Mutex<ShardManager>>;
-}
-
-struct CommandCounter;
-
-impl TypeMapKey for CommandCounter {
-    type Value = HashMap<String, u64>;
 }
 
 struct Handler;
@@ -183,8 +179,6 @@ async fn main() {
         .unrecognised_command(unknown_command)
         .normal_message(normal_message)
         .on_dispatch_error(dispatch_error)
-        .bucket("stats", |b| b.delay(5).time_span(30).limit(2))
-        .await
         .help(&MY_HELP)
         .group(&META_GROUP)
         .group(&RANDOM_GROUP);
@@ -205,10 +199,3 @@ async fn main() {
         println!("Client error: {:?}", why);
     }
 }
-
-
-
-
-
-
-
