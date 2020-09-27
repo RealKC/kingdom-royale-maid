@@ -36,6 +36,9 @@ use std::{
 use serenity::prelude::*;
 use tokio::sync::Mutex;
 
+mod commands;
+use commands::{random::*, stats::*};
+
 // A container type is created for inserting into the Client's `data`, which
 // allows for data to be accessible across all events and framework commands, or
 // anywhere else that has a copy of the `data` Arc.
@@ -66,7 +69,7 @@ impl EventHandler for Handler {
 struct Meta;
 
 #[group]
-#[commands(say)]
+#[commands(say, commands)]
 struct Random;
 
 #[help]
@@ -180,7 +183,7 @@ async fn main() {
         .unrecognised_command(unknown_command)
         .normal_message(normal_message)
         .on_dispatch_error(dispatch_error)
-        .bucket("complicated", |b| b.delay(5).time_span(30).limit(2))
+        .bucket("stats", |b| b.delay(5).time_span(30).limit(2))
         .await
         .help(&MY_HELP)
         .group(&META_GROUP)
@@ -203,66 +206,9 @@ async fn main() {
     }
 }
 
-// Commands can be created via the attribute `#[command]` macro.
-#[command]
-// Options are passed via subsequent attributes.
-// Make this command use the "complicated" bucket.
-#[bucket = "complicated"]
-async fn commands(ctx: &Context, msg: &Message) -> CommandResult {
-    let mut contents = "Commands used:\n".to_string();
 
-    let data = ctx.data.read().await;
-    let counter = data
-        .get::<CommandCounter>()
-        .expect("Expected CommandCounter in TypeMap.");
 
-    for (k, v) in counter {
-        let _ = write!(contents, "- {name}: {amount}\n", name = k, amount = v);
-    }
 
-    if let Err(why) = msg.channel_id.say(&ctx.http, &contents).await {
-        println!("Error sending message: {:?}", why);
-    }
 
-    Ok(())
-}
 
-// Repeats what the user passed as argument but ensures that user and role
-// mentions are replaced with a safe textual alternative.
-// In this example channel mentions are excluded via the `ContentSafeOptions`.
-#[command]
-async fn say(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
-    let settings = if let Some(guild_id) = msg.guild_id {
-        // By default roles, users, and channel mentions are cleaned.
-        ContentSafeOptions::default()
-            // We do not want to clean channal mentions as they
-            // do not ping users.
-            .clean_channel(false)
-            // If it's a guild channel, we want mentioned users to be displayed
-            // as their display name.
-            .display_as_member_from(guild_id)
-    } else {
-        ContentSafeOptions::default()
-            .clean_channel(false)
-            .clean_role(false)
-    };
 
-    let content = content_safe(&ctx.cache, &args.rest(), &settings).await;
-
-    if let Err(why) = msg.channel_id.say(&ctx.http, &content).await {
-        println!("Error sending message: {:?}", why);
-    }
-
-    Ok(())
-}
-
-#[command]
-async fn purpose(ctx: &Context, msg: &Message, _: Args) -> CommandResult {
-    let reply = MessageBuilder::new()
-        .push("Hmph?! Stop staring at me ")
-        .mention(&msg.author)
-        .push("!! You want to know why I exist? Ah, to help my lazy master run this silly game of course~")
-        .build();
-    msg.channel_id.say(&ctx.http, reply).await;
-    Ok(())
-}
