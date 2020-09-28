@@ -35,6 +35,7 @@ use std::{
 
 use serenity::prelude::*;
 use tokio::sync::Mutex;
+use tracing::{error, info, instrument};
 
 mod commands;
 use commands::{meta::*, random::*, stats::*};
@@ -55,7 +56,7 @@ struct Handler;
 #[async_trait]
 impl EventHandler for Handler {
     async fn ready(&self, _: Context, ready: Ready) {
-        println!("{} is connected!", ready.user.name);
+        info!("{} is connected!", ready.user.name);
     }
 }
 
@@ -89,7 +90,7 @@ async fn my_help(
 }
 #[hook]
 async fn before(ctx: &Context, msg: &Message, command_name: &str) -> bool {
-    println!(
+    info!(
         "Got command '{}' by user '{}'",
         command_name, msg.author.name
     );
@@ -110,19 +111,19 @@ async fn before(ctx: &Context, msg: &Message, command_name: &str) -> bool {
 #[hook]
 async fn after(_ctx: &Context, _msg: &Message, command_name: &str, command_result: CommandResult) {
     match command_result {
-        Ok(()) => println!("Processed command '{}'", command_name),
-        Err(why) => println!("Command '{}' returned error {:?}", command_name, why),
+        Ok(()) => info!("Processed command '{}'", command_name),
+        Err(why) => info!("Command '{}' returned error {:?}", command_name, why),
     }
 }
 
 #[hook]
 async fn unknown_command(_ctx: &Context, _msg: &Message, unknown_command_name: &str) {
-    println!("Could not find command named '{}'", unknown_command_name);
+    info!("Could not find command named '{}'", unknown_command_name);
 }
 
 #[hook]
 async fn normal_message(_ctx: &Context, msg: &Message) {
-    println!("Message is not a command '{}'", msg.content);
+    info!("Message is not a command '{}'", msg.content);
 }
 
 #[hook]
@@ -139,8 +140,11 @@ async fn dispatch_error(ctx: &Context, msg: &Message, error: DispatchError) {
 }
 
 #[tokio::main]
+#[instrument]
 async fn main() {
-    // Configure the client with your Discord bot token in the environment.
+    tracing_subscriber::fmt::init();
+
+    // Configure the client with your Discord bot token & prefix in the environment.
     let token = env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
     let prefix = env::var("MAID_PREFIX").unwrap_or("!".into());
 
@@ -196,6 +200,6 @@ async fn main() {
     }
 
     if let Err(why) = client.start().await {
-        println!("Client error: {:?}", why);
+        error!("Client error: {:?}", why);
     }
 }
