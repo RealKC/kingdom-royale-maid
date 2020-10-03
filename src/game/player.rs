@@ -4,7 +4,7 @@ use serenity::model::id::UserId;
 
 pub struct Player {
     id: UserId,
-    role: Box<dyn Role>,
+    role: Box<(dyn Role + Send + Sync)>,
     alive: bool,
 }
 

@@ -38,7 +38,7 @@ use tokio::sync::Mutex;
 use tracing::{error, info, instrument};
 
 mod commands;
-use commands::{meta::*, random::*, stats::*};
+use commands::{game::*, meta::*, random::*, stats::*};
 
 mod game;
 
@@ -68,6 +68,10 @@ struct Meta;
 #[group]
 #[commands(say, commands)]
 struct Random;
+
+#[group]
+#[commands(new_game, join)]
+struct Game;
 
 #[help]
 #[individual_command_tip = "Hello! If you want more information about a specific command, just pass the command as argument."]
@@ -185,7 +189,8 @@ async fn main() {
         .on_dispatch_error(dispatch_error)
         .help(&MY_HELP)
         .group(&META_GROUP)
-        .group(&RANDOM_GROUP);
+        .group(&RANDOM_GROUP)
+        .group(&GAME_GROUP);
 
     let mut client = Client::new(&token)
         .event_handler(Handler)

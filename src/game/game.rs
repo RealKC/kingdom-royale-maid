@@ -1,6 +1,7 @@
 use crate::game::{player::Player, roles::RoleName};
 use serenity::model::id::{GuildId, UserId};
 use std::collections::HashMap;
+use std::fmt;
 
 type Host = UserId;
 
@@ -9,11 +10,43 @@ pub struct Game {
     state: GameState,
     host: Host,
     players: HashMap<UserId, Player>, // 6
+    joined_users: Vec<UserId>,        // only ever used in Pregame
     king_murder_target: UserId,
     day: u8,
 }
 
 impl Game {
+    pub fn new(guild_: GuildId, host_: Host) -> Self {
+        Self {
+            guild: guild_,
+            state: GameState::Pregame,
+            host: host_,
+            players: Default::default(),
+            joined_users: Default::default(),
+            king_murder_target: Default::default(),
+            day: 1,
+        }
+    }
+
+    pub fn join(&mut self, id: UserId) -> JoinResult {
+        if self.joined_users.len() < 6 {
+            if id == self.host {
+                Err(JoinError::YoureTheHost)
+            } else if self.joined_users.contains(&id) {
+                Err(JoinError::AlreadyIn)
+            } else {
+                self.joined_users.push(id);
+                Ok(())
+            }
+        } else {
+            Err(JoinError::GameFull)
+        }
+    }
+
+    pub fn host(&self) -> Host {
+        self.host
+    }
+
     pub fn state(&self) -> GameState {
         self.state
     }
@@ -60,6 +93,26 @@ impl Game {
         }
 
         unreachable!("There should always be a {:?} in the game", role)
+    }
+}
+
+type JoinResult = Result<(), JoinError>;
+
+#[derive(Copy, Clone, PartialEq, Eq)]
+pub enum JoinError {
+    GameFull,
+    YoureTheHost,
+    AlreadyIn,
+}
+
+impl fmt::Display for JoinError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        use JoinError::*;
+        match self {
+            GameFull => write!(f, ", you can't join a full game"),
+            YoureTheHost => write!(f, ", you can't be both The Host, and a player"), // technically not following canon
+            AlreadyIn => write!(f, ", you can't join a game multiple times"),
+        }
     }
 }
 
