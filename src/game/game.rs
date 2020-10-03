@@ -98,7 +98,7 @@ impl Game {
 
 type JoinResult = Result<(), JoinError>;
 
-#[derive(Copy, Clone, PartialEq, Eq)]
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub enum JoinError {
     GameFull,
     YoureTheHost,
