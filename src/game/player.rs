@@ -1,4 +1,4 @@
-use crate::game::role::Role;
+use crate::game::roles::{Role, RoleName};
 use crate::game::Game;
 use serenity::model::id::UserId;
 
@@ -9,15 +9,19 @@ pub struct Player {
 }
 
 impl Player {
-    fn is_alive(&self) -> bool {
+    pub fn is_alive(&self) -> bool {
         self.alive
     }
 
-    fn can_act(&self, game: &Game) -> bool {
-        self.role.can_act(game)
+    pub fn can_do_special_action(&self, game: &Game) -> bool {
+        self.role.can_do_special_action(game)
     }
 
-    fn act(&self, game: &mut Game) {
+    pub fn act(&self, game: &mut Game) {
         self.role.act(game)
+    }
+
+    pub fn role_name(&self) -> RoleName {
+        self.role.name()
     }
 }

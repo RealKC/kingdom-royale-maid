@@ -1,4 +1,4 @@
-use super::player::Player;
+use crate::game::{player::Player, roles::RoleName};
 use serenity::model::id::{GuildId, UserId};
 
 type Host = UserId;
@@ -7,13 +7,23 @@ pub struct Game {
     guild: GuildId,
     state: GameState,
     host: Host,
-    players: Vec<Player>,
+    players: Vec<Player>, // 6
     day: u8,
 }
 
 impl Game {
-    pub fn state(&self) -> GameState{
+    pub fn state(&self) -> GameState {
         self.state
+    }
+
+    pub fn is_sorcerer_alive(&self) -> bool {
+        for player in self.players.iter() {
+            if player.role_name() == RoleName::Sorcerer {
+                return player.is_alive();
+            }
+        }
+
+        false
     }
 }
 

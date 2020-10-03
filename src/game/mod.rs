@@ -1,5 +1,5 @@
 mod game;
 mod player;
-mod role;
+mod roles;
 
-pub use game::Game;
+pub use game::{Game, GameState};
