@@ -36,12 +36,20 @@ impl Game {
         self.is_alive(RoleName::King)
     }
 
+    pub fn is_prince_alive(&self) -> bool {
+        self.is_alive(RoleName::Prince)
+    }
+
     pub fn is_the_double_alive(&self) -> bool {
         self.is_alive(RoleName::TheDouble)
     }
 
     pub fn is_sorcerer_alive(&self) -> bool {
         self.is_alive(RoleName::Sorcerer)
+    }
+
+    pub fn is_revolutionary_alive(&self) -> bool {
+        self.is_alive(RoleName::Revolutionary)
     }
 
     fn is_alive(&self, role: RoleName) -> bool {
