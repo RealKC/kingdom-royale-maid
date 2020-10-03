@@ -37,6 +37,7 @@ mod common_actions {
     pub fn sorcerer_like_action(this: &dyn Role, target: &mut Player, game: &mut Game) {
         assert!(this.can_do_special_action(game));
         assert!([RoleName::Sorcerer, RoleName::Knight].contains(&this.name()));
+        assert!(target.id() == game.king_murder_target().id());
 
         game.kill(target.id(), this.name().into());
     }
