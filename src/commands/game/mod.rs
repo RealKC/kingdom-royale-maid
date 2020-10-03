@@ -1,7 +1,9 @@
 mod join;
+mod leave;
 mod new_game;
 
 pub use join::*;
+pub use leave::*;
 pub use new_game::*;
 
 mod prelude {

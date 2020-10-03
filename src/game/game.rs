@@ -43,6 +43,24 @@ impl Game {
         }
     }
 
+    pub fn leave(&mut self, id: UserId) -> LeaveResult {
+        if id == self.host {
+            Err(LeaveError::YoureTheHost)
+        } else if !self.joined_users.contains(&id) {
+            Err(LeaveError::NonInAGame)
+        } else {
+            let mut user_idx = 7;
+            for user in self.joined_users.iter().enumerate() {
+                if *user.1 == id {
+                    user_idx = user.0;
+                }
+            }
+            assert!(user_idx < 7);
+            self.joined_users.remove(user_idx);
+            Ok(())
+        }
+    }
+
     pub fn host(&self) -> Host {
         self.host
     }
@@ -112,6 +130,27 @@ impl fmt::Display for JoinError {
             GameFull => write!(f, ", you can't join a full game"),
             YoureTheHost => write!(f, ", you can't be both The Host, and a player"), // technically not following canon
             AlreadyIn => write!(f, ", you can't join a game multiple times"),
+        }
+    }
+}
+
+type LeaveResult = Result<(), LeaveError>;
+
+#[derive(Copy, Clone, Debug)]
+pub enum LeaveError {
+    NonInAGame,
+    YoureTheHost,
+}
+
+impl fmt::Display for LeaveError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        use LeaveError::*;
+        match self {
+            NotInAGame => write!(f, ", you can't leave a game if you're not in one"),
+            YoureTheHost => write!(
+                f,
+                ", you can't leave a game if you're The Host, why would you anyway?"
+            ),
         }
     }
 }

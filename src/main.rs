@@ -70,7 +70,7 @@ struct Meta;
 struct Random;
 
 #[group]
-#[commands(new_game, join)]
+#[commands(new_game, join, leave)]
 struct Game;
 
 #[help]
