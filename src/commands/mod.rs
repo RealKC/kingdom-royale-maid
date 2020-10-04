@@ -1,4 +1,5 @@
 pub mod game;
+pub mod help;
 pub mod meta;
 pub mod random;
 pub mod stats;

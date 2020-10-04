@@ -39,7 +39,7 @@ use tracing::{error, info, instrument};
 
 mod commands;
 mod hooks;
-use commands::{game::*, meta::*, random::*, stats::*};
+use commands::{game::*, help::*, meta::*, random::*, stats::*};
 use hooks::*;
 
 mod game;
@@ -75,26 +75,6 @@ struct Random;
 #[only_in(guilds)]
 #[commands(new_game, join, leave, roles, info)]
 struct Game;
-
-#[help]
-#[individual_command_tip = "Hello! If you want more information about a specific command, just pass the command as argument."]
-#[command_not_found_text = "Could not find: `{}`."]
-#[max_levenshtein_distance(3)]
-#[indention_prefix = "+"]
-#[lacking_permissions = "Hide"]
-#[lacking_role = "Nothing"]
-#[wrong_channel = "Strike"]
-async fn my_help(
-    context: &Context,
-    msg: &Message,
-    args: Args,
-    help_options: &'static HelpOptions,
-    groups: &[&'static CommandGroup],
-    owners: HashSet<UserId>,
-) -> CommandResult {
-    let _ = help_commands::with_embeds(context, msg, args, help_options, groups, owners).await;
-    Ok(())
-}
 
 #[tokio::main]
 #[instrument]
