@@ -47,7 +47,7 @@ impl Game {
         if id == self.host {
             Err(LeaveError::YoureTheHost)
         } else if !self.joined_users.contains(&id) {
-            Err(LeaveError::NonInAGame)
+            Err(LeaveError::NotInAGame)
         } else {
             let mut user_idx = 7;
             for user in self.joined_users.iter().enumerate() {
@@ -138,7 +138,7 @@ type LeaveResult = Result<(), LeaveError>;
 
 #[derive(Copy, Clone, Debug)]
 pub enum LeaveError {
-    NonInAGame,
+    NotInAGame,
     YoureTheHost,
 }
 
