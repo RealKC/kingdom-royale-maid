@@ -9,27 +9,12 @@
 //! features = ["framework", "standard_framework"]
 //! ```
 use serenity::{
-    async_trait,
-    client::bridge::gateway::{ShardId, ShardManager},
-    framework::standard::{
-        help_commands,
-        macros::{check, command, group, help, hook},
-        Args, CheckResult, CommandGroup, CommandOptions, CommandResult, DispatchError, HelpOptions,
-        StandardFramework,
-    },
-    http::Http,
-    model::{
-        channel::{Channel, Message},
-        gateway::Ready,
-        id::UserId,
-        permissions::Permissions,
-    },
-    utils::{content_safe, ContentSafeOptions, EmbedMessageBuilding, MessageBuilder},
+    async_trait, client::bridge::gateway::ShardManager, framework::standard::StandardFramework,
+    http::Http, model::gateway::Ready,
 };
 use std::{
     collections::{HashMap, HashSet},
     env,
-    fmt::Write,
     sync::Arc,
 };
 

@@ -3,7 +3,7 @@ use super::prelude::*;
 use std::env;
 
 #[command("newgame")]
-pub async fn new_game(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
+pub async fn new_game(ctx: &Context, msg: &Message) -> CommandResult {
     let mut data = ctx.data.write().await;
 
     if data.get::<GameContainer>().is_some() {

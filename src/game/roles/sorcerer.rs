@@ -15,7 +15,7 @@ impl Role for Sorcerer {
         RoleName::Sorcerer
     }
 
-    fn win_condition_achieved(&self, game: &Game) -> bool {
+    fn win_condition_achieved(&self, _: &Game) -> bool {
         true // As long as he's alive at the end of the game, he wins
     }
 }
