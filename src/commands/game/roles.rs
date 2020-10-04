@@ -8,10 +8,11 @@ use serenity::builder::CreateEmbed;
 // 『  』 -> for stronger emphasis
 
 macro_rules! role_embed {
-    ($name:ident, $name_str:expr, $description:expr, $colour:expr, $skills:expr, $victory:expr) => {
+    ($name:ident, $name_str:expr, $image:expr, $description:expr, $colour:expr, $skills:expr, $victory:expr) => {
         static $name: Lazy<CreateEmbed> = Lazy::new(|| {
             CreateEmbed::default()
                 .title($name_str)
+                .thumbnail($image)
                 .description($description)
                 .colour($colour)
                 .field("『 Skills 』", $skills, false)
@@ -25,6 +26,7 @@ macro_rules! role_embed {
 role_embed!(
     KING,
     "『 King 』",
+    "https://github.com/RealKC/kingdom-royale-maid/raw/master/res/king.png",
     r#"“He is the king who has ascended to the throne by assassinating the previous ruler and has carried out many invasions. Having a distrustful personality, he's scheming murder of the ones that threaten his throne. He does not notice that his distrust makes others lose their loyalty for him.
 
 He can request his subordinates to commit 「 murder 」, but he cannot force themm because he fears their animosity could become directed at him.
@@ -45,6 +47,7 @@ He can once avoid being the target of 「 Assassination 」 by changing roles wi
 role_embed!(
     PRINCE,
     "『 Prince 』",
+    "https://github.com/RealKC/kingdom-royale-maid/raw/master/res/prince.png",
     r#"
 “An ambitious person. He was originally only at the third place in the inheritance order of the king's rank. But taking advantage of the king's mistrust, he made him murder the other princes and moved up to the first place. He acquired anti-magic to guard himself against this mistrust.
 
@@ -63,6 +66,7 @@ He cannot be killed by 「Sorcery 」."#,
 role_embed!(
     THE_DOUBLE,
     "『 The Double 』",
+    "https://github.com/RealKC/kingdom-royale-maid/raw/master/res/the_double.png",
     r#"
 “An ex-farmer who is loyal to the 「 King 」 and looks exactly the same as him. He is not really ambitious, but he can absolutely not allow the 「 Prince 」 to become the king since he was always made a fool by him.
 
@@ -78,6 +82,7 @@ If the 「 King 」 dies or 「 Substitution 」 was executed, he becomes able t
 role_embed!(
     SORCERER,
     "『 Sorcerer 』",
+    "https://github.com/RealKC/kingdom-royale-maid/raw/master/res/sorcerer.png",
     r#"
 “A subordinate of the 「 King 」. He is the teacher of the 「 Prince 」 in magic and also gets on well with the 「 Prince 」. He is satisfied as long he can pursue his studies in magic and has no interest in the king's throne whatsoever.
 
@@ -91,6 +96,7 @@ He can choose whether to effectively kill the character that was selected by 「
 role_embed!(
     KNIGHT,
     "『 Knight 』",
+    "https://github.com/RealKC/kingdom-royale-maid/raw/master/res/knight.png",
     r#"
 “A subordinate of the 「 King 」. While being a subordinate, he is plotting revenge on the royal family for they have ruined his homeland. He believes firmly that he can only attain happiness by exterminating the royal family.
 
@@ -105,6 +111,7 @@ He can choose whether to effectively kill the character that was selected by 「
 role_embed!(
     REVOLUTIONARY,
     "『 Revolutionary 』",
+    "https://github.com/RealKC/kingdom-royale-maid/raw/master/res/revolutionary.png",
     r#"
 “He is the right arm of the 「 King 」. Because of his competence, he realized that this land is going to fall into ruin if it goes on like this. Hence, he prepared himself to take over the land.
 
