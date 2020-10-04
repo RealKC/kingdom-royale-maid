@@ -3,6 +3,7 @@ use super::prelude::*;
 use tracing::info;
 
 #[command]
+#[only_in(guilds)]
 pub async fn leave(ctx: &Context, msg: &Message) -> CommandResult {
     let mut data = ctx.data.write().await;
     let mut game = data.get_mut::<GameContainer>();

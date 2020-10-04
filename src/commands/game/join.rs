@@ -2,6 +2,7 @@ use super::prelude::*;
 use tracing::{error, info, instrument};
 
 #[command]
+#[only_in(guilds)]
 pub async fn join(ctx: &Context, msg: &Message) -> CommandResult {
     let mut data = ctx.data.write().await;
     let mut game = data.get_mut::<GameContainer>();
