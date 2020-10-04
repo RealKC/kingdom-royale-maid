@@ -62,7 +62,7 @@ impl EventHandler for Handler {
 
 #[group]
 #[only_in(guilds)]
-#[commands(purpose)]
+#[commands(purpose, about)]
 struct Meta;
 
 #[group]
