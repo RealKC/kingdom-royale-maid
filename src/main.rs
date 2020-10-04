@@ -39,7 +39,7 @@ use tracing::{error, info, instrument};
 
 mod commands;
 mod hooks;
-use commands::{game::*, help::*, meta::*, random::*, stats::*};
+use commands::{help::*, *};
 use hooks::*;
 
 mod game;
@@ -61,20 +61,6 @@ impl EventHandler for Handler {
         info!("{} is connected!", ready.user.name);
     }
 }
-
-#[group]
-#[only_in(guilds)]
-#[commands(purpose, about)]
-struct Meta;
-
-#[group]
-#[commands(say, commands)]
-struct Random;
-
-#[group]
-#[only_in(guilds)]
-#[commands(new_game, join, leave, roles, info)]
-struct Game;
 
 #[tokio::main]
 #[instrument]

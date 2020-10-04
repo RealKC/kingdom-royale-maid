@@ -1,4 +1,4 @@
-use crate::commands::stats::CommandCounter;
+use crate::commands::CommandCounter;
 use serenity::prelude::*;
 use serenity::{
     framework::standard::{macros::hook, CommandResult, DispatchError},

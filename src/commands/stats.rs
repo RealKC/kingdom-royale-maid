@@ -1,15 +1,10 @@
+use super::CommandCounter;
 use serenity::prelude::*;
 use serenity::{
     framework::standard::{macros::command, CommandResult},
     model::channel::Message,
 };
-use std::{collections::HashMap, fmt::Write};
-
-pub struct CommandCounter;
-
-impl TypeMapKey for CommandCounter {
-    type Value = HashMap<String, u64>;
-}
+use std::fmt::Write;
 
 #[command]
 #[owners_only]
