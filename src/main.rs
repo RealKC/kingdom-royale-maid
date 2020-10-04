@@ -70,7 +70,8 @@ struct Meta;
 struct Random;
 
 #[group]
-#[commands(new_game, join, leave)]
+#[only_in(guilds)]
+#[commands(new_game, join, leave, roles, info)]
 struct Game;
 
 #[help]

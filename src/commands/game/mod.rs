@@ -1,10 +1,12 @@
 mod join;
 mod leave;
 mod new_game;
+mod roles;
 
 pub use join::*;
 pub use leave::*;
 pub use new_game::*;
+pub use roles::*;
 
 mod prelude {
     pub use crate::commands::prelude::*;
