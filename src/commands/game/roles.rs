@@ -158,8 +158,8 @@ pub async fn info(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
             .await?;
         return Ok(());
     }
-    let role = role.unwrap();
-    match role {
+    let role = role.unwrap().to_lowercase();
+    match role.as_str() {
         "king" => say_role(ctx, msg, &*KING).await?,
         "prince" => say_role(ctx, msg, &*PRINCE).await?,
         "double" | "the double" => say_role(ctx, msg, &*THE_DOUBLE).await?,
