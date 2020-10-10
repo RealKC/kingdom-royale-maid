@@ -39,6 +39,22 @@ impl Item {
             weapon: false,
         }
     }
+
+    fn ballpoint_pen() -> Self {
+        Self {
+            name: "Ballpoint pen".to_string(),
+            edible: false,
+            weapon: false,
+        }
+    }
+
+    fn memo_book() -> Self {
+        Self {
+            name: "Memo book".to_string(),
+            edible: false,
+            weapon: false,
+        }
+    }
 }
 
 type Count = u8;
@@ -49,13 +65,15 @@ pub struct Items {
 }
 
 impl Items {
-    pub fn new() -> Self {
+    pub fn new(watch_colour: String) -> Self {
         Self {
             items: vec![
                 (7, Item::food()),
-                (1, Item::watch("".to_string())),
+                (1, Item::watch(watch_colour)),
                 (1, Item::knife()),
                 (1, Item::tablet()),
+                (1, Item::memo_book()),
+                (1, Item::ballpoint_pen()),
             ],
         }
     }
