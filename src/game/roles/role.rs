@@ -10,6 +10,19 @@ pub enum RoleName {
     Revolutionary,
 }
 
+impl ToString for RoleName {
+    fn to_string(&self) -> String {
+        match self {
+            RoleName::King => "King".to_string(),
+            RoleName::Prince => "Prince".to_string(),
+            RoleName::TheDouble => "The Double".to_string(),
+            RoleName::Sorcerer => "Sorcerer".to_string(),
+            RoleName::Knight => "Knight".to_string(),
+            RoleName::Revolutionary => "Revolutionary".to_string(),
+        }
+    }
+}
+
 pub trait Role {
     fn can_do_special_action(&self, game: &Game) -> bool;
     fn act(&self, target: &mut Player, game: &mut Game);
