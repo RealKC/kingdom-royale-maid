@@ -10,20 +10,33 @@ pub async fn join(ctx: &Context, msg: &Message) -> CommandResult {
 
     if game.is_some() {
         let mut game = game.unwrap().write().await;
-        let result = game.join(msg.author.id);
-        if result.is_ok() {
-            info!("Successfully added a new user to the game");
+
+        let member = msg.member(ctx).await?;
+        let mut member_may_have_admin_perms = member.permissions(ctx).await?.administrator();
+        member_may_have_admin_perms |= msg.guild(ctx).await.unwrap().owner_id == msg.author.id;
+
+        if member_may_have_admin_perms {
             msg.reply(
                 ctx,
-                format!(
-                    ", you've joined {}'s Kingdom Royale game.",
-                    game.host().to_user(ctx).await?
-                ),
+                ", you can't join a game if you're the Owner of a server or an administrator!",
             )
             .await?;
         } else {
-            info!("Couldn't add new user, error is {:?}", result.unwrap_err());
-            msg.reply(ctx, format!("{}", result.unwrap_err())).await?;
+            let result = game.join(msg.author.id);
+            if result.is_ok() {
+                info!("Successfully added a new user to the game");
+                msg.reply(
+                    ctx,
+                    format!(
+                        ", you've joined {}'s Kingdom Royale game.",
+                        game.host().to_user(ctx).await?
+                    ),
+                )
+                .await?;
+            } else {
+                info!("Couldn't add new user, error is {:?}", result.unwrap_err());
+                msg.reply(ctx, format!("{}", result.unwrap_err())).await?;
+            }
         }
     } else {
         info!("User tried joining nonexistent user");
