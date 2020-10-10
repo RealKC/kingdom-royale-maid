@@ -1,5 +1,6 @@
 use super::common_actions::sorcerer_like_action;
 use super::prelude::*;
+
 pub struct Sorcerer;
 
 impl Role for Sorcerer {
