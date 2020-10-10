@@ -3,11 +3,13 @@ pub mod help;
 pub mod meta;
 pub mod random;
 pub mod stats;
+mod tos;
 
 use crate::commands::meta::*;
 use game::*;
 use random::*;
 use stats::*;
+use tos::*;
 
 use serenity::framework::standard::macros::group;
 use serenity::prelude::*;
@@ -15,7 +17,7 @@ use std::collections::HashMap;
 
 #[group]
 #[only_in(guilds)]
-#[commands(purpose, about)]
+#[commands(purpose, about, tos)]
 pub struct Meta;
 
 #[group]
