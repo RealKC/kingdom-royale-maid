@@ -1,8 +1,10 @@
+mod game_info;
 mod join;
 mod leave;
 mod new_game;
 mod roles;
 
+pub use game_info::*;
 pub use join::*;
 pub use leave::*;
 pub use new_game::*;

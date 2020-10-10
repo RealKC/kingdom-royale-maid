@@ -52,6 +52,10 @@ impl Player {
         self.role.act(target, game)
     }
 
+    pub fn win_condition_achieved(&self, game: &Game) -> bool {
+        self.role.win_condition_achieved(game)
+    }
+
     pub fn role_name(&self) -> RoleName {
         self.role.name()
     }

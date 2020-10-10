@@ -61,6 +61,22 @@ impl Game {
         }
     }
 
+    pub fn can_start(&self) -> bool {
+        self.players.len() == 6
+    }
+
+    pub fn joined_users(&self) -> &Vec<UserId> {
+        &self.joined_users
+    }
+
+    pub fn day(&self) -> u8 {
+        self.day
+    }
+
+    pub fn players(&self) -> &HashMap<UserId, Player> {
+        &self.players
+    }
+
     pub fn host(&self) -> Host {
         self.host
     }

@@ -26,7 +26,7 @@ pub struct Random;
 
 #[group]
 #[only_in(guilds)]
-#[commands(new_game, join, leave, roles, info)]
+#[commands(new_game, join, leave, roles, info, game_info)]
 pub struct Game;
 
 pub struct CommandCounter;
