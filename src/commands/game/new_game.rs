@@ -4,6 +4,7 @@ use std::env;
 
 #[command("newgame")]
 #[only_in(guilds)]
+#[description("Creates a new game")]
 pub async fn new_game(ctx: &Context, msg: &Message) -> CommandResult {
     let mut data = ctx.data.write().await;
 

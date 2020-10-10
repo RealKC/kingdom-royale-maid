@@ -1,8 +1,8 @@
 use super::prelude::*;
 use serenity::model::id::UserId;
-use serenity::utils::MessageBuilder;
 
 #[command]
+#[description("Gives information about the bot")]
 pub async fn about(ctx: &Context, msg: &Message) -> CommandResult {
     let info = ctx.http.get_current_application_info().await?;
     let owner = if let Some(team) = info.team {

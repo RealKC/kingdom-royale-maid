@@ -3,6 +3,8 @@ use crate::game::GameState;
 use serenity::model::misc::Mentionable;
 
 #[command("gameinfo")]
+#[only_in(guilds)]
+#[description("Shows info(such as players and started status) about a game")]
 pub async fn game_info(ctx: &Context, msg: &Message) -> CommandResult {
     let game = ctx.data.read().await;
     let game = game.get::<GameContainer>();

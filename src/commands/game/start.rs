@@ -1,6 +1,8 @@
 use super::prelude::*;
 
 #[command]
+#[only_in(guilds)]
+#[description("Starts a game if it has 6 players in it")]
 pub async fn start(ctx: &Context, msg: &Message) -> CommandResult {
     let game = ctx.data.write().await;
     let game = game.get::<GameContainer>();
