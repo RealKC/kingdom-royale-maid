@@ -40,16 +40,6 @@ pub async fn after(
 }
 
 #[hook]
-pub async fn unknown_command(_ctx: &Context, _msg: &Message, unknown_command_name: &str) {
-    info!("Could not find command named '{}'", unknown_command_name);
-}
-
-#[hook]
-pub async fn normal_message(_ctx: &Context, msg: &Message) {
-    info!("Message is not a command '{}'", msg.content);
-}
-
-#[hook]
 pub async fn dispatch_error(ctx: &Context, msg: &Message, error: DispatchError) {
     if let DispatchError::Ratelimited(duration) = error {
         let _ = msg

@@ -88,8 +88,6 @@ async fn main() {
         })
         .before(before)
         .after(after)
-        .unrecognised_command(unknown_command)
-        .normal_message(normal_message)
         .on_dispatch_error(dispatch_error)
         .help(&MY_HELP)
         .group(&META_GROUP)
