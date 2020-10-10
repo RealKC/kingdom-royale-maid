@@ -1,5 +1,13 @@
 use crate::game::{player::Player, roles::RoleName};
-use serenity::model::id::{GuildId, UserId};
+use itertools::izip;
+use rand::seq::SliceRandom;
+use rand::thread_rng;
+use serenity::model::{
+    channel::{ChannelType, PermissionOverwrite, PermissionOverwriteType},
+    id::{GuildId, UserId},
+    Permissions,
+};
+use serenity::prelude::*;
 use std::collections::HashMap;
 use std::fmt;
 
@@ -62,7 +70,91 @@ impl Game {
     }
 
     pub fn can_start(&self) -> bool {
-        self.players.len() == 6
+        self.joined_users.len() == 6
+    }
+
+    pub async fn start(
+        &mut self,
+        ctx: &Context,
+    ) -> Result<(), Box<(dyn std::error::Error + Send + Sync)>> {
+        assert!(self.can_start());
+
+        use super::roles::{self, King, Knight, Prince, Revolutionary, Sorcerer, TheDouble};
+        let mut roles: Vec<Box<(dyn roles::Role + Send + Sync)>> = vec![
+            Box::new(King),
+            Box::new(Knight),
+            Box::new(Prince),
+            Box::new(Revolutionary),
+            Box::new(Sorcerer),
+            Box::new(TheDouble),
+        ];
+        {
+            let mut rng = thread_rng();
+            roles.shuffle(&mut rng);
+        }
+
+        // I'm a sucker for plot accuracy, these should be all
+        let watch_colours = vec!["blue", "beige", "orange", "green", "black", "red"];
+        let mut current_room: u8 = 1;
+
+        let at_everyone_perms = PermissionOverwrite {
+            allow: Permissions::empty(),
+            deny: Permissions::READ_MESSAGES | Permissions::SEND_MESSAGES,
+            kind: PermissionOverwriteType::Member(UserId {
+                0: *self.guild.as_u64(),
+            }),
+        };
+
+        let rooms_category = self
+            .guild
+            .create_channel(ctx, |c| c.name("Rooms").kind(ChannelType::Category))
+            .await?
+            .id;
+
+        for new_player in izip!(&mut self.joined_users, &watch_colours) {
+            self.players.insert(
+                *new_player.0,
+                Player::new(*new_player.0, roles.remove(0), new_player.1.to_string()),
+            );
+
+            let channel = self
+                .guild
+                .create_channel(ctx, |c| {
+                    c.name(format!("room-{}", current_room))
+                        .category(rooms_category)
+                })
+                .await?;
+
+            channel.create_permission(ctx, &at_everyone_perms).await?;
+
+            channel
+                .create_permission(
+                    ctx,
+                    &PermissionOverwrite {
+                        allow: Permissions::READ_MESSAGES | Permissions::SEND_MESSAGES,
+                        deny: Permissions::empty(),
+                        kind: PermissionOverwriteType::Member(*new_player.0),
+                    },
+                )
+                .await?;
+
+            channel.say(ctx, format!(r#"
+You look around the room you see yourself in. You see a toilet and a washbowl, a table with a jute bag on top of it in the center of the room, and a 20-inch screen in the center of the room.
+
+You reach inside the bag and take out one item after another.
+A ball-point pen.
+A memo book.
+A {} digital watch.
+Seven portions of solid food.
+Some kind of a tablet.
+
+And a heavy-dute knife.
+            "#, new_player.1)).await?;
+
+            current_room += 1;
+        }
+
+        Ok(())
     }
 
     pub fn joined_users(&self) -> &Vec<UserId> {
