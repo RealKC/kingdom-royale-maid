@@ -17,7 +17,7 @@ use std::collections::HashMap;
 
 #[group]
 #[only_in(guilds)]
-#[commands(purpose, about, tos)]
+#[commands(about, tos)]
 pub struct Meta;
 
 #[group]

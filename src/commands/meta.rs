@@ -3,17 +3,6 @@ use serenity::model::id::UserId;
 use serenity::utils::MessageBuilder;
 
 #[command]
-pub async fn purpose(ctx: &Context, msg: &Message, _: Args) -> CommandResult {
-    let reply = MessageBuilder::new()
-        .push("Hmph?! Stop staring at me ")
-        .mention(&msg.author)
-        .push("!! You want to know why I exist? Ah, to help my lazy master run this silly game of course~")
-        .build();
-    msg.channel_id.say(&ctx.http, reply).await?;
-    Ok(())
-}
-
-#[command]
 pub async fn about(ctx: &Context, msg: &Message) -> CommandResult {
     let info = ctx.http.get_current_application_info().await?;
     let owner = if let Some(team) = info.team {
