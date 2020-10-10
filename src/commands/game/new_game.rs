@@ -3,6 +3,7 @@ use super::prelude::*;
 use std::env;
 
 #[command("newgame")]
+#[only_in(guilds)]
 pub async fn new_game(ctx: &Context, msg: &Message) -> CommandResult {
     let mut data = ctx.data.write().await;
 
