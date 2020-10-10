@@ -7,7 +7,7 @@ pub struct Player {
     id: UserId,
     role: Box<(dyn Role + Send + Sync)>,
     alive: bool,
-    items: Items, // count + item
+    items: Items,
 }
 
 impl Player {
@@ -18,7 +18,7 @@ impl Player {
             id: id,
             role: role,
             alive: true,
-            items: Items::new(),
+            items: Items::new(watch_colour),
         }
     }
 
