@@ -3,6 +3,7 @@ mod join;
 mod leave;
 mod new_game;
 mod roles;
+mod rules;
 mod start;
 
 pub use game_info::*;
@@ -10,6 +11,7 @@ pub use join::*;
 pub use leave::*;
 pub use new_game::*;
 pub use roles::*;
+pub use rules::*;
 pub use start::*;
 
 mod prelude {
