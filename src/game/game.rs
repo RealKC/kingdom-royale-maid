@@ -168,6 +168,12 @@ impl Game {
                 })
                 .await?;
 
+            self.guild
+                .member(ctx, *new_player.0)
+                .await?
+                .add_role(ctx, self.player_role)
+                .await?;
+
             channel.create_permission(ctx, &at_everyone_perms).await?;
 
             channel
