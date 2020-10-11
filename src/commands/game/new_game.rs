@@ -17,13 +17,7 @@ pub async fn new_game(ctx: &Context, msg: &Message, mut args: Args) -> CommandRe
             .await
             .unwrap()
             .role_by_name("The Guests")
-            .unwrap_or(
-                msg.guild(ctx)
-                    .await
-                    .unwrap()
-                    .role_by_name("Players")
-                    .unwrap(),
-            )
+            .unwrap()
             .id,
     );
 
