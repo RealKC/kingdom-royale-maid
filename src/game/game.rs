@@ -4,7 +4,7 @@ use rand::seq::SliceRandom;
 use rand::thread_rng;
 use serenity::model::{
     channel::{ChannelType, PermissionOverwrite, PermissionOverwriteType},
-    id::{GuildId, UserId},
+    id::{ChannelId, GuildId, RoleId, UserId},
     Permissions,
 };
 use serenity::prelude::*;
@@ -12,9 +12,13 @@ use std::collections::HashMap;
 use std::fmt;
 
 type Host = UserId;
+type StdResult<T, E> = std::result::Result<T, E>;
+pub type Result = StdResult<(), Box<(dyn std::error::Error + Send + Sync)>>;
 
 pub struct Game {
     guild: GuildId,
+    meeting_room: ChannelId,
+    player_role: RoleId,
     state: GameState,
     host: Host,
     players: HashMap<UserId, Player>, // 6
@@ -24,11 +28,13 @@ pub struct Game {
 }
 
 impl Game {
-    pub fn new(guild_: GuildId, host_: Host) -> Self {
+    pub fn new(guild: GuildId, host: Host, meeting_room: ChannelId, player_role: RoleId) -> Self {
         Self {
-            guild: guild_,
-            state: GameState::Pregame,
-            host: host_,
+            guild: guild,
+            meeting_room: meeting_room,
+            player_role: player_role,
+            state: GameState::NotStarted,
+            host: host,
             players: Default::default(),
             joined_users: Default::default(),
             king_murder_target: Default::default(),
@@ -69,14 +75,19 @@ impl Game {
         }
     }
 
+    pub fn meeting_room(&self) -> ChannelId {
+        self.meeting_room
+    }
+
+    pub fn player_role(&self) -> RoleId {
+        self.player_role
+    }
+
     pub fn can_start(&self) -> bool {
         self.joined_users.len() == 6
     }
 
-    pub async fn start(
-        &mut self,
-        ctx: &Context,
-    ) -> Result<(), Box<(dyn std::error::Error + Send + Sync)>> {
+    pub async fn start(&mut self, ctx: &Context) -> Result {
         assert!(self.can_start());
 
         use super::roles::{self, King, Knight, Prince, Revolutionary, Sorcerer, TheDouble};
@@ -222,7 +233,7 @@ And a heavy-dute knife.
     }
 }
 
-type JoinResult = Result<(), JoinError>;
+type JoinResult = StdResult<(), JoinError>;
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub enum JoinError {
@@ -242,7 +253,7 @@ impl fmt::Display for JoinError {
     }
 }
 
-type LeaveResult = Result<(), LeaveError>;
+type LeaveResult = StdResult<(), LeaveError>;
 
 #[derive(Copy, Clone, Debug)]
 pub enum LeaveError {

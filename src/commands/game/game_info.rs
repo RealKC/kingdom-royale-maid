@@ -77,6 +77,19 @@ pub async fn game_info(ctx: &Context, msg: &Message) -> CommandResult {
                             })(),
                             true,
                         )
+                        .colour((|| {
+                            if game.state() == GameState::NotStarted {
+                                if game.can_start() {
+                                    0xdea712 // Yellow
+                                } else {
+                                    0xbf2419 // Red
+                                }
+                            } else {
+                                0x0dd910 // Green
+                            }
+                        })())
+                        .field("Meeting room", game.meeting_room().mention(), true)
+                        .field("Player role", game.player_role().mention(), true)
                         .footer(|f| {
                             if let Some(ava) = msg.author.avatar_url() {
                                 f.icon_url(ava);
