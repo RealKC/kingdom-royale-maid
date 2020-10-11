@@ -82,6 +82,38 @@ impl Game {
     pub fn player_role(&self) -> RoleId {
         self.player_role
     }
+    pub async fn start_gathering(&mut self, ctx: &Context) -> Result {
+        assert!([GameState::ABlock, GameState::CBlock].contains(&self.state));
+        match self.state() {
+            GameState::ABlock => {
+                self.state = GameState::BBlock;
+                self.open_meeting_room(ctx).await?;
+            }
+            GameState::CBlock => {
+                self.state = GameState::DBlock;
+                self.open_meeting_room(ctx).await?;
+            }
+            _ => unreachable!(),
+        };
+
+        Ok(())
+    }
+
+    async fn open_meeting_room(&self, ctx: &Context) -> Result {
+        self.meeting_room
+            .create_permission(
+                ctx,
+                &PermissionOverwrite {
+                    allow: Permissions::SEND_MESSAGES
+                        | Permissions::READ_MESSAGES
+                        | Permissions::READ_MESSAGE_HISTORY,
+                    deny: Permissions::empty(),
+                    kind: PermissionOverwriteType::Role(self.player_role),
+                },
+            )
+            .await?;
+        Ok(())
+    }
 
     pub fn can_start(&self) -> bool {
         self.joined_users.len() == 6

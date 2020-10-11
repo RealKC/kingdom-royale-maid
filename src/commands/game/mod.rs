@@ -5,6 +5,7 @@ mod new_game;
 mod roles;
 mod rules;
 mod start;
+mod start_gathering;
 
 pub use game_info::*;
 pub use join::*;
@@ -13,6 +14,7 @@ pub use new_game::*;
 pub use roles::*;
 pub use rules::*;
 pub use start::*;
+pub use start_gathering::*;
 
 mod prelude {
     pub use crate::commands::prelude::*;
