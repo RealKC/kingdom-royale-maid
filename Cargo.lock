@@ -523,6 +523,7 @@ dependencies = [
  "tracing",
  "tracing-futures",
  "tracing-subscriber",
+ "typemap_rev",
 ]
 
 [[package]]

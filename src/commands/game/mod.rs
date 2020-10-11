@@ -1,3 +1,4 @@
+mod end_game;
 mod game_info;
 mod join;
 mod leave;
@@ -7,6 +8,7 @@ mod rules;
 mod start;
 mod start_gathering;
 
+pub use end_game::*;
 pub use game_info::*;
 pub use join::*;
 pub use leave::*;

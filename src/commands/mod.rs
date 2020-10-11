@@ -35,7 +35,8 @@ pub struct Random;
     game_info,
     start,
     rules,
-    start_gathering
+    start_gathering,
+    end_game
 )]
 pub struct Game;
 

@@ -206,6 +206,20 @@ And a heavy-dute knife.
         Ok(())
     }
 
+    pub async fn end(&mut self, ctx: &Context) -> Result {
+        if !self.players.is_empty() {
+            for player in self.players.iter() {
+                self.guild
+                    .member(ctx, player.0)
+                    .await?
+                    .remove_role(ctx, self.player_role)
+                    .await?;
+            }
+        }
+
+        Ok(())
+    }
+
     pub fn joined_users(&self) -> &Vec<UserId> {
         &self.joined_users
     }
