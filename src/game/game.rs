@@ -10,6 +10,7 @@ use serenity::model::{
 use serenity::prelude::*;
 use std::collections::HashMap;
 use std::fmt;
+use tracing::error;
 
 type Host = UserId;
 type StdResult<T, E> = std::result::Result<T, E>;
@@ -86,11 +87,11 @@ impl Game {
         assert!([GameState::ABlock, GameState::CBlock].contains(&self.state));
         match self.state() {
             GameState::ABlock => {
-                self.state = GameState::BBlock;
+                self.transition_to_next_state();
                 self.open_meeting_room(ctx).await?;
             }
             GameState::CBlock => {
-                self.state = GameState::DBlock;
+                self.transition_to_next_state();
                 self.open_meeting_room(ctx).await?;
             }
             _ => unreachable!(),
@@ -222,6 +223,76 @@ And a heavy-dute knife.
 
     pub fn joined_users(&self) -> &Vec<UserId> {
         &self.joined_users
+    }
+
+    pub fn transition_to_next_state(&mut self) {
+        let all_alive_have_won = self.all_alive_have_won();
+
+        match self.state {
+            GameState::NotStarted => {
+                error!("Function called before game started");
+                panic!();
+            }
+
+            GameState::Pregame => todo!(),
+            GameState::ABlock => {
+                self.state = if all_alive_have_won {
+                    GameState::GameEnded
+                } else {
+                    GameState::BBlock
+                };
+            }
+            GameState::BBlock => {
+                self.state = if all_alive_have_won {
+                    GameState::GameEnded
+                } else {
+                    GameState::CBlock
+                }
+            }
+            GameState::CBlock => {
+                self.state = if all_alive_have_won {
+                    GameState::GameEnded
+                } else {
+                    GameState::DBlock
+                }
+            }
+            GameState::DBlock => {
+                self.state = if all_alive_have_won {
+                    GameState::GameEnded
+                } else {
+                    GameState::EBlock
+                }
+            }
+            GameState::EBlock => {
+                self.state = if all_alive_have_won {
+                    GameState::GameEnded
+                } else {
+                    GameState::FBlock
+                }
+            }
+            GameState::FBlock => {
+                if all_alive_have_won {
+                    self.state = GameState::GameEnded
+                } else {
+                    self.day += 1;
+                    self.state = GameState::ABlock;
+                }
+            }
+            GameState::GameEnded => {
+                error!("Function called after game ended");
+                panic!();
+            }
+        }
+    }
+
+    pub fn all_alive_have_won(&self) -> bool {
+        for player in self.players.iter() {
+            if !player.1.win_condition_achieved(self) {
+                return false;
+            }
+        }
+
+        true
     }
 
     pub fn day(&self) -> u8 {

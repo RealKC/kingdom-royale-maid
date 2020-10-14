@@ -31,11 +31,7 @@ pub async fn game_info(ctx: &Context, msg: &Message) -> CommandResult {
                         } else {
                             let mut players = String::new();
 
-                            let mut all_alive_have_won = false;
-
-                            for player in game.players().iter() {
-                                all_alive_have_won |= player.1.win_condition_achieved(&*game);
-                            }
+                            let all_alive_have_won = game.all_alive_have_won();
 
                             for player in game.players().iter() {
                                 if player.1.is_alive() {
