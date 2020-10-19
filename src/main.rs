@@ -97,7 +97,7 @@ async fn main() -> CommandResult {
         .group(&GAME_GROUP)
         .group(&TESTS_GROUP);
 
-    let mut client = Client::new(&token)
+    let mut client = Client::builder(&token)
         .event_handler(Handler)
         .framework(framework)
         .await
