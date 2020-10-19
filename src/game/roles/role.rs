@@ -10,6 +10,15 @@ pub enum RoleName {
     Revolutionary,
 }
 
+impl RoleName {
+    pub fn is_king_like(&self) -> bool {
+        match self {
+            RoleName::King | RoleName::TheDouble | RoleName::Prince => true,
+            _ => false,
+        }
+    }
+}
+
 impl ToString for RoleName {
     fn to_string(&self) -> String {
         match self {
