@@ -29,6 +29,7 @@ use hooks::*;
 
 mod data;
 mod game;
+mod helpers;
 
 use crate::data::{Cdn, Reqwest, ReqwestClient};
 
@@ -93,7 +94,8 @@ async fn main() -> CommandResult {
         .help(&MY_HELP)
         .group(&META_GROUP)
         .group(&RANDOM_GROUP)
-        .group(&GAME_GROUP);
+        .group(&GAME_GROUP)
+        .group(&TESTS_GROUP);
 
     let mut client = Client::new(&token)
         .event_handler(Handler)

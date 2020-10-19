@@ -8,3 +8,5 @@
 [the_double.png](the_double.png) under the CC BY 3.0 license by [Delapouite](http://delapouite.com/). [On game-icons](https://game-icons.net/1x1/delapouite/farmer.html)  
 
 The icons were edited using the built-in game-icons.net editors in order to have the colours they have.
+
+[avatars.png](avatars.png) by Millie on Discord. THANK YOU SO MUCH :heart:

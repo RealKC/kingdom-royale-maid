@@ -3,12 +3,14 @@ pub mod help;
 pub mod meta;
 pub mod random;
 pub mod stats;
+mod test_cmds;
 mod tos;
 
 use crate::commands::meta::*;
 use game::*;
 use random::*;
 use stats::*;
+use test_cmds::*;
 use tos::*;
 
 use serenity::framework::standard::macros::group;
@@ -39,6 +41,10 @@ pub struct Random;
     end_game
 )]
 pub struct Game;
+
+#[group]
+#[commands(king_test, rev_test)]
+pub struct Tests;
 
 pub struct CommandCounter;
 
