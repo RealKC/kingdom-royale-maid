@@ -43,7 +43,7 @@ pub struct Random;
 pub struct Game;
 
 #[group]
-#[commands(king_test, rev_test)]
+#[commands(king_test, rev_test, confirm_murder)]
 pub struct Tests;
 
 pub struct CommandCounter;
