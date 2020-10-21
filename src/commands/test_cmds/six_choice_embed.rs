@@ -1,6 +1,6 @@
 use crate::commands::prelude::*;
 use crate::game::RoleName;
-use crate::helpers::choose_target::build_embed_for_target_choice;
+use crate::helpers::{choose_target::build_embed_for_target_choice, react::react_with};
 use serenity::model::channel::ReactionType;
 use serenity::model::id::UserId;
 
@@ -41,11 +41,7 @@ async fn generic_test(
         })
         .await?;
 
-    for emoji in &["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣"] {
-        sent_msg
-            .react(ctx, ReactionType::Unicode(emoji.to_string()))
-            .await?;
-    }
+    react_with(ctx, &sent_msg, &["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣"]).await?;
 
     Ok(())
 }

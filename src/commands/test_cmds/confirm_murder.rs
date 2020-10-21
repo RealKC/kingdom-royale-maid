@@ -1,6 +1,6 @@
 use crate::commands::prelude::*;
 use crate::commands::GameContainer;
-use crate::helpers::confirm_murder::build_embed_for_murder_confirmation;
+use crate::helpers::{confirm_murder::build_embed_for_murder_confirmation, react::react_with};
 use serenity::model::channel::Message;
 use serenity::model::channel::ReactionType;
 
@@ -29,11 +29,7 @@ pub async fn confirm_murder(ctx: &Context, msg: &Message) -> CommandResult {
         .send_message(ctx, |m| m.set_embed(embed))
         .await?;
 
-    for emoji in &["🇾", "🇳"] {
-        sent_msg
-            .react(ctx, ReactionType::Unicode(emoji.to_string()))
-            .await?;
-    }
+    react_with(ctx, &sent_msg, &["🇾", "🇳"]).await?;
 
     Ok(())
 }
