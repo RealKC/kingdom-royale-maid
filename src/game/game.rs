@@ -307,6 +307,10 @@ And a heavy-dute knife.
         self.host
     }
 
+    pub fn guild(&self) -> GuildId {
+        self.guild
+    }
+
     pub fn state(&self) -> GameState {
         self.state
     }
@@ -321,8 +325,12 @@ And a heavy-dute knife.
         self.king_murder_target = target.id();
     }
 
-    pub fn king_murder_target(&mut self) -> &mut Player {
+    pub fn king_murder_target_mut(&mut self) -> &mut Player {
         self.players.get_mut(&self.king_murder_target).unwrap()
+    }
+
+    pub fn king_murder_target(&self) -> &Player {
+        self.players.get(&self.king_murder_target).unwrap()
     }
 
     pub fn is_king_alive(&self) -> bool {
