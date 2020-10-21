@@ -17,14 +17,17 @@ pub use roles::*;
 pub use rules::*;
 pub use start::*;
 pub use start_gathering::*;
+pub struct GameContainer;
+
+use super::prelude::*;
+pub use crate::game::Game;
+
+impl TypeMapKey for GameContainer {
+    type Value = Arc<RwLock<Game>>;
+}
 
 mod prelude {
+    pub use super::GameContainer;
     pub use crate::commands::prelude::*;
     pub use crate::game::Game;
-
-    pub struct GameContainer;
-
-    impl TypeMapKey for GameContainer {
-        type Value = Arc<RwLock<Game>>;
-    }
 }
