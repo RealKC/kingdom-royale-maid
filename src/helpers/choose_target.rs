@@ -1,3 +1,4 @@
+use super::Error;
 use crate::data::{Cdn, ReqwestClient};
 use crate::game::RoleName;
 use image::{
@@ -57,8 +58,6 @@ pub async fn build_embed_for_target_choice(
 
     Ok(embed)
 }
-
-type Error = Box<dyn std::error::Error + Send + Sync>;
 
 async fn fetch_avatars(ctx: &Context, players: &Vec<UserId>) -> Result<Vec<Image>, Error> {
     let data = ctx.data.write().await;
