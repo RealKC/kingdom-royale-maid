@@ -249,41 +249,40 @@ And a heavy-dute knife.
                 if all_alive_have_won {
                     self.state = GameState::GameEnded;
                 } else {
-                    self.open_meeting_room(ctx).await?;
-
                     self.state = GameState::BBlock;
                 };
+
+                self.open_meeting_room(ctx).await?;
             }
             GameState::BBlock => {
-                self.state = if all_alive_have_won {
-                    GameState::GameEnded
+                if all_alive_have_won {
+                    self.state = GameState::GameEnded;
                 } else {
-                    self.close_meeting_room(ctx).await?;
-                    GameState::CBlock
+                    self.state = GameState::CBlock;
                 }
+
+                self.close_meeting_room(ctx).await?;
             }
             GameState::CBlock => {
                 // TODO: Secret meeting partner selection!
                 if all_alive_have_won {
                     self.state = GameState::GameEnded;
                 } else {
-                    self.open_meeting_room(ctx).await?;
-
                     self.state = GameState::DBlock;
                 };
+
+                self.open_meeting_room(ctx).await?;
             }
             GameState::DBlock => {
-                self.state = if all_alive_have_won {
-                    GameState::GameEnded
+                if all_alive_have_won {
+                    self.state = GameState::GameEnded;
                 } else {
-                    self.close_meeting_room(ctx).await?;
-                    self.make_king_select_target(ctx).await?;
-                    self.make_assistant_choose(ctx).await?;
-
-                    // TODO: Make Sorc/Knight
-
-                    GameState::EBlock
+                    self.state = GameState::EBlock;
                 }
+
+                self.close_meeting_room(ctx).await?;
+                self.make_king_select_target(ctx).await?;
+                self.make_assistant_choose(ctx).await?;
             }
             GameState::EBlock => {
                 self.state = if all_alive_have_won {
