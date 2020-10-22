@@ -1,4 +1,3 @@
-use super::common_actions::sorcerer_like_action;
 use super::prelude::*;
 
 pub struct Sorcerer;
@@ -8,8 +7,8 @@ impl Role for Sorcerer {
         game.state() == GameState::CBlock
     }
 
-    fn act(&self, target: &mut Player, game: &mut Game) {
-        sorcerer_like_action(self, target, game);
+    fn act(&self, target: &mut Player) {
+        target.set_dead()
     }
 
     fn name(&self) -> RoleName {

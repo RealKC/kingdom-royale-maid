@@ -1,4 +1,3 @@
-use super::common_actions::sorcerer_like_action;
 use crate::game::roles::prelude::*;
 
 pub struct Knight;
@@ -12,8 +11,8 @@ impl Role for Knight {
         !game.is_sorcerer_alive() && game.state() == GameState::CBlock
     }
 
-    fn act(&self, target: &mut Player, game: &mut Game) {
-        sorcerer_like_action(self, target, game);
+    fn act(&self, target: &mut Player) {
+        target.set_dead();
     }
 
     fn win_condition_achieved(&self, game: &Game) -> bool {

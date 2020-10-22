@@ -1,4 +1,3 @@
-use super::common_actions::king_like_action;
 use super::prelude::*;
 
 pub struct TheDouble;
@@ -8,10 +7,11 @@ impl Role for TheDouble {
         !game.is_king_alive() && game.state() == GameState::CBlock
     }
 
-    fn act(&self, target: &mut Player, game: &mut Game) {
-        king_like_action(self, target, game);
+    fn act(&self, _target: &mut Player) {
+        unreachable!(
+            "This should never be called, instead handled by Game::make_king_choose_target"
+        );
     }
-
     fn name(&self) -> RoleName {
         RoleName::TheDouble
     }
