@@ -2,6 +2,7 @@ use super::prelude::*;
 use crate::game::GameState;
 
 #[command("startgathering")]
+#[description("Forcefully start a meeting")]
 pub async fn start_gathering(ctx: &Context, msg: &Message) -> CommandResult {
     let game = ctx.data.write().await;
     let game = game.get::<GameContainer>();
