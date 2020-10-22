@@ -12,7 +12,7 @@ impl Role for Knight {
     }
 
     fn act(&self, target: &mut Player) {
-        target.set_dead();
+        target.set_dead(self.name().into());
     }
 
     fn win_condition_achieved(&self, game: &Game) -> bool {

@@ -454,7 +454,7 @@ And a heavy-dute knife.
             let emoji = reaction.as_inner_ref().emoji.to_string();
             if emoji.as_str() == REACTIONS[0] {
                 let target = self.players.get_mut(&self.king_murder_target).unwrap();
-                target.set_dead();
+                target.set_dead(target.role_name().into());
             }
             return Ok(());
         }

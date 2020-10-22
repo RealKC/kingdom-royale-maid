@@ -1,6 +1,6 @@
 use super::item::Items;
 use super::roles::{Role, RoleName};
-use super::Game;
+use super::{DeathCause, Game};
 use serenity::model::id::{ChannelId, UserId};
 
 pub struct Player {
@@ -8,6 +8,7 @@ pub struct Player {
     role: Box<(dyn Role + Send + Sync)>,
     alive: bool,
     room: ChannelId,
+    death_cause: Option<DeathCause>,
     items: Items,
 }
 
@@ -24,6 +25,7 @@ impl Player {
             id,
             role,
             room,
+            death_cause: None,
             alive: true,
             items: Items::new(watch_colour),
         }
@@ -41,10 +43,13 @@ impl Player {
         self.alive
     }
 
-    pub fn set_dead(&mut self) {
+    pub fn set_dead(&mut self, cause: DeathCause) {
         self.alive = false;
+        self.death_cause = Some(cause);
+    }
 
-        // TODO: Discord related stuffs
+    pub fn death_cause(&self) -> Option<DeathCause> {
+        self.death_cause
     }
 
     pub fn give_item_to(&mut self, other: &mut Player, name: &str) {
