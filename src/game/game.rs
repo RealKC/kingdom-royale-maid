@@ -492,20 +492,6 @@ And a heavy-dute knife.
         self.state
     }
 
-    pub fn kill(&mut self, target: UserId, _killed_by: KilledBy) {
-        let player = self.players.get_mut(&target).unwrap();
-
-        player.set_dead();
-    }
-
-    pub fn set_king_murder_target(&mut self, target: &Player) {
-        self.king_murder_target = target.id();
-    }
-
-    pub fn king_murder_target_mut(&mut self) -> &mut Player {
-        self.players.get_mut(&self.king_murder_target).unwrap()
-    }
-
     pub fn king_murder_target(&self) -> &Player {
         self.players.get(&self.king_murder_target).unwrap()
     }
