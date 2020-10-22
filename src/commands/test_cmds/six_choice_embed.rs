@@ -32,12 +32,7 @@ async fn generic_test(
 
     let sent_msg = msg
         .channel_id
-        .send_message(ctx, |m| {
-            m.embed(|e| {
-                e.0 = embed.0.clone();
-                e
-            })
-        })
+        .send_message(ctx, |m| m.set_embed(embed))
         .await?;
 
     react_with(ctx, &sent_msg, &["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣"]).await?;

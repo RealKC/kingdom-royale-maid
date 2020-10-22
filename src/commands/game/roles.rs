@@ -124,12 +124,7 @@ He can assassinate the selected character. He does not need to select one. The t
 
 async fn say_role(ctx: &Context, msg: &Message, role: &CreateEmbed) -> CommandResult {
     msg.channel_id
-        .send_message(ctx, |m| {
-            m.embed(|e| {
-                e.0 = role.0.clone();
-                e
-            })
-        })
+        .send_message(ctx, |m| m.set_embed(role.clone()))
         .await?;
     Ok(())
 }
