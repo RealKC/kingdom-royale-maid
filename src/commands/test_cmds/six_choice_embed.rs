@@ -1,7 +1,6 @@
 use crate::commands::prelude::*;
 use crate::game::RoleName;
 use crate::helpers::{choose_target::build_embed_for_target_choice, react::react_with};
-use serenity::model::channel::ReactionType;
 use serenity::model::id::UserId;
 
 #[command("testk")]
