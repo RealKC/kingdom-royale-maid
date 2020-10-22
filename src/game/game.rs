@@ -1,5 +1,8 @@
 use crate::game::{player::Player, roles::RoleName};
-use crate::helpers::{choose_target::build_embed_for_target_choice, react::react_with};
+use crate::helpers::{
+    choose_target::build_embed_for_target_choice,
+    confirm_murder::build_embed_for_murder_confirmation, react::react_with,
+};
 use itertools::izip;
 use rand::seq::SliceRandom;
 use rand::thread_rng;
@@ -275,6 +278,7 @@ And a heavy-dute knife.
                 } else {
                     self.close_meeting_room(ctx).await?;
                     self.make_king_select_target(ctx).await?;
+                    self.make_assistant_choose(ctx).await?;
 
                     // TODO: Make Sorc/Knight
 
@@ -346,6 +350,19 @@ And a heavy-dute knife.
 
         let king = king.unwrap();
 
+        if !self.is_sorcerer_alive() || !self.is_knight_alive() {
+            self.players
+                .get(&king)
+                .unwrap()
+                .room()
+                .say(
+                    ctx,
+                    "You cannot ask the dead to commit murder for you. Maybe pick up that knife?",
+                )
+                .await?;
+            return Ok(());
+        }
+
         let embed = build_embed_for_target_choice(
             ctx,
             &self.players.keys().map(|k| *k).collect::<Vec<_>>(),
@@ -389,6 +406,60 @@ And a heavy-dute knife.
         }
 
         Err("Probably an error to arrive here".into())
+    }
+
+    pub async fn make_assistant_choose(&mut self, ctx: &Context) -> Result {
+        let embed =
+            build_embed_for_murder_confirmation(ctx, self.king_murder_target, self.guild).await?;
+
+        let sorc_or_knight = {
+            let mut res = None;
+
+            for player in &self.players {
+                if player.1.is_alive()
+                    && [RoleName::Knight, RoleName::Sorcerer].contains(&player.1.role_name())
+                {
+                    res = Some(player.0);
+                    break;
+                }
+            }
+
+            res
+        };
+
+        if sorc_or_knight.is_none() {
+            return Ok(());
+        }
+
+        let sorc_or_knight = sorc_or_knight.unwrap();
+
+        let msg = self
+            .players
+            .get(sorc_or_knight)
+            .unwrap()
+            .room()
+            .send_message(ctx, |m| m.set_embed(embed))
+            .await?;
+
+        static REACTIONS: [&str; 2] = ["🇾", "🇳"];
+        react_with(ctx, &msg, &REACTIONS).await?;
+
+        if let Some(reaction) = msg
+            .await_reaction(&ctx)
+            .filter(|r| REACTIONS.contains(&r.emoji.to_string().as_str()))
+            .guild_id(self.guild)
+            .author_id(*sorc_or_knight)
+            .await
+        {
+            let emoji = reaction.as_inner_ref().emoji.to_string();
+            if emoji.as_str() == REACTIONS[0] {
+                let target = self.players.get_mut(&self.king_murder_target).unwrap();
+                target.set_dead();
+            }
+            return Ok(());
+        }
+
+        Err("Reaching here is probably a bug".into())
     }
 
     pub fn all_alive_have_won(&self) -> bool {
@@ -453,6 +524,10 @@ And a heavy-dute knife.
 
     pub fn is_sorcerer_alive(&self) -> bool {
         self.is_alive(RoleName::Sorcerer)
+    }
+
+    pub fn is_knight_alive(&self) -> bool {
+        self.is_alive(RoleName::Knight)
     }
 
     pub fn is_revolutionary_alive(&self) -> bool {
