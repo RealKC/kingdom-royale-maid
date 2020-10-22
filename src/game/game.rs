@@ -9,7 +9,6 @@ use rand::thread_rng;
 use serenity::model::{
     channel::{ChannelType, PermissionOverwrite, PermissionOverwriteType},
     id::{ChannelId, GuildId, RoleId, UserId},
-    prelude::*,
     Permissions,
 };
 use serenity::prelude::*;
