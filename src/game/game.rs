@@ -234,7 +234,6 @@ And a heavy-dute knife.
                 panic!();
             }
 
-            GameState::Pregame => todo!(),
             GameState::ABlock => {
                 self.state = if all_alive_have_won {
                     GameState::GameEnded
@@ -415,7 +414,6 @@ pub enum KilledBy {
 #[derive(Copy, Clone, PartialEq, Eq)]
 pub enum GameState {
     NotStarted, // Recruiting phase and stuff
-    Pregame,    // for giving players an introduction to the game _in character_
     // Blocks taken from the timetable in the book
     ABlock, // break, standby in own room
     BBlock, // Gathering in the big room, "First meeting"
