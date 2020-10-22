@@ -23,3 +23,4 @@ rust-embed = { version = "5.6.0", features = ["debug-embed"] }
 [dependencies.serenity]
 git = "https://github.com/serenity-rs/serenity"
 branch = "current"
+features = ["collector"]

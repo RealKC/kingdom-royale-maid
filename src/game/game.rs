@@ -1,14 +1,16 @@
 use crate::game::{player::Player, roles::RoleName};
+use crate::helpers::{choose_target::build_embed_for_target_choice, react::react_with};
 use itertools::izip;
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 use serenity::model::{
     channel::{ChannelType, PermissionOverwrite, PermissionOverwriteType},
     id::{ChannelId, GuildId, RoleId, UserId},
+    prelude::*,
     Permissions,
 };
 use serenity::prelude::*;
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use std::fmt;
 use tracing::error;
 
@@ -22,8 +24,8 @@ pub struct Game {
     player_role: RoleId,
     state: GameState,
     host: Host,
-    players: HashMap<UserId, Player>, // 6
-    joined_users: Vec<UserId>,        // only ever used in Pregame
+    players: BTreeMap<UserId, Player>, // 6
+    joined_users: Vec<UserId>,         // only ever used in Pregame
     king_murder_target: UserId,
     day: u8,
 }
@@ -157,11 +159,6 @@ impl Game {
             .id;
 
         for new_player in izip!(&mut self.joined_users, &watch_colours) {
-            self.players.insert(
-                *new_player.0,
-                Player::new(*new_player.0, roles.remove(0), new_player.1.to_string()),
-            );
-
             let channel = self
                 .guild
                 .create_channel(ctx, |c| {
@@ -169,6 +166,16 @@ impl Game {
                         .category(rooms_category)
                 })
                 .await?;
+
+            self.players.insert(
+                *new_player.0,
+                Player::new(
+                    *new_player.0,
+                    roles.remove(0),
+                    channel.id,
+                    new_player.1.to_string(),
+                ),
+            );
 
             self.guild
                 .member(ctx, *new_player.0)
@@ -267,6 +274,9 @@ And a heavy-dute knife.
                     GameState::GameEnded
                 } else {
                     self.close_meeting_room(ctx).await?;
+                    self.make_king_select_target(ctx).await?;
+
+                    // TODO: Make Sorc/Knight
 
                     GameState::EBlock
                 }
@@ -295,6 +305,92 @@ And a heavy-dute knife.
         Ok(())
     }
 
+    pub async fn make_king_select_target(&mut self, ctx: &Context) -> Result {
+        let king = {
+            // May not necessarily be the king proper, but the next one in the hierarchy
+            // Hierarchy: King -(dies)-> The Double -(dies)-> Prince
+
+            let mut candidates = vec![];
+            for player in &self.players {
+                if player.1.role_name().is_king_like() {
+                    candidates.push(player);
+                }
+            }
+
+            candidates.sort_by(|a, b| {
+                fn map_to_int(role: RoleName) -> u8 {
+                    match role {
+                        RoleName::King => 100,
+                        RoleName::TheDouble => 50,
+                        RoleName::Prince => 25,
+                        _ => unreachable!(),
+                    }
+                };
+
+                map_to_int(a.1.role_name()).cmp(&map_to_int(b.1.role_name()))
+            });
+
+            let mut res = None;
+            for candidate in candidates {
+                let player = candidate.1;
+                if player.is_alive() {
+                    res = Some(*candidate.0);
+                }
+            }
+            res
+        };
+
+        if king.is_none() {
+            return Ok(()); // I *think* this shouldn't happen as no nobility => someone won, already
+        }
+
+        let king = king.unwrap();
+
+        let embed = build_embed_for_target_choice(
+            ctx,
+            &self.players.keys().map(|k| *k).collect::<Vec<_>>(),
+            RoleName::King,
+        )
+        .await?;
+
+        let msg = self
+            .players
+            .get(&king)
+            .unwrap()
+            .room()
+            .send_message(ctx, |m| m.set_embed(embed))
+            .await?;
+
+        static REACTIONS: [&str; 6] = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣"];
+        react_with(ctx, &msg, &REACTIONS).await?;
+
+        if let Some(reaction) = msg
+            .await_reaction(&ctx)
+            .author_id(self.players.get(&king).unwrap().id())
+            .channel_id(self.players.get(&king).unwrap().room())
+            .filter(|r| REACTIONS.contains(&r.emoji.to_string().as_str()))
+            .await
+        {
+            let emoji = reaction.as_inner_ref().emoji.to_string();
+            if let Ok(idx) = REACTIONS.binary_search(&emoji.as_str()) {
+                let id = self.players.keys().nth(idx).map(|o| *o);
+                match id {
+                    Some(id) => {
+                        self.king_murder_target = id;
+                    }
+                    None => {
+                        error!("Got a wrong reaction somehow");
+                        panic!();
+                    }
+                }
+            }
+
+            return Ok(());
+        }
+
+        Err("Probably an error to arrive here".into())
+    }
+
     pub fn all_alive_have_won(&self) -> bool {
         for player in self.players.iter() {
             if !player.1.win_condition_achieved(self) {
@@ -309,7 +405,7 @@ And a heavy-dute knife.
         self.day
     }
 
-    pub fn players(&self) -> &HashMap<UserId, Player> {
+    pub fn players(&self) -> &BTreeMap<UserId, Player> {
         &self.players
     }
 
