@@ -100,6 +100,23 @@ impl Game {
         Ok(())
     }
 
+    async fn close_meeting_room(&self, ctx: &Context) -> Result {
+        self.meeting_room
+            .create_permission(
+                ctx,
+                &PermissionOverwrite {
+                    allow: Permissions::empty(),
+                    deny: Permissions::SEND_MESSAGES
+                        | Permissions::READ_MESSAGES
+                        | Permissions::READ_MESSAGE_HISTORY,
+                    kind: PermissionOverwriteType::Role(self.player_role),
+                },
+            )
+            .await?;
+
+        Ok(())
+    }
+
     pub fn can_start(&self) -> bool {
         self.joined_users.len() == 6
     }
@@ -231,6 +248,7 @@ And a heavy-dute knife.
                 self.state = if all_alive_have_won {
                     GameState::GameEnded
                 } else {
+                    self.close_meeting_room(ctx).await?;
                     GameState::CBlock
                 }
             }
@@ -248,6 +266,8 @@ And a heavy-dute knife.
                 self.state = if all_alive_have_won {
                     GameState::GameEnded
                 } else {
+                    self.close_meeting_room(ctx).await?;
+
                     GameState::EBlock
                 }
             }
