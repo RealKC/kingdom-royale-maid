@@ -35,7 +35,7 @@ pub async fn start_gathering(ctx: &Context, msg: &Message) -> CommandResult {
                 return Ok(());
             }
 
-            game.start_gathering(ctx).await?;
+            game.transition_to_next_state(ctx).await?;
         }
         None => {
             msg.reply(

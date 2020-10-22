@@ -83,22 +83,6 @@ impl Game {
     pub fn player_role(&self) -> RoleId {
         self.player_role
     }
-    pub async fn start_gathering(&mut self, ctx: &Context) -> Result {
-        assert!([GameState::ABlock, GameState::CBlock].contains(&self.state));
-        match self.state() {
-            GameState::ABlock => {
-                self.transition_to_next_state();
-                self.open_meeting_room(ctx).await?;
-            }
-            GameState::CBlock => {
-                self.transition_to_next_state();
-                self.open_meeting_room(ctx).await?;
-            }
-            _ => unreachable!(),
-        };
-
-        Ok(())
-    }
 
     async fn open_meeting_room(&self, ctx: &Context) -> Result {
         self.meeting_room
@@ -225,7 +209,7 @@ And a heavy-dute knife.
         &self.joined_users
     }
 
-    pub fn transition_to_next_state(&mut self) {
+    pub async fn transition_to_next_state(&mut self, ctx: &Context) -> Result {
         let all_alive_have_won = self.all_alive_have_won();
 
         match self.state {
@@ -235,10 +219,12 @@ And a heavy-dute knife.
             }
 
             GameState::ABlock => {
-                self.state = if all_alive_have_won {
-                    GameState::GameEnded
+                if all_alive_have_won {
+                    self.state = GameState::GameEnded;
                 } else {
-                    GameState::BBlock
+                    self.open_meeting_room(ctx).await?;
+
+                    self.state = GameState::BBlock;
                 };
             }
             GameState::BBlock => {
@@ -249,11 +235,14 @@ And a heavy-dute knife.
                 }
             }
             GameState::CBlock => {
-                self.state = if all_alive_have_won {
-                    GameState::GameEnded
+                // TODO: Secret meeting partner selection!
+                if all_alive_have_won {
+                    self.state = GameState::GameEnded;
                 } else {
-                    GameState::DBlock
-                }
+                    self.open_meeting_room(ctx).await?;
+
+                    self.state = GameState::DBlock;
+                };
             }
             GameState::DBlock => {
                 self.state = if all_alive_have_won {
@@ -281,7 +270,9 @@ And a heavy-dute knife.
                 error!("Function called after game ended");
                 panic!();
             }
-        }
+        };
+
+        Ok(())
     }
 
     pub fn all_alive_have_won(&self) -> bool {
