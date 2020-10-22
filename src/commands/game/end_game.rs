@@ -2,6 +2,7 @@ use super::prelude::*;
 use typemap_rev::Entry;
 
 #[command("endgame")]
+#[description("Forcefully end a game")]
 pub async fn end_game(ctx: &Context, msg: &Message) -> CommandResult {
     let mut map = ctx.data.write().await;
 
