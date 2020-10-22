@@ -18,5 +18,5 @@ pub use sorcerer::Sorcerer;
 
 mod prelude {
     pub use super::{Role, RoleName};
-    pub use crate::game::{Game, GameState, KilledBy, Player};
+    pub use crate::game::{DeathCause, Game, GameState, Player};
 }

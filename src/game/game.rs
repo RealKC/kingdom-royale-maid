@@ -573,10 +573,11 @@ impl fmt::Display for LeaveError {
 }
 
 #[derive(Copy, Clone, PartialEq, Eq)]
-pub enum KilledBy {
-    Sorcerer,
-    Knight,
-    Revolutionary,
+pub enum DeathCause {
+    Sorcery,
+    Beheading,
+    Assassination,
+    Starvation,
 }
 
 #[derive(Copy, Clone, PartialEq, Eq)]

@@ -39,12 +39,12 @@ pub trait Role {
     fn win_condition_achieved(&self, game: &Game) -> bool;
 }
 
-impl Into<KilledBy> for RoleName {
-    fn into(self) -> KilledBy {
+impl Into<DeathCause> for RoleName {
+    fn into(self) -> DeathCause {
         match self {
-            RoleName::Sorcerer => KilledBy::Sorcerer,
-            RoleName::Knight => KilledBy::Knight,
-            RoleName::Revolutionary => KilledBy::Revolutionary,
+            RoleName::Sorcerer => DeathCause::Sorcery,
+            RoleName::Knight => DeathCause::Beheading,
+            RoleName::Revolutionary => DeathCause::Assassination,
             _ => panic!(
                 "RoleName.into::<KilledBy> should never be called on {:?}",
                 self
