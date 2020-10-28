@@ -52,6 +52,11 @@ pub async fn game_info(ctx: &Context, msg: &Message) -> CommandResult {
                     true,
                 ),
                 ("Meeting room", game.meeting_room().mention(), true),
+                (
+                    "Announcement channel",
+                    game.announcement_channel().mention(),
+                    true,
+                ),
                 ("Player role", game.player_role().mention(), true),
             ];
 

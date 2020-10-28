@@ -23,6 +23,7 @@ pub type Result = StdResult<(), Box<(dyn std::error::Error + Send + Sync)>>;
 pub struct Game {
     guild: GuildId,
     meeting_room: ChannelId,
+    announcement_channel: ChannelId,
     player_role: RoleId,
     state: GameState,
     host: Host,
@@ -33,10 +34,17 @@ pub struct Game {
 }
 
 impl Game {
-    pub fn new(guild: GuildId, host: Host, meeting_room: ChannelId, player_role: RoleId) -> Self {
+    pub fn new(
+        guild: GuildId,
+        host: Host,
+        meeting_room: ChannelId,
+        announcement_channel: ChannelId,
+        player_role: RoleId,
+    ) -> Self {
         Self {
             guild,
             meeting_room,
+            announcement_channel,
             player_role,
             state: GameState::NotStarted,
             host,
@@ -82,6 +90,10 @@ impl Game {
 
     pub fn meeting_room(&self) -> ChannelId {
         self.meeting_room
+    }
+
+    pub fn announcement_channel(&self) -> ChannelId {
+        self.announcement_channel
     }
 
     pub fn player_role(&self) -> RoleId {

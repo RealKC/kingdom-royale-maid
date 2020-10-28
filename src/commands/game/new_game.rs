@@ -21,6 +21,9 @@ pub async fn new_game(ctx: &Context, msg: &Message, mut args: Args) -> CommandRe
             .id,
     );
 
+    let announcement_channel = args.single::<ChannelId>();
+    let announcement_channel_id = announcement_channel.unwrap_or(msg.channel_id);
+
     if data.get::<GameContainer>().is_some() {
         msg.reply(ctx, ": Cannot start a game if one is already running")
             .await?;
@@ -29,6 +32,7 @@ pub async fn new_game(ctx: &Context, msg: &Message, mut args: Args) -> CommandRe
             msg.guild_id.unwrap(),
             msg.author.id,
             meeting_room_id,
+            announcement_channel_id,
             player_role_id,
         ))));
         msg.reply(
