@@ -8,6 +8,7 @@ pub struct Player {
     role: Box<(dyn Role + Send + Sync)>,
     alive: bool,
     room: ChannelId,
+    secret_meeting_partner: Option<UserId>,
     death_cause: Option<DeathCause>,
     items: Items,
 }
@@ -27,6 +28,7 @@ impl Player {
             room,
             death_cause: None,
             alive: true,
+            secret_meeting_partner: None,
             items: Items::new(watch_colour),
         }
     }
@@ -37,6 +39,14 @@ impl Player {
 
     pub fn room(&self) -> ChannelId {
         self.room
+    }
+
+    pub fn secret_meeting_partner(&self) -> Option<UserId> {
+        self.secret_meeting_partner
+    }
+
+    pub fn set_secret_meeting_partner(&mut self, partner: UserId) {
+        self.secret_meeting_partner = Some(partner);
     }
 
     pub fn is_alive(&self) -> bool {

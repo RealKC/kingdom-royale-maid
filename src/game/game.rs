@@ -263,7 +263,6 @@ And a heavy-dute knife.
                 self.close_meeting_room(ctx).await?;
             }
             GameState::CBlock => {
-                // TODO: Secret meeting partner selection!
                 if all_alive_have_won {
                     self.state = GameState::GameEnded;
                 } else {
@@ -280,6 +279,7 @@ And a heavy-dute knife.
                 }
 
                 self.close_meeting_room(ctx).await?;
+                self.select_secret_meeting_partners(ctx).await?;
                 self.make_king_select_target(ctx).await?;
                 self.make_assistant_choose(ctx).await?;
             }
@@ -305,6 +305,60 @@ And a heavy-dute knife.
         };
 
         Ok(())
+    }
+
+    pub async fn select_secret_meeting_partners(&mut self, ctx: &Context) -> Result {
+        let rooms = self
+            .players
+            .iter()
+            .map(|player| (*player.0, player.1.room()))
+            .collect::<Vec<_>>();
+
+        for user_and_room in rooms {
+            let embed = build_embed_for_target_choice(
+                ctx,
+                &self.players.keys().map(|k| *k).collect::<Vec<_>>(),
+                "Please select a partner for your secret meeting",
+            )
+            .await?;
+
+            let msg = user_and_room
+                .1
+                .send_message(ctx, |m| m.set_embed(embed))
+                .await?;
+
+            static REACTIONS: [&str; 6] = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣"];
+            react_with(ctx, &msg, &REACTIONS).await?;
+
+            if let Some(reaction) = msg
+                .await_reaction(&ctx)
+                .author_id(user_and_room.0)
+                .channel_id(user_and_room.1)
+                .filter(|r| REACTIONS.contains(&r.emoji.to_string().as_str()))
+                .await
+            {
+                let emoji = reaction.as_inner_ref().emoji.to_string();
+                if let Ok(idx) = REACTIONS.binary_search(&emoji.as_str()) {
+                    let id = self.players.keys().nth(idx).map(|o| *o);
+                    match id {
+                        Some(id) => {
+                            self.players
+                                .get_mut(&user_and_room.0)
+                                .unwrap()
+                                .set_secret_meeting_partner(id);
+                        }
+                        None => {
+                            error!("Got a wrong reaction somehow");
+                            panic!();
+                        }
+                    }
+                }
+
+                return Ok(());
+            }
+        }
+
+        Err("Probably an error to arrive here".into())
     }
 
     pub async fn make_king_select_target(&mut self, ctx: &Context) -> Result {
