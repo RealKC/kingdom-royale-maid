@@ -13,44 +13,41 @@ pub async fn game_info(ctx: &Context, msg: &Message) -> CommandResult {
         Some(game) => {
             let game = game.write().await;
 
+            let players = {
+                if game.state() == GameState::NotStarted {
+                    let mut players = String::new();
+                    for user in game.joined_users().iter() {
+                        players.push_str(&user.mention());
+                    }
+                    if !players.is_empty() {
+                        players
+                    } else {
+                        "None have joined yet :(".to_string()
+                    }
+                } else {
+                    let mut players = String::new();
+
+                    let all_alive_have_won = game.all_alive_have_won();
+
+                    for player in game.players().iter() {
+                        if player.1.is_alive() {
+                            let mention = player.0.mention();
+                            players.push_str(&mention);
+                            if all_alive_have_won {
+                                players.push_str("(Victory!)");
+                            }
+                            players.push('\n');
+                        } else {
+                            let mention = format! {"~~{}~~\n", player.0.mention()};
+                            players.push_str(&mention);
+                        }
+                    }
+                    players
+                }
+            };
             let fields = vec![
                 ("Host", game.host().mention(), false),
-                (
-                    "Players",
-                    (|| {
-                        if game.state() == GameState::NotStarted {
-                            let mut players = String::new();
-                            for user in game.joined_users().iter() {
-                                players.push_str(&user.mention());
-                            }
-                            if !players.is_empty() {
-                                players
-                            } else {
-                                "None have joined yet :(".to_string()
-                            }
-                        } else {
-                            let mut players = String::new();
-
-                            let all_alive_have_won = game.all_alive_have_won();
-
-                            for player in game.players().iter() {
-                                if player.1.is_alive() {
-                                    let mention = player.0.mention();
-                                    players.push_str(&mention);
-                                    if all_alive_have_won {
-                                        players.push_str("(Victory!)");
-                                    }
-                                    players.push('\n');
-                                } else {
-                                    let mention = format! {"~~{}~~\n", player.0.mention()};
-                                    players.push_str(&mention);
-                                }
-                            }
-                            players
-                        }
-                    })(),
-                    true,
-                ),
+                ("Players", players, true),
                 ("Meeting room", game.meeting_room().mention(), true),
                 (
                     "Announcement channel",
@@ -80,7 +77,7 @@ pub async fn game_info(ctx: &Context, msg: &Message) -> CommandResult {
                                 a.icon_url(
                                     "https://cdn.discordapp.com/emojis/764529758998102037.png",
                                 )
-                                .name("Started")
+                                .name(&game.state().to_string())
                             }
                         })
                         .title("Kingdom Royale")
@@ -105,7 +102,9 @@ pub async fn game_info(ctx: &Context, msg: &Message) -> CommandResult {
                             } else {
                                 format!("{} | {}", msg.author.name, game.day())
                             })
-                        })
+                        });
+
+                        e
                     })
                 })
                 .await

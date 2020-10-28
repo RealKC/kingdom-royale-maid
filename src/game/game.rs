@@ -654,3 +654,18 @@ pub enum GameState {
     FBlock, // Sleep & Break, is this useful?
     GameEnded,
 }
+
+impl fmt::Display for GameState {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            GameState::NotStarted => write!(f, "Not started"),
+            GameState::ABlock => write!(f, "<A>"),
+            GameState::BBlock => write!(f, "<B>"),
+            GameState::CBlock => write!(f, "<C>"),
+            GameState::DBlock => write!(f, "<D>"),
+            GameState::EBlock => write!(f, "<E>"),
+            GameState::FBlock => write!(f, "<F>"),
+            GameState::GameEnded => write!(f, "Game has ended"),
+        }
+    }
+}
