@@ -70,6 +70,10 @@ impl Player {
         their_item.0 += 1;
     }
 
+    pub fn items_mut(&mut self) -> &mut Items {
+        &mut self.items
+    }
+
     pub fn can_do_special_action(&self, game: &Game) -> bool {
         self.role.can_do_special_action(game)
     }

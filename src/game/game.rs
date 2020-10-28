@@ -277,6 +277,18 @@ And a heavy-dute knife.
                     GameState::GameEnded
                 } else {
                     GameState::FBlock
+                };
+
+                for player in &mut self.players {
+                    let items = player.1.items_mut();
+
+                    let food = items.get_item_mut(super::item::Item::FOOD_NAME);
+
+                    if food.0 > 0 {
+                        food.0 -= 1;
+                    } else {
+                        player.1.set_dead(DeathCause::Starvation);
+                    }
                 }
             }
             GameState::FBlock => {

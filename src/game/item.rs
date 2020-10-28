@@ -8,9 +8,11 @@ pub struct Item {
 }
 
 impl Item {
+    pub const FOOD_NAME: &'static str = "Food bar";
+
     fn food() -> Self {
         Self {
-            name: "Food bar".to_string(),
+            name: Self::FOOD_NAME.to_string(),
             edible: true,
             weapon: false,
         }
