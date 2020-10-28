@@ -292,6 +292,8 @@ And a heavy-dute knife.
                         player.1.set_dead(DeathCause::Starvation);
                     }
                 }
+
+                self.make_revolutionary_assassinate(ctx).await?;
             }
             GameState::FBlock => {
                 if all_alive_have_won {
@@ -607,6 +609,68 @@ And a heavy-dute knife.
         }
 
         Err("Reaching here is probably a bug".into())
+    }
+
+    pub async fn make_revolutionary_assassinate(&mut self, ctx: &Context) -> Result {
+        let revolutionary = {
+            let mut res = None;
+            for player in &self.players {
+                if player.1.is_alive() && player.1.role_name() == RoleName::Revolutionary {
+                    res = Some(player);
+                    break;
+                }
+            }
+            res
+        };
+
+        if revolutionary.is_none() {
+            return Ok(());
+        }
+
+        let revolutionary = revolutionary.unwrap();
+
+        let embed = build_embed_for_target_choice(
+            ctx,
+            &self.players.keys().map(|k| *k).collect::<Vec<_>>(),
+            "Please select a target for 「 Murder 」",
+        )
+        .await?;
+
+        let msg = revolutionary
+            .1
+            .room()
+            .send_message(ctx, |m| m.set_embed(embed))
+            .await?;
+
+        static REACTIONS: [&str; 6] = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣"];
+        react_with(ctx, &msg, &REACTIONS).await?;
+
+        if let Some(reaction) = msg
+            .await_reaction(&ctx)
+            .author_id(*revolutionary.0)
+            .channel_id(revolutionary.1.room())
+            .filter(|r| REACTIONS.contains(&r.emoji.to_string().as_str()))
+            .await
+        {
+            let emoji = reaction.as_inner_ref().emoji.to_string();
+            if let Ok(idx) = REACTIONS.binary_search(&emoji.as_str()) {
+                let id = self.players.keys().nth(idx).map(|o| *o);
+                match id {
+                    Some(id) => {
+                        let player = self.players.get_mut(&id);
+                        player.unwrap().set_dead(DeathCause::Assassination);
+                    }
+                    None => {
+                        error!("Got a wrong reaction somehow");
+                        panic!();
+                    }
+                }
+            }
+
+            return Ok(());
+        }
+
+        Err("Probably an error to arrive here".into())
     }
 
     pub fn all_alive_have_won(&self) -> bool {
