@@ -35,11 +35,11 @@ pub struct Game {
 impl Game {
     pub fn new(guild: GuildId, host: Host, meeting_room: ChannelId, player_role: RoleId) -> Self {
         Self {
-            guild: guild,
-            meeting_room: meeting_room,
-            player_role: player_role,
+            guild,
+            meeting_room,
+            player_role,
             state: GameState::NotStarted,
-            host: host,
+            host,
             players: Default::default(),
             joined_users: Default::default(),
             king_murder_target: Default::default(),
