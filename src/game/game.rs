@@ -268,8 +268,10 @@ And a heavy-dute knife.
                 } else {
                     self.state = GameState::DBlock;
                 };
-
-                self.open_meeting_room(ctx).await?;
+                self.close_meeting_room(ctx).await?;
+                self.select_secret_meeting_partners(ctx).await?;
+                self.make_king_select_target(ctx).await?;
+                self.make_assistant_choose(ctx).await?;
             }
             GameState::DBlock => {
                 if all_alive_have_won {
@@ -278,10 +280,7 @@ And a heavy-dute knife.
                     self.state = GameState::EBlock;
                 }
 
-                self.close_meeting_room(ctx).await?;
-                self.select_secret_meeting_partners(ctx).await?;
-                self.make_king_select_target(ctx).await?;
-                self.make_assistant_choose(ctx).await?;
+                self.open_meeting_room(ctx).await?;
             }
             GameState::EBlock => {
                 self.state = if all_alive_have_won {
