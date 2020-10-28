@@ -279,6 +279,8 @@ And a heavy-dute knife.
                     GameState::FBlock
                 };
 
+                self.close_meeting_room(ctx).await?;
+
                 for player in &mut self.players {
                     let items = player.1.items_mut();
 
