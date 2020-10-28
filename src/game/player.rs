@@ -1,4 +1,4 @@
-use super::item::Items;
+use super::item::{Item, Items};
 use super::roles::{Role, RoleName};
 use super::{DeathCause, Game};
 use serenity::model::id::{ChannelId, UserId};
@@ -62,12 +62,12 @@ impl Player {
         self.death_cause
     }
 
-    pub fn give_item_to(&mut self, other: &mut Player, name: &str) {
-        let my_item = self.items.get_item_mut(name);
-        let their_item = other.items.get_item_mut(name);
+    pub fn items(&self) -> &Items {
+        &self.items
+    }
 
-        my_item.0 -= 1;
-        their_item.0 += 1;
+    pub fn add_item(&mut self, item: Item) {
+        self.items.add_item(item)
     }
 
     pub fn items_mut(&mut self) -> &mut Items {

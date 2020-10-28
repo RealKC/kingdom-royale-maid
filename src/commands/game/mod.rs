@@ -1,5 +1,6 @@
 mod end_game;
 mod game_info;
+mod give_item;
 mod join;
 mod leave;
 mod new_game;
@@ -10,6 +11,7 @@ mod start_gathering;
 
 pub use end_game::*;
 pub use game_info::*;
+pub use give_item::*;
 pub use join::*;
 pub use leave::*;
 pub use new_game::*;

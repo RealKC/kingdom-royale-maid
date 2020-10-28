@@ -38,7 +38,8 @@ pub struct Random;
     start,
     rules,
     start_gathering,
-    end_game
+    end_game,
+    give_item
 )]
 pub struct Game;
 

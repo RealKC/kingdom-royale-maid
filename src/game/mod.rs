@@ -1,6 +1,6 @@
 mod data;
 mod game;
-mod item;
+pub mod item;
 mod player;
 mod roles;
 

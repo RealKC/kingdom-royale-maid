@@ -691,6 +691,10 @@ And a heavy-dute knife.
         &self.players
     }
 
+    pub fn players_mut(&mut self) -> &mut BTreeMap<UserId, Player> {
+        &mut self.players
+    }
+
     pub fn host(&self) -> Host {
         self.host
     }

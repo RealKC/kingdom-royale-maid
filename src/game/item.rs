@@ -83,7 +83,7 @@ impl Items {
     #[instrument]
     pub fn get_item(&self, item_name: &str) -> &(Count, Item) {
         for item in self.items.iter() {
-            if item.1.name == item_name {
+            if item.1.name.contains(item_name) {
                 return item;
             }
         }
@@ -95,12 +95,16 @@ impl Items {
     #[instrument]
     pub fn get_item_mut(&mut self, item_name: &str) -> &mut (Count, Item) {
         for item in self.items.iter_mut() {
-            if item.1.name == item_name {
+            if item.1.name.contains(item_name) {
                 return item;
             }
         }
 
         error!("Items::get_item_mut should be called with valid item names only!!!");
         unreachable!();
+    }
+
+    pub fn add_item(&mut self, item: Item) {
+        self.items.push((1, item))
     }
 }
