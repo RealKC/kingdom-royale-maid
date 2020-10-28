@@ -6,12 +6,15 @@ use crate::helpers::{
 use itertools::izip;
 use rand::seq::SliceRandom;
 use rand::thread_rng;
-use serenity::model::{
-    channel::{ChannelType, PermissionOverwrite, PermissionOverwriteType},
-    id::{ChannelId, GuildId, RoleId, UserId},
-    Permissions,
-};
 use serenity::prelude::*;
+use serenity::{
+    builder::CreateEmbed,
+    model::{
+        channel::{ChannelType, PermissionOverwrite, PermissionOverwriteType},
+        id::{ChannelId, GuildId, RoleId, UserId},
+        Permissions,
+    },
+};
 use std::collections::BTreeMap;
 use std::fmt;
 use tracing::error;
@@ -281,6 +284,7 @@ And a heavy-dute knife.
                     self.state = GameState::DBlock;
                 };
                 self.select_secret_meeting_partners(ctx).await?;
+                self.announce_secret_meeting_partners(ctx).await?;
                 self.make_king_select_target(ctx).await?;
                 self.make_assistant_choose(ctx).await?;
             }
@@ -369,6 +373,33 @@ And a heavy-dute knife.
         }
 
         Err("Probably an error to arrive here".into())
+    }
+
+    pub async fn announce_secret_meeting_partners(&self, ctx: &Context) -> Result {
+        let partners = {
+            let mut res = String::new();
+
+            for player in &self.players {
+                res.push_str(&format!(
+                    "{} => {}",
+                    player.0.mention(),
+                    player.1.secret_meeting_partner().unwrap().mention()
+                ));
+            }
+
+            res
+        };
+
+        let mut embed = CreateEmbed::default();
+        embed
+            .title("Secret meeting partners")
+            .field("A => B", partners, true);
+
+        self.announcement_channel
+            .send_message(ctx, |m| m.set_embed(embed))
+            .await?;
+
+        Ok(())
     }
 
     pub async fn make_king_select_target(&mut self, ctx: &Context) -> Result {
