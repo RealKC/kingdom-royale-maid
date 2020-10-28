@@ -1,7 +1,7 @@
 use crate::game::{player::Player, roles::RoleName};
 use crate::helpers::{
     choose_target::build_embed_for_target_choice,
-    confirm_murder::build_embed_for_murder_confirmation, react::react_with,
+    confirm_murder::build_embed_for_murder_confirmation, perms, react::react_with,
 };
 use itertools::izip;
 use rand::seq::SliceRandom;
@@ -9,9 +9,8 @@ use rand::thread_rng;
 use serenity::{
     builder::CreateEmbed,
     model::{
-        channel::{ChannelType, PermissionOverwrite, PermissionOverwriteType},
+        channel::ChannelType,
         id::{ChannelId, GuildId, RoleId, UserId},
-        Permissions,
     },
 };
 use serenity::{model::prelude::User, prelude::*};
@@ -107,13 +106,7 @@ impl Game {
         self.meeting_room
             .create_permission(
                 ctx,
-                &PermissionOverwrite {
-                    allow: Permissions::SEND_MESSAGES
-                        | Permissions::READ_MESSAGES
-                        | Permissions::READ_MESSAGE_HISTORY,
-                    deny: Permissions::empty(),
-                    kind: PermissionOverwriteType::Role(self.player_role),
-                },
+                &perms::make_allowed_override_for_role(self.player_role),
             )
             .await?;
         Ok(())
@@ -121,16 +114,7 @@ impl Game {
 
     async fn close_meeting_room(&self, ctx: &Context) -> Result {
         self.meeting_room
-            .create_permission(
-                ctx,
-                &PermissionOverwrite {
-                    allow: Permissions::empty(),
-                    deny: Permissions::SEND_MESSAGES
-                        | Permissions::READ_MESSAGES
-                        | Permissions::READ_MESSAGE_HISTORY,
-                    kind: PermissionOverwriteType::Role(self.player_role),
-                },
-            )
+            .create_permission(ctx, &perms::make_denied_override_for_role(self.player_role))
             .await?;
 
         Ok(())
@@ -161,13 +145,9 @@ impl Game {
         let watch_colours = vec!["blue", "beige", "orange", "green", "black", "red"];
         let mut current_room: u8 = 1;
 
-        let at_everyone_perms = PermissionOverwrite {
-            allow: Permissions::empty(),
-            deny: Permissions::READ_MESSAGES | Permissions::SEND_MESSAGES,
-            kind: PermissionOverwriteType::Member(UserId {
-                0: *self.guild.as_u64(),
-            }),
-        };
+        let at_everyone_perms = perms::make_denied_override_for_role(RoleId {
+            0: *self.guild.as_u64(),
+        });
 
         let rooms_category = self
             .guild
@@ -203,14 +183,7 @@ impl Game {
             channel.create_permission(ctx, &at_everyone_perms).await?;
 
             channel
-                .create_permission(
-                    ctx,
-                    &PermissionOverwrite {
-                        allow: Permissions::READ_MESSAGES | Permissions::SEND_MESSAGES,
-                        deny: Permissions::empty(),
-                        kind: PermissionOverwriteType::Member(*new_player.0),
-                    },
-                )
+                .create_permission(ctx, &perms::make_allowed_override_for_user(*new_player.0))
                 .await?;
 
             channel.say(ctx, format!(r#"
@@ -445,25 +418,11 @@ And a heavy-dute knife.
             let mut name = String::with_capacity(16 + guest_name.len() + host_name.len());
             write!(name, "{}-{}", guest_name, host_name)?;
 
-            let at_everyone_perms = PermissionOverwrite {
-                allow: Permissions::empty(),
-                deny: Permissions::READ_MESSAGES | Permissions::SEND_MESSAGES,
-                kind: PermissionOverwriteType::Member(UserId {
-                    0: *self.guild.as_u64(),
-                }),
-            };
-
-            let guest_perms = PermissionOverwrite {
-                allow: Permissions::READ_MESSAGES | Permissions::SEND_MESSAGES,
-                deny: Permissions::empty(),
-                kind: PermissionOverwriteType::Member(guest_id),
-            };
-
-            let host_perms = PermissionOverwrite {
-                allow: Permissions::READ_MESSAGES | Permissions::SEND_MESSAGES,
-                deny: Permissions::empty(),
-                kind: PermissionOverwriteType::Member(host_id),
-            };
+            let at_everyone_perms = perms::make_denied_override_for_role(RoleId {
+                0: *self.guild.as_u64(),
+            });
+            let guest_perms = perms::make_allowed_override_for_user(guest_id);
+            let host_perms = perms::make_allowed_override_for_user(host_id);
 
             let channel = self
                 .guild
