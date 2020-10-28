@@ -268,7 +268,6 @@ And a heavy-dute knife.
                 } else {
                     self.state = GameState::DBlock;
                 };
-                self.close_meeting_room(ctx).await?;
                 self.select_secret_meeting_partners(ctx).await?;
                 self.make_king_select_target(ctx).await?;
                 self.make_assistant_choose(ctx).await?;
