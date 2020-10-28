@@ -1,6 +1,5 @@
 use super::Error;
 use crate::data::{Cdn, ReqwestClient};
-use crate::game::RoleName;
 use image::{
     self, imageops, load_from_memory_with_format, png::PngEncoder, ColorType, ImageFormat,
 };
