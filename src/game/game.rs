@@ -6,7 +6,6 @@ use crate::helpers::{
 use itertools::izip;
 use rand::seq::SliceRandom;
 use rand::thread_rng;
-use serenity::prelude::*;
 use serenity::{
     builder::CreateEmbed,
     model::{
@@ -15,8 +14,9 @@ use serenity::{
         Permissions,
     },
 };
-use std::collections::BTreeMap;
+use serenity::{model::prelude::User, prelude::*};
 use std::fmt;
+use std::{collections::BTreeMap, fmt::Write};
 use tracing::error;
 
 type Host = UserId;
@@ -285,6 +285,7 @@ And a heavy-dute knife.
                 };
                 self.select_secret_meeting_partners(ctx).await?;
                 self.announce_secret_meeting_partners(ctx).await?;
+                self.open_secret_meeting_rooms(ctx).await?;
                 self.make_king_select_target(ctx).await?;
                 self.make_assistant_choose(ctx).await?;
             }
@@ -398,6 +399,85 @@ And a heavy-dute knife.
         self.announcement_channel
             .send_message(ctx, |m| m.set_embed(embed))
             .await?;
+
+        Ok(())
+    }
+
+    pub async fn open_secret_meeting_rooms(&mut self, ctx: &Context) -> Result {
+        let meetings_category = self
+            .guild
+            .create_channel(ctx, |ch| {
+                ch.name(format!("Secret meetings for day {}", self.day))
+                    .kind(ChannelType::Category)
+            })
+            .await?;
+
+        for player in &self.players {
+            async fn get_suitable_name(user: User, ctx: &Context, game: &Game) -> String {
+                user.nick_in(ctx, game.guild).await.unwrap_or(
+                    user.name
+                        .chars()
+                        .map(|c| {
+                            if c.is_whitespace()
+                                || ['"', ',', '.', '\'', '/', ';', '[', ']', '=', '\\'].contains(&c)
+                            {
+                                '-'
+                            } else {
+                                c
+                            }
+                        })
+                        .collect(),
+                )
+            }
+
+            let guest = player.0.to_user(ctx).await?;
+            let guest_id = guest.id;
+            let guest_name = get_suitable_name(guest, ctx, &self).await;
+            let host = player
+                .1
+                .secret_meeting_partner()
+                .unwrap()
+                .to_user(ctx)
+                .await?;
+            let host_id = host.id;
+            let host_name = get_suitable_name(host, ctx, self).await;
+
+            let mut name = String::with_capacity(16 + guest_name.len() + host_name.len());
+            write!(name, "{}-{}", guest_name, host_name)?;
+
+            let at_everyone_perms = PermissionOverwrite {
+                allow: Permissions::empty(),
+                deny: Permissions::READ_MESSAGES | Permissions::SEND_MESSAGES,
+                kind: PermissionOverwriteType::Member(UserId {
+                    0: *self.guild.as_u64(),
+                }),
+            };
+
+            let guest_perms = PermissionOverwrite {
+                allow: Permissions::READ_MESSAGES | Permissions::SEND_MESSAGES,
+                deny: Permissions::empty(),
+                kind: PermissionOverwriteType::Member(guest_id),
+            };
+
+            let host_perms = PermissionOverwrite {
+                allow: Permissions::READ_MESSAGES | Permissions::SEND_MESSAGES,
+                deny: Permissions::empty(),
+                kind: PermissionOverwriteType::Member(host_id),
+            };
+
+            let channel = self
+                .guild
+                .create_channel(ctx, |ch| {
+                    ch.name(name)
+                        .kind(ChannelType::Text)
+                        .category(meetings_category.id)
+                })
+                .await?;
+
+            channel.create_permission(ctx, &guest_perms).await?;
+            channel.create_permission(ctx, &host_perms).await?;
+            channel.create_permission(ctx, &at_everyone_perms).await?;
+        }
 
         Ok(())
     }
