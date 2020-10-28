@@ -28,7 +28,16 @@ async fn generic_test(
         players.push(user_id);
     }
 
-    let embed = build_embed_for_target_choice(ctx, &players, role_kind).await?;
+    let embed = build_embed_for_target_choice(
+        ctx,
+        &players,
+        if role_kind.is_king_like() {
+            "Please select a target for 「 Murder 」"
+        } else {
+            "Please select a target for 「 Assassination 」"
+        },
+    )
+    .await?;
 
     let sent_msg = msg
         .channel_id

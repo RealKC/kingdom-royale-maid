@@ -30,10 +30,8 @@ mod res {
 pub async fn build_embed_for_target_choice(
     ctx: &Context,
     players: &Vec<UserId>,
-    role: RoleName,
+    embed_title: &str,
 ) -> Result<CreateEmbed, Error> {
-    assert!(![RoleName::Sorcerer, RoleName::Knight].contains(&role));
-
     let avatars = fetch_avatars(ctx, players).await?;
 
     let merged_avatars = merge_avatars(avatars)?;
@@ -49,11 +47,7 @@ pub async fn build_embed_for_target_choice(
     let msg = cdn.send_message(ctx, |m| m.add_file(foo)).await?;
 
     let mut embed = CreateEmbed::default();
-    embed.title(if role.is_king_like() {
-        "Please select a target for 「 Murder 」"
-    } else {
-        "Please select a target for 「 Assassination 」"
-    });
+    embed.title(embed_title);
     embed.image(msg.attachments[0].url.clone());
 
     Ok(embed)

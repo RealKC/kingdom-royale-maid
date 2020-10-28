@@ -364,7 +364,7 @@ And a heavy-dute knife.
         let embed = build_embed_for_target_choice(
             ctx,
             &self.players.keys().map(|k| *k).collect::<Vec<_>>(),
-            RoleName::King,
+            "Please select a target for 「 Murder 」",
         )
         .await?;
 
