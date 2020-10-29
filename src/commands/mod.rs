@@ -36,6 +36,7 @@ pub struct Random;
     game_info,
     start,
     start_gathering,
+    end_gathering,
     give_item,
     stab,
     roles,
