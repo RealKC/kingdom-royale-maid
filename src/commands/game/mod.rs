@@ -11,6 +11,7 @@ mod rules;
 mod stab;
 mod start;
 mod start_gathering;
+mod substitute;
 
 pub use end_game::*;
 pub use end_gathering::*;
@@ -25,6 +26,7 @@ pub use rules::*;
 pub use stab::*;
 pub use start::*;
 pub use start_gathering::*;
+pub use substitute::*;
 pub struct GameContainer;
 
 use super::prelude::*;

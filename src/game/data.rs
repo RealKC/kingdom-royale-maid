@@ -10,6 +10,13 @@ pub enum DeathCause {
     Stab(UserId),
 }
 
+#[derive(Copy, Clone, PartialEq, Eq)]
+pub enum SubstitutionStatus {
+    HasNot,
+    CurrentlyIs,
+    Has,
+}
+
 impl fmt::Display for DeathCause {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {

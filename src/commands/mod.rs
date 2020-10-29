@@ -39,6 +39,7 @@ pub struct Random;
     end_gathering,
     next_block,
     give_item,
+    substitute,
     stab,
     roles,
     info,

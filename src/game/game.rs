@@ -1,5 +1,5 @@
 use crate::game::data::*;
-use crate::game::{player::Player, roles::RoleName};
+use crate::game::{player::Player, roles::RoleName, SubstitutionStatus};
 use crate::helpers::{
     choose_target::build_embed_for_target_choice,
     confirm_murder::build_embed_for_murder_confirmation, perms, react::react_with,
@@ -34,6 +34,7 @@ pub struct Game {
     joined_users: Vec<UserId>,         // only ever used in Pregame
     king_murder_target: UserId,
     day: u8,
+    king_substitution_status: SubstitutionStatus,
 }
 
 impl Game {
@@ -55,6 +56,7 @@ impl Game {
             joined_users: Default::default(),
             king_murder_target: Default::default(),
             day: 1,
+            king_substitution_status: SubstitutionStatus::HasNot,
         }
     }
 
@@ -296,7 +298,13 @@ And a heavy-dute knife.
                     }
                 }
 
-                self.make_revolutionary_assassinate(ctx).await?;
+                let res = self.make_revolutionary_assassinate(ctx).await;
+
+                if self.king_substitution_status == SubstitutionStatus::CurrentlyIs {
+                    self.king_substitution_status = SubstitutionStatus::Has;
+                }
+
+                return res;
             }
             GameState::FBlock => {
                 if all_alive_have_won {
@@ -616,6 +624,14 @@ And a heavy-dute knife.
         Err("Reaching here is probably a bug".into())
     }
 
+    pub fn king_has_substituted(&self) -> bool {
+        self.king_substitution_status == SubstitutionStatus::Has
+    }
+
+    pub fn set_king_substitution_status(&mut self, s: SubstitutionStatus) {
+        self.king_substitution_status = s;
+    }
+
     pub async fn make_revolutionary_assassinate(&mut self, ctx: &Context) -> Result {
         let revolutionary = {
             let mut res = None;
@@ -662,11 +678,33 @@ And a heavy-dute knife.
                 let id = self.players.keys().nth(idx).map(|o| *o);
                 match id {
                     Some(id) => {
-                        let player = self.players.get_mut(&id);
-                        player
-                            .unwrap()
-                            .set_dead(DeathCause::Assassination, ctx, self.meeting_room)
-                            .await?;
+                        let hit_king =
+                            self.players().get(&id).unwrap().role_name() == RoleName::King;
+                        if hit_king
+                            && self.king_substitution_status == SubstitutionStatus::CurrentlyIs
+                        {
+                            let double = {
+                                let mut res = None;
+                                for player in &mut self.players {
+                                    if player.1.role_name() == RoleName::TheDouble {
+                                        res = Some(player);
+                                        break;
+                                    }
+                                }
+                                res.unwrap()
+                            };
+
+                            double
+                                .1
+                                .set_dead(DeathCause::Assassination, ctx, self.meeting_room)
+                                .await?;
+                        } else {
+                            let player = self.players.get_mut(&id);
+                            player
+                                .unwrap()
+                                .set_dead(DeathCause::Assassination, ctx, self.meeting_room)
+                                .await?;
+                        }
                     }
                     None => {
                         error!("Got a wrong reaction somehow");
