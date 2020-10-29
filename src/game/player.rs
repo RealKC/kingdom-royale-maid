@@ -15,7 +15,6 @@ pub struct Player {
     alive: bool,
     room: ChannelId,
     secret_meeting_partner: Option<UserId>,
-    death_cause: Option<DeathCause>,
     items: Items,
 }
 
@@ -32,7 +31,6 @@ impl Player {
             id,
             role,
             room,
-            death_cause: None,
             alive: true,
             secret_meeting_partner: None,
             items: Items::new(watch_colour),
@@ -71,10 +69,6 @@ impl Player {
             .say(ctx, format!("{} {}", self.id.mention(), cause))
             .await?;
         Ok(())
-    }
-
-    pub fn death_cause(&self) -> Option<DeathCause> {
-        self.death_cause
     }
 
     pub fn items(&self) -> &Items {
