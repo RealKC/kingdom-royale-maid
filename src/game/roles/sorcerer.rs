@@ -7,10 +7,6 @@ impl Role for Sorcerer {
         game.state() == GameState::CBlock
     }
 
-    fn act(&self, target: &mut Player) {
-        target.set_dead(self.name().into())
-    }
-
     fn name(&self) -> RoleName {
         RoleName::Sorcerer
     }

@@ -11,10 +11,6 @@ impl Role for Knight {
         !game.is_sorcerer_alive() && game.state() == GameState::CBlock
     }
 
-    fn act(&self, target: &mut Player) {
-        target.set_dead(self.name().into());
-    }
-
     fn win_condition_achieved(&self, game: &Game) -> bool {
         !game.is_king_alive() && !game.is_the_double_alive()
     }

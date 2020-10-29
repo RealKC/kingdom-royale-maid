@@ -7,10 +7,6 @@ impl Role for Revolutionary {
         game.state() == GameState::EBlock
     }
 
-    fn act(&self, target: &mut Player) {
-        target.set_dead(self.name().into());
-    }
-
     fn name(&self) -> RoleName {
         RoleName::Revolutionary
     }
