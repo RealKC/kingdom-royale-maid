@@ -47,7 +47,7 @@ You can join a game using `!join`, and leave it using `!leave`.
 
 Depending on the role you get, you might have to choose whether to kill a player or not, this is done by reacting to the bot's message. (You should understand what I mean when playing).
 
-There are many commands you can use, use `!help` to discover them all.
+There are many commands you can use `!help` to discover them all.
                 "#, false)
                 .colour(0x7289DA)
             })
