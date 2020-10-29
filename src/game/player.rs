@@ -1,7 +1,13 @@
-use super::item::{Item, Items};
-use super::roles::{Role, RoleName};
-use super::{DeathCause, Game};
-use serenity::model::id::{ChannelId, UserId};
+use super::{
+    item::{Item, Items},
+    roles::{Role, RoleName},
+    DeathCause, Game,
+};
+use serenity::{
+    framework::standard::CommandResult,
+    model::id::{ChannelId, UserId},
+    prelude::*,
+};
 
 pub struct Player {
     id: UserId,
@@ -53,9 +59,18 @@ impl Player {
         self.alive
     }
 
-    pub fn set_dead(&mut self, cause: DeathCause) {
+    pub async fn set_dead(
+        &mut self,
+        cause: DeathCause,
+        ctx: &Context,
+        channel: ChannelId,
+    ) -> CommandResult {
         self.alive = false;
-        self.death_cause = Some(cause);
+
+        channel
+            .say(ctx, format!("{} {}", self.id.mention(), cause))
+            .await?;
+        Ok(())
     }
 
     pub fn death_cause(&self) -> Option<DeathCause> {

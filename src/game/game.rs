@@ -289,7 +289,10 @@ And a heavy-dute knife.
                     if food.0 > 0 {
                         food.0 -= 1;
                     } else {
-                        player.1.set_dead(DeathCause::Starvation);
+                        player
+                            .1
+                            .set_dead(DeathCause::Starvation, ctx, self.meeting_room)
+                            .await?;
                     }
                 }
 
@@ -603,7 +606,9 @@ And a heavy-dute knife.
             let emoji = reaction.as_inner_ref().emoji.to_string();
             if emoji.as_str() == REACTIONS[0] {
                 let target = self.players.get_mut(&self.king_murder_target).unwrap();
-                target.set_dead(target.role_name().into());
+                target
+                    .set_dead(target.role_name().into(), ctx, self.meeting_room)
+                    .await?;
             }
             return Ok(());
         }
@@ -658,7 +663,10 @@ And a heavy-dute knife.
                 match id {
                     Some(id) => {
                         let player = self.players.get_mut(&id);
-                        player.unwrap().set_dead(DeathCause::Assassination);
+                        player
+                            .unwrap()
+                            .set_dead(DeathCause::Assassination, ctx, self.meeting_room)
+                            .await?;
                     }
                     None => {
                         error!("Got a wrong reaction somehow");

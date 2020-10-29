@@ -67,18 +67,10 @@ pub async fn stab(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult
 
     if attacker_roll > target_roll {
         let target = game.players_mut().get_mut(&target).unwrap();
-        target.set_dead(DeathCause::Stab);
-
-        channel
-            .say(
-                ctx,
-                format!(
-                    "{} has been stabbed by {}",
-                    target.id().mention(),
-                    msg.author.id.mention()
-                ),
-            )
+        target
+            .set_dead(DeathCause::Stab(msg.author.id), &ctx, channel.id)
             .await?;
+
         let new_target_perms = crate::helpers::perms::make_denied_override_for_user(target.id());
         if channel.id != game.meeting_room() {
             channel.create_permission(ctx, &new_target_perms).await?;
