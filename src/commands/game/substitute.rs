@@ -2,6 +2,7 @@ use super::prelude::*;
 use crate::game::{RoleName, SubstitutionStatus};
 
 #[command]
+#[description("This allows the『 King 』to use 「 Substitution 」 once per game.")]
 pub async fn substitute(ctx: &Context, msg: &Message) -> CommandResult {
     let data = ctx.data.read().await;
     let game = data.get::<GameContainer>();
@@ -25,7 +26,7 @@ pub async fn substitute(ctx: &Context, msg: &Message) -> CommandResult {
                 if player.role_name() != RoleName::King {
                     msg.reply(
                         ctx,
-                        ", you can't 「 substitute 」 if you're not the 「 King 」 .",
+                        ", you can't 「 substitute 」 if you're not the 『 King 』 .",
                     )
                     .await?;
                     return Ok(());
@@ -56,7 +57,7 @@ pub async fn substitute(ctx: &Context, msg: &Message) -> CommandResult {
                 if !aliveness_statuses[1].0 {
                     msg.reply(
                         ctx,
-                        ", you can't 「 substitute 」 when 「 The Double 」 is dead",
+                        ", you can't 「 substitute 」 when『 The Double 』is dead",
                     )
                     .await?;
                     return Ok(());
