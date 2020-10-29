@@ -6,6 +6,7 @@ mod leave;
 mod new_game;
 mod roles;
 mod rules;
+mod stab;
 mod start;
 mod start_gathering;
 
@@ -17,6 +18,7 @@ pub use leave::*;
 pub use new_game::*;
 pub use roles::*;
 pub use rules::*;
+pub use stab::*;
 pub use start::*;
 pub use start_gathering::*;
 pub struct GameContainer;

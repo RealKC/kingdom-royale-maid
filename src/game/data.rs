@@ -6,6 +6,7 @@ pub enum DeathCause {
     Beheading,
     Assassination,
     Starvation,
+    Stab,
 }
 
 #[derive(Copy, Clone, PartialEq, Eq)]
