@@ -3,10 +3,6 @@ use super::prelude::*;
 pub struct Revolutionary;
 
 impl Role for Revolutionary {
-    fn can_do_special_action(&self, game: &Game) -> bool {
-        game.state() == GameState::EBlock
-    }
-
     fn name(&self) -> RoleName {
         RoleName::Revolutionary
     }

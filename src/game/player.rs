@@ -83,10 +83,6 @@ impl Player {
         &mut self.items
     }
 
-    pub fn can_do_special_action(&self, game: &Game) -> bool {
-        self.role.can_do_special_action(game)
-    }
-
     pub fn win_condition_achieved(&self, game: &Game) -> bool {
         self.role.win_condition_achieved(game)
     }

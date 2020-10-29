@@ -3,10 +3,6 @@ use super::prelude::*;
 pub struct TheDouble;
 
 impl Role for TheDouble {
-    fn can_do_special_action(&self, game: &Game) -> bool {
-        !game.is_king_alive() && game.state() == GameState::CBlock
-    }
-
     fn name(&self) -> RoleName {
         RoleName::TheDouble
     }

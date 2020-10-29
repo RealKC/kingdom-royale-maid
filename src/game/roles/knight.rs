@@ -7,10 +7,6 @@ impl Role for Knight {
         RoleName::Knight
     }
 
-    fn can_do_special_action(&self, game: &Game) -> bool {
-        !game.is_sorcerer_alive() && game.state() == GameState::CBlock
-    }
-
     fn win_condition_achieved(&self, game: &Game) -> bool {
         !game.is_king_alive() && !game.is_the_double_alive()
     }

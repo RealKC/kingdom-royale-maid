@@ -33,7 +33,6 @@ impl ToString for RoleName {
 }
 
 pub trait Role {
-    fn can_do_special_action(&self, game: &Game) -> bool;
     fn name(&self) -> RoleName;
     fn win_condition_achieved(&self, game: &Game) -> bool;
 }
