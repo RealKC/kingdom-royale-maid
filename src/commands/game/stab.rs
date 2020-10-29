@@ -6,7 +6,13 @@ use serenity::model::id::UserId;
 
 #[command]
 #[only_in(guilds)]
-#[description("Stab another player")]
+#[description(
+    r#"
+Stab another player
+
+Use this like `!stab @MyArchNemesis`
+"#
+)]
 pub async fn stab(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let data = ctx.data.read().await;
     let game = data.get::<GameContainer>();

@@ -4,7 +4,11 @@ use crate::game::GameState;
 use serenity::model::id::UserId;
 
 #[command("give")]
-#[description("This command allows you to give some items away. You cannot give away your memo book, ballpoint pen or tablet.")]
+#[description(
+    r#"This command allows you to give some items away. You cannot give away your memo book, ballpoint pen or tablet.
+
+The syntax of this command is `!give <TARGET> <WHAT>`, you'd use it like: `!give @MyFriend food`
+"#)]
 pub async fn give_item(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let data = ctx.data.read().await;
     let game = data.get::<GameContainer>();
