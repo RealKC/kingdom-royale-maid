@@ -56,10 +56,10 @@ If he comes to the throne, this land is likely to turn into a worse dictatorship
     0xfcf403, // Yellow for the crown he wishes
     r#"
 「 Throne Succession」
-He becomes able to use 「Murder 」 once the 「King 」 and 「The Double 」 die. 
+He becomes able to use 「 Murder 」 once the 「 King 」 and 「 The Double 」 die. 
 
 「 Anti-magic 」
-He cannot be killed by 「Sorcery 」."#,
+He cannot be killed by 「 Sorcery 」."#,
     "To become the king. (Elimination of 「 King 」 「 The Double 」 「 Revolutionary 」)"
 );
 
