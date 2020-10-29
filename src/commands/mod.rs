@@ -30,17 +30,17 @@ pub struct Random;
 #[only_in(guilds)]
 #[commands(
     new_game,
+    end_game,
     join,
     leave,
-    roles,
-    info,
     game_info,
     start,
-    rules,
     start_gathering,
-    end_game,
     give_item,
-    stab
+    stab,
+    roles,
+    info,
+    rules
 )]
 pub struct Game;
 
