@@ -91,6 +91,11 @@ async fn main() -> CommandResult {
         .before(before)
         .after(after)
         .on_dispatch_error(dispatch_error)
+        // Ratelimit !join and !leave to 2 invocations, every 45 secs, with a 5 second delay between the two
+        .bucket("join_leave_ratelimit_bucket", |b| {
+            b.delay(5).time_span(45).limit(2)
+        })
+        .await
         .help(&MY_HELP)
         .group(&META_GROUP)
         .group(&RANDOM_GROUP)

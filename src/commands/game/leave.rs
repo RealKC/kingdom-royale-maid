@@ -4,6 +4,7 @@ use tracing::info;
 
 #[command]
 #[only_in(guilds)]
+#[bucket = "join_leave_ratelimit_bucket"]
 #[description("Allows you to leave a game")]
 pub async fn leave(ctx: &Context, msg: &Message) -> CommandResult {
     let mut data = ctx.data.write().await;

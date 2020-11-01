@@ -3,6 +3,7 @@ use tracing::info;
 
 #[command]
 #[only_in(guilds)]
+#[bucket = "join_leave_ratelimit_bucket"]
 #[description("Allows you to join a game that has yet to start and that has less than 6 players")]
 pub async fn join(ctx: &Context, msg: &Message) -> CommandResult {
     let mut data = ctx.data.write().await;
