@@ -1,4 +1,4 @@
-use crate::game::DeathCause;
+use crate::game::{DeathCause, GameState};
 
 use super::prelude::*;
 use rand::{self, distributions::Distribution};
@@ -26,10 +26,22 @@ pub async fn stab(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult
     }
     let game = game.unwrap();
     let mut game = game.write().await;
-    if !game.players().contains_key(&msg.author.id) {
-        msg.reply(ctx, ", you can't stab someone when you're not in the game!")
+    if game.state() == GameState::NotStarted {
+        if !game.joined_users().contains(&msg.author.id) {
+            msg.reply(ctx, ", you can't stab someone when you're not in the game!")
+                .await?;
+            return Ok(());
+        }
+    } else if game.state() == GameState::GameEnded {
+        msg.reply(ctx, ", you can't stab someone when the game just ended")
             .await?;
         return Ok(());
+    } else {
+        if !game.players().contains_key(&msg.author.id) {
+            msg.reply(ctx, ", you can't stab someone when you're not in the game!")
+                .await?;
+            return Ok(());
+        }
     }
 
     let target = args.single::<UserId>();
