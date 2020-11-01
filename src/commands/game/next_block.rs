@@ -10,18 +10,18 @@ pub async fn next_block(ctx: &Context, msg: &Message) -> CommandResult {
         Some(game) => {
             let mut game = game.write().await;
             if msg.author.id != game.host() {
-                msg.reply(
+                msg.reply_err(
                     ctx,
-                    ", you can't go to the next time block if you're not the host.",
+                    "you can't go to the next time block if you're not the host.".into(),
                 )
                 .await?;
                 return Ok(());
             }
 
             if game.state() == GameState::NotStarted {
-                msg.reply(
+                msg.reply_err(
                     ctx,
-                    ", you can't go to the next time block if the game hasn't started yet",
+                    "you can't go to the next time block if the game hasn't started yet.".into(),
                 )
                 .await?;
                 return Ok(());
@@ -30,9 +30,9 @@ pub async fn next_block(ctx: &Context, msg: &Message) -> CommandResult {
             game.transition_to_next_state(ctx).await?;
         }
         None => {
-            msg.reply(
+            msg.reply_err(
                 ctx,
-                ", you can't go to the next time block if there's no game running!",
+                "you can't go to the next time block if there's no game running!".into(),
             )
             .await?;
         }

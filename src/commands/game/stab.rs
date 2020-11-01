@@ -17,9 +17,9 @@ pub async fn stab(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult
     let data = ctx.data.read().await;
     let game = data.get::<GameContainer>();
     if game.is_none() {
-        msg.reply(
+        msg.reply_err(
             ctx,
-            ", you can't stab someone when there isn't a game running!",
+            "you can't stab someone when there isn't a game running!".into(),
         )
         .await?;
         return Ok(());
@@ -28,31 +28,40 @@ pub async fn stab(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult
     let mut game = game.write().await;
     if game.state() == GameState::NotStarted {
         if !game.joined_users().contains(&msg.author.id) {
-            msg.reply(ctx, ", you can't stab someone when you're not in the game!")
-                .await?;
+            msg.reply_err(
+                ctx,
+                "you can't stab someone when you're not in the game!".into(),
+            )
+            .await?;
             return Ok(());
         }
     } else if game.state() == GameState::GameEnded {
-        msg.reply(ctx, ", you can't stab someone when the game just ended")
-            .await?;
+        msg.reply_err(
+            ctx,
+            "you can't stab someone when the game just ended".into(),
+        )
+        .await?;
         return Ok(());
     } else {
         if !game.players().contains_key(&msg.author.id) {
-            msg.reply(ctx, ", you can't stab someone when you're not in the game!")
-                .await?;
+            msg.reply_err(
+                ctx,
+                "you can't stab someone when you're not in the game!".into(),
+            )
+            .await?;
             return Ok(());
         }
     }
 
     let target = args.single::<UserId>();
     if target.is_err() {
-        msg.reply(ctx, ", I couldn't get a user ID from your message!")
+        msg.reply_err(ctx, "I couldn't get a user ID from your message!".into())
             .await?;
         return Err(target.unwrap_err().into());
     }
     let target = target.unwrap();
     if game.players().contains_key(&target) {
-        msg.reply(ctx, ", you can't stab someone not in the game!")
+        msg.reply_err(ctx, "you can't stab someone not in the game!".into())
             .await?;
         return Ok(());
     }
@@ -72,7 +81,7 @@ pub async fn stab(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult
         && !target_perms.read_message_history()
         && !target_perms.send_messages()
     {
-        msg.reply(ctx, ", you can't kill a player that's not in this room! ... you sure are blood thirsty though...").await?;
+        msg.reply_err(ctx, "you can't kill a player that's not in this room! ... you sure are blood thirsty though...".into()).await?;
         return Ok(());
     }
 

@@ -40,4 +40,5 @@ mod prelude {
     pub use super::GameContainer;
     pub use crate::commands::prelude::*;
     pub use crate::game::Game;
+    pub use crate::helpers::serenity_ext::MaidReply;
 }

@@ -25,8 +25,11 @@ pub async fn new_game(ctx: &Context, msg: &Message, mut args: Args) -> CommandRe
     let announcement_channel_id = announcement_channel.unwrap_or(msg.channel_id);
 
     if data.get::<GameContainer>().is_some() {
-        msg.reply(ctx, ": Cannot start a game if one is already running")
-            .await?;
+        msg.reply_err(
+            ctx,
+            ", you cannot start a game if one is already running".into(),
+        )
+        .await?;
     } else {
         data.insert::<GameContainer>(Arc::new(RwLock::new(Game::new(
             msg.guild_id.unwrap(),

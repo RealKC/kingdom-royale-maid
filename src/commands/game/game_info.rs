@@ -112,9 +112,9 @@ pub async fn game_info(ctx: &Context, msg: &Message) -> CommandResult {
                 .map(|_| ())?
         }
         None => msg
-            .reply(
+            .reply_err(
                 ctx,
-                ", you can't get info about a game if there's none running!",
+                "you can't get info about a game if there's none running!".into(),
             )
             .await
             .map(|_| ())?,

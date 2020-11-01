@@ -13,8 +13,11 @@ pub async fn give_item(ctx: &Context, msg: &Message, mut args: Args) -> CommandR
     let data = ctx.data.read().await;
     let game = data.get::<GameContainer>();
     if game.is_none() {
-        msg.reply(ctx, ", you can't give items when there's no game running")
-            .await?;
+        msg.reply_err(
+            ctx,
+            "you can't give items when there's no game running".into(),
+        )
+        .await?;
         return Ok(());
     }
 
@@ -25,28 +28,28 @@ pub async fn give_item(ctx: &Context, msg: &Message, mut args: Args) -> CommandR
     let giver = msg.author.id;
     let giver = players.get_mut(&giver);
     if giver.is_none() {
-        msg.reply(ctx, ", you can't give items when you're not in a game")
+        msg.reply_err(ctx, "you can't give items when you're not in a game".into())
             .await?;
         return Ok(());
     }
 
     if game_state == GameState::NotStarted {
-        msg.reply(ctx, ", you can't give items before a game starts")
+        msg.reply_err(ctx, "you can't give items before a game starts".into())
             .await?;
         return Ok(());
     }
 
     if game_state == GameState::GameEnded {
-        msg.reply(ctx, ", you can't give items after a game has ended")
+        msg.reply_err(ctx, "you can't give items after a game has ended".into())
             .await?;
         return Ok(());
     }
 
     let target = args.single::<UserId>();
     if target.is_err() {
-        msg.reply(
+        msg.reply_err(
             ctx,
-            ", you need to specify a valid user to give an item to.",
+            "you need to specify a valid user to give an item to.".into(),
         )
         .await?;
         return Ok(());
@@ -55,7 +58,7 @@ pub async fn give_item(ctx: &Context, msg: &Message, mut args: Args) -> CommandR
 
     let what = args.remains();
     if what.is_none() {
-        msg.reply(ctx, ", you need to specify an item to give it away")
+        msg.reply_err(ctx, "you need to specify an item to give it away".into())
             .await?;
         return Ok(());
     }
@@ -66,12 +69,12 @@ pub async fn give_item(ctx: &Context, msg: &Message, mut args: Args) -> CommandR
         watch_name = Some(giver.items().get_item("watch").1.name.clone());
         let what = parse_item(what, watch_name.as_ref().unwrap().as_ref());
         if what.is_err() {
-            msg.reply(ctx, &what.unwrap_err()).await?;
+            msg.reply_err(ctx, what.unwrap_err()).await?;
             return Ok(());
         }
         let giver_item = giver.items_mut().get_item_mut(what.unwrap().as_ref());
         if giver_item.0 == 0 {
-            msg.reply(ctx, ", you can't give away items you don't have")
+            msg.reply_err(ctx, "you can't give away items you don't have".into())
                 .await?;
             return Ok(());
         }
@@ -81,9 +84,9 @@ pub async fn give_item(ctx: &Context, msg: &Message, mut args: Args) -> CommandR
 
     let target = players.get_mut(&target);
     if target.is_none() {
-        msg.reply(
+        msg.reply_err(
             ctx,
-            ", you can't give an item to someone who's not in the game",
+            "you can't give an item to someone who's not in the game".into(),
         )
         .await?;
         return Ok(());
@@ -91,7 +94,7 @@ pub async fn give_item(ctx: &Context, msg: &Message, mut args: Args) -> CommandR
     if let Some(target) = target {
         let what = parse_item(what, watch_name.unwrap().as_ref());
         if what.is_err() {
-            msg.reply(ctx, &what.unwrap_err()).await?;
+            msg.reply_err(ctx, what.unwrap_err()).await?;
             return Ok(());
         }
 
@@ -116,6 +119,6 @@ fn parse_item(name: &str, watch: &str) -> Result<String, String> {
         "food" | "food bar" | "food bars" => Ok(Item::FOOD_NAME.into()),
         "knife" => Ok("Knife".into()),
         "watch" => Ok(watch.into()),
-        _ => Err(format!(", you can't give away a '{}'", name)),
+        _ => Err(format!("you can't give away a '{}'", name)),
     }
 }

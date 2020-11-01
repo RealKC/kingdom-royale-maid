@@ -14,9 +14,10 @@ pub async fn substitute(ctx: &Context, msg: &Message) -> CommandResult {
             {
                 let player = game.players().get(&msg.author.id);
                 if player.is_none() {
-                    msg.reply(
+                    msg.reply_err(
                         ctx,
-                        ", you can't 「 substitute 」  with someone when you aren't in a game!",
+                        "you can't 「 substitute 」  with someone when you aren't in a game!"
+                            .into(),
                     )
                     .await?;
                     return Ok(());
@@ -24,9 +25,9 @@ pub async fn substitute(ctx: &Context, msg: &Message) -> CommandResult {
                 let player = player.unwrap();
 
                 if player.role_name() != RoleName::King {
-                    msg.reply(
+                    msg.reply_err(
                         ctx,
-                        ", you can't 「 substitute 」 if you're not the 『 King 』 .",
+                        "you can't 「 substitute 」 if you're not the 『 King 』 .".into(),
                     )
                     .await?;
                     return Ok(());
@@ -43,21 +44,24 @@ pub async fn substitute(ctx: &Context, msg: &Message) -> CommandResult {
                     aliveness_statuses.swap(0, 1);
                 }
                 if !aliveness_statuses[0].0 {
-                    msg.reply(ctx, ", you can't 「 substitute 」 when you're dead")
+                    msg.reply_err(ctx, "you can't 「 substitute 」 when you're dead".into())
                         .await?;
                     return Ok(());
                 }
 
                 if game.king_has_substituted() {
-                    msg.reply(ctx, ", you can't 「 substitute 」 more than once per game")
-                        .await?;
+                    msg.reply_err(
+                        ctx,
+                        "you can't 「 substitute 」 more than once per game".into(),
+                    )
+                    .await?;
                     return Ok(());
                 }
 
                 if !aliveness_statuses[1].0 {
-                    msg.reply(
+                    msg.reply_err(
                         ctx,
-                        ", you can't 「 substitute 」 when『 The Double 』is dead",
+                        "you can't 「 substitute 」 when『 The Double 』is dead".into(),
                     )
                     .await?;
                     return Ok(());
@@ -67,9 +71,9 @@ pub async fn substitute(ctx: &Context, msg: &Message) -> CommandResult {
             game.set_king_substitution_status(SubstitutionStatus::CurrentlyIs);
         }
         None => {
-            msg.reply(
+            msg.reply_err(
                 ctx,
-                ", you can't 「 substitute 」  with someone when you're not in a game!",
+                "you can't 「 substitute 」  with someone when you're not in a game!".into(),
             )
             .await?;
         }

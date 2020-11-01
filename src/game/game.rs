@@ -805,9 +805,9 @@ impl fmt::Display for JoinError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use JoinError::*;
         match self {
-            GameFull => write!(f, ", you can't join a full game"),
-            YoureTheHost => write!(f, ", you can't be both The Host, and a player"), // technically not following canon
-            AlreadyIn => write!(f, ", you can't join a game multiple times"),
+            GameFull => write!(f, "you can't join a full game"),
+            YoureTheHost => write!(f, "you can't be both The Host, and a player"), // technically not following canon
+            AlreadyIn => write!(f, "you can't join a game multiple times"),
         }
     }
 }
@@ -824,10 +824,10 @@ impl fmt::Display for LeaveError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use LeaveError::*;
         match self {
-            NotInAGame => write!(f, ", you can't leave a game if you're not in one"),
+            NotInAGame => write!(f, "you can't leave a game if you're not in one"),
             YoureTheHost => write!(
                 f,
-                ", you can't leave a game if you're The Host, why would you anyway?"
+                "you can't leave a game if you're The Host, why would you anyway?"
             ),
         }
     }

@@ -149,7 +149,7 @@ pub async fn roles(ctx: &Context, msg: &Message) -> CommandResult {
 pub async fn info(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let role = args.remains();
     if role.is_none() {
-        msg.reply(ctx, ", you need to write a role you want info about")
+        msg.reply_err(ctx, "you need to write a role you want info about".into())
             .await?;
         return Ok(());
     }
@@ -162,7 +162,7 @@ pub async fn info(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
         "knight" => say_role(ctx, msg, &*KNIGHT).await?,
         "revolutionary" => say_role(ctx, msg, &*REVOLUTIONARY).await?,
         _ => msg
-            .reply(ctx, ", that's not a valid role!")
+            .reply_err(ctx, "that's not a valid role!".into())
             .await
             .map(|_| ())?,
     };

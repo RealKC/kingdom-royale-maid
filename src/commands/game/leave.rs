@@ -15,14 +15,14 @@ pub async fn leave(ctx: &Context, msg: &Message) -> CommandResult {
         let result = game.leave(msg.author.id);
         if result.is_ok() {
             info!("A user succesfully left a game");
-            msg.reply(ctx, ", you've successfully left the game :c")
+            msg.reply_err(ctx, "you've successfully left the game :c".into())
                 .await?;
         } else {
             info!("User couldn't leave, error is {:?}", result.unwrap_err());
             msg.reply(ctx, format!("{}", result.unwrap_err())).await?;
         }
     } else {
-        msg.reply(ctx, ", you can't leave a game if you aren't in one!")
+        msg.reply_err(ctx, "you can't leave a game if you aren't in one!".into())
             .await?;
     }
     Ok(())

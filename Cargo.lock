@@ -683,6 +683,7 @@ dependencies = [
  "rand",
  "reqwest",
  "rust-embed",
+ "serde_json",
  "serenity",
  "tokio",
  "tracing",
