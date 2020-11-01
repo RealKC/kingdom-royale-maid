@@ -13,16 +13,17 @@ pub async fn game_info(ctx: &Context, msg: &Message) -> CommandResult {
         Some(game) => {
             let game = game.write().await;
 
-            let players = {
+            let (players_field_name, players_field_value) = {
                 if game.state() == GameState::NotStarted {
                     let mut players = String::new();
                     for user in game.joined_users().iter() {
                         players.push_str(&user.mention());
+                        players.push('\n');
                     }
                     if !players.is_empty() {
-                        players
+                        (format!("Players ({})", game.joined_users().len()), players)
                     } else {
-                        "None have joined yet :(".to_string()
+                        ("Players".into(), "None have joined yet :(".into())
                     }
                 } else {
                     let mut players = String::new();
@@ -42,12 +43,12 @@ pub async fn game_info(ctx: &Context, msg: &Message) -> CommandResult {
                             players.push_str(&mention);
                         }
                     }
-                    players
+                    (format!("Players ({})", game.players().len()), players)
                 }
             };
             let fields = vec![
                 ("Host", game.host().mention(), false),
-                ("Players", players, true),
+                (&players_field_name, players_field_value, true),
                 ("Meeting room", game.meeting_room().mention(), true),
                 (
                     "Announcement channel",
