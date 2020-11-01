@@ -4,7 +4,7 @@ pub mod item;
 mod player;
 mod roles;
 
-pub use data::{DeathCause, GameState, SubstitutionStatus};
-pub use game::{Game, JoinError};
+pub use data::{DeathCause, GameState, JoinError, SubstitutionStatus};
+pub use game::Game;
 pub use player::Player;
 pub use roles::RoleName;

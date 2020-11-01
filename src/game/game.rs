@@ -15,12 +15,10 @@ use serenity::{
     },
 };
 use serenity::{model::prelude::User, prelude::*};
-use std::fmt;
 use std::{collections::BTreeMap, fmt::Write};
 use tracing::error;
 
 type Host = UserId;
-type StdResult<T, E> = std::result::Result<T, E>;
 pub type Result = StdResult<(), Box<(dyn std::error::Error + Send + Sync)>>;
 
 pub struct Game {
@@ -789,46 +787,5 @@ And a heavy-dute knife.
         }
 
         unreachable!("There should always be a {:?} in the game", role)
-    }
-}
-
-type JoinResult = StdResult<(), JoinError>;
-
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
-pub enum JoinError {
-    GameFull,
-    YoureTheHost,
-    AlreadyIn,
-}
-
-impl fmt::Display for JoinError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        use JoinError::*;
-        match self {
-            GameFull => write!(f, "you can't join a full game"),
-            YoureTheHost => write!(f, "you can't be both The Host, and a player"), // technically not following canon
-            AlreadyIn => write!(f, "you can't join a game multiple times"),
-        }
-    }
-}
-
-type LeaveResult = StdResult<(), LeaveError>;
-
-#[derive(Copy, Clone, Debug)]
-pub enum LeaveError {
-    NotInAGame,
-    YoureTheHost,
-}
-
-impl fmt::Display for LeaveError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        use LeaveError::*;
-        match self {
-            NotInAGame => write!(f, "you can't leave a game if you're not in one"),
-            YoureTheHost => write!(
-                f,
-                "you can't leave a game if you're The Host, why would you anyway?"
-            ),
-        }
     }
 }
