@@ -10,8 +10,9 @@
 //! ```
 use data::Prefix;
 use serenity::{
-    async_trait, client::bridge::gateway::ShardManager, framework::standard::CommandResult,
-    framework::standard::StandardFramework, http::Http, model::gateway::Ready,
+    async_trait, client::bridge::gateway::GatewayIntents, client::bridge::gateway::ShardManager,
+    framework::standard::CommandResult, framework::standard::StandardFramework, http::Http,
+    model::gateway::Ready,
 };
 use std::{
     collections::{HashMap, HashSet},
@@ -105,6 +106,11 @@ async fn main() -> CommandResult {
 
     let mut client = Client::builder(&token)
         .event_handler(Handler)
+        .intents(
+            GatewayIntents::GUILD_MEMBERS
+                | GatewayIntents::GUILD_MESSAGES
+                | GatewayIntents::GUILD_MESSAGE_REACTIONS,
+        )
         .framework(framework)
         .await
         .expect("Err creating client");
