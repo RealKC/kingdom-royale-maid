@@ -203,6 +203,8 @@ And a heavy-dute knife.
             current_room += 1;
         }
 
+        self.state = GameState::ABlock;
+
         Ok(())
     }
 
