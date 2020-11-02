@@ -1,7 +1,7 @@
 use serenity::prelude::*;
 use serenity::{
     framework::standard::{
-        help_commands, macros::help, Args, CommandGroup, CommandResult, HelpOptions,
+        help_commands, macros::help, Args, CommandGroup, CommandResult, Delimiter, HelpOptions,
     },
     model::{channel::Message, id::UserId},
 };
@@ -23,6 +23,15 @@ pub async fn my_help(
     groups: &[&'static CommandGroup],
     owners: HashSet<UserId>,
 ) -> CommandResult {
+    let mut args_message = args.rest();
+    let prefix = std::env::var("MAID_PREFIX").unwrap();
+
+    if args_message.starts_with(&prefix) {
+        args_message = args_message.trim_start_matches(&prefix);
+    }
+
+    let args = Args::new(args_message, &[Delimiter::Single(' ')]);
+
     let _ = help_commands::with_embeds(context, msg, args, help_options, groups, owners).await;
     Ok(())
 }
