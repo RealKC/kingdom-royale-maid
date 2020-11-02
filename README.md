@@ -12,7 +12,7 @@ entertaining.
 
 ## Cool. How can I host it myself?
 
-1. You will need to make a Discord application and turn it into a bot. (Google
+1. You will need to make a Discord application and turn it into a bot. (~~Google~~ (you mean DuckDuckGo since we all know Go\*gle is trash)
 is your friend here)
 2. You will need to [install Rust](https://www.rust-lang.org/learn/get-started)
 3. If all went well, you can then simply run it by writing in a terminal, the
