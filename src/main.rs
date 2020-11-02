@@ -16,7 +16,6 @@ use serenity::{
 };
 use std::{
     collections::{HashMap, HashSet},
-    env,
     sync::Arc,
 };
 
@@ -58,10 +57,7 @@ impl EventHandler for Handler {
 async fn main() -> CommandResult {
     tracing_subscriber::fmt::init();
 
-    // Configure the client with your Discord bot token & prefix in the environment.
-    let token = env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
-    let prefix = env::var("MAID_PREFIX").unwrap_or("!".into());
-    let cdn_channel_id = env::var("MAID_CDN_CHANNEL_ID").expect("Give me my discord cdn pl0x");
+    let (token, prefix, cdn_channel_id) = get_env_config();
 
     let http = Http::new_with_token(&token);
 
@@ -136,4 +132,14 @@ async fn main() -> CommandResult {
     }
 
     Ok(())
+}
+
+fn get_env_config() -> (String, String, String) {
+    dotenv::dotenv().expect("Encountered an error that didn't allow parsing the .env file");
+
+    let token = dotenv::var("DISCORD_TOKEN").expect("Expected a token in the environment");
+    let prefix = dotenv::var("MAID_PREFIX").unwrap_or("!".into());
+    let cdn_channel_id = dotenv::var("MAID_CDN_CHANNEL_ID").expect("Give me my discord cdn pl0x");
+
+    (token, prefix, cdn_channel_id)
 }
