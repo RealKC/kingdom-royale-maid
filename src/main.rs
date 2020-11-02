@@ -1,13 +1,3 @@
-//! Requires the 'framework' feature flag be enabled in your project's
-//! `Cargo.toml`.
-//!
-//! This can be enabled by specifying the feature in the dependency section:
-//!
-//! ```toml
-//! [dependencies.serenity]
-//! git = "https://github.com/serenity-rs/serenity.git"
-//! features = ["framework", "standard_framework"]
-//! ```
 use data::Prefix;
 use serenity::{
     async_trait, client::bridge::gateway::GatewayIntents, client::bridge::gateway::ShardManager,
@@ -34,9 +24,6 @@ mod helpers;
 
 use crate::data::{Cdn, Reqwest, ReqwestClient};
 
-// A container type is created for inserting into the Client's `data`, which
-// allows for data to be accessible across all events and framework commands, or
-// anywhere else that has a copy of the `data` Arc.
 struct ShardManagerContainer;
 
 impl TypeMapKey for ShardManagerContainer {
