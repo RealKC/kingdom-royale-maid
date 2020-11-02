@@ -8,6 +8,7 @@
 //! git = "https://github.com/serenity-rs/serenity.git"
 //! features = ["framework", "standard_framework"]
 //! ```
+use data::Prefix;
 use serenity::{
     async_trait, client::bridge::gateway::ShardManager, framework::standard::CommandResult,
     framework::standard::StandardFramework, http::Http, model::gateway::Ready,
@@ -120,6 +121,7 @@ async fn main() -> CommandResult {
         data.insert::<ShardManagerContainer>(Arc::clone(&client.shard_manager));
         data.insert::<ReqwestClient>(reqwest_client);
         data.insert::<Cdn>(ChannelId(str::parse::<u64>(&cdn_channel_id)?));
+        data.insert::<Prefix>(prefix);
     }
 
     if let Err(why) = client.start().await {

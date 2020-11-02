@@ -12,3 +12,9 @@ pub struct Cdn;
 impl TypeMapKey for Cdn {
     type Value = ChannelId;
 }
+
+pub struct Prefix;
+
+impl TypeMapKey for Prefix {
+    type Value = String;
+}

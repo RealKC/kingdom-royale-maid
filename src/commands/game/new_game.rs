@@ -1,6 +1,7 @@
+use crate::data::Prefix;
+
 use super::prelude::*;
 use serenity::model::id::{ChannelId, RoleId};
-use std::env;
 
 #[command("newgame")]
 #[only_in(guilds)]
@@ -42,7 +43,7 @@ pub async fn new_game(ctx: &Context, msg: &Message, mut args: Args) -> CommandRe
             ctx,
             format!(
                 "has started a new game. You can join it by typing {}join",
-                env::var("MAID_PREFIX").unwrap_or("!".to_owned())
+                data.get::<Prefix>().unwrap()
             ),
         )
         .await?;

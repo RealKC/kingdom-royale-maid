@@ -7,6 +7,8 @@ use serenity::{
 };
 use std::collections::HashSet;
 
+use crate::data::Prefix;
+
 #[help]
 #[individual_command_tip = "Hello! If you want more information about a specific command, just pass the command as argument."]
 #[command_not_found_text = "Could not find: `{}`."]
@@ -24,10 +26,11 @@ pub async fn my_help(
     owners: HashSet<UserId>,
 ) -> CommandResult {
     let mut args_message = args.rest();
-    let prefix = std::env::var("MAID_PREFIX").unwrap();
+    let data = context.data.read().await;
+    let prefix = data.get::<Prefix>().unwrap();
 
-    if args_message.starts_with(&prefix) {
-        args_message = args_message.trim_start_matches(&prefix);
+    if args_message.starts_with(prefix) {
+        args_message = args_message.trim_start_matches(prefix);
     }
 
     let args = Args::new(args_message, &[Delimiter::Single(' ')]);
