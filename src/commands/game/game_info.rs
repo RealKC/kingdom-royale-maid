@@ -101,7 +101,11 @@ pub async fn game_info(ctx: &Context, msg: &Message) -> CommandResult {
                             f.text(if game.state() == GameState::NotStarted {
                                 msg.author.name.clone()
                             } else {
-                                format!("{} | {}", msg.author.name, game.day())
+                                format!(
+                                    "{} | {} day",
+                                    msg.author.name,
+                                    number_to_nice_string(game.day())
+                                )
                             })
                         });
 
@@ -120,4 +124,20 @@ pub async fn game_info(ctx: &Context, msg: &Message) -> CommandResult {
             .map(|_| ())?,
     }
     Ok(())
+}
+
+fn number_to_nice_string(num: u8) -> String {
+    let last_digit = num % 10;
+    let teen = num >= 10 && num < 20;
+
+    if teen {
+        format!("{}th", num)
+    } else {
+        match last_digit {
+            1 => format!("{}st", num),
+            2 => format!("{}nd", num),
+            3 => format!("{}rd", num),
+            _ => format!("{}th", num),
+        }
+    }
 }
