@@ -197,7 +197,7 @@ A {} digital watch.
 Seven portions of solid food.
 Some kind of a tablet.
 
-And a heavy-dute knife.
+And a heavy-duty knife.
             "#, new_player.1)).await?;
 
             current_room += 1;
