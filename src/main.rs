@@ -109,7 +109,8 @@ async fn main() -> CommandResult {
         .intents(
             GatewayIntents::GUILD_MEMBERS
                 | GatewayIntents::GUILD_MESSAGES
-                | GatewayIntents::GUILD_MESSAGE_REACTIONS,
+                | GatewayIntents::GUILD_MESSAGE_REACTIONS
+                | GatewayIntents::GUILDS,
         )
         .framework(framework)
         .await
