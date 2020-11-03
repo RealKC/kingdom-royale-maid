@@ -16,7 +16,7 @@ use serenity::{
 };
 use serenity::{model::prelude::User, prelude::*};
 use std::{collections::BTreeMap, fmt::Write};
-use tracing::error;
+use tracing::{error, info};
 
 type Host = UserId;
 pub type Result = StdResult<(), Box<(dyn std::error::Error + Send + Sync)>>;
@@ -259,11 +259,18 @@ And a heavy-duty knife.
                 } else {
                     self.state = GameState::DBlock;
                 };
+
+                info!("Selecting secret meeting partners...");
                 self.select_secret_meeting_partners(ctx).await?;
+                info!("Announcing secret meeting partners...");
                 self.announce_secret_meeting_partners(ctx).await?;
+                info!("Opening the secret meeting rooms...");
                 self.open_secret_meeting_rooms(ctx).await?;
+                info!("Making the king select a target...");
                 self.make_king_select_target(ctx).await?;
+                info!("Making the king's assistant choose...");
                 self.make_assistant_choose(ctx).await?;
+                info!("Going to the next block...");
             }
             GameState::DBlock => {
                 if all_alive_have_won {
@@ -324,24 +331,30 @@ And a heavy-duty knife.
     }
 
     pub async fn select_secret_meeting_partners(&mut self, ctx: &Context) -> Result {
+        info!("Collecting rooms...");
         let rooms = self
             .players
             .iter()
             .map(|player| (*player.0, player.1.room()))
             .collect::<Vec<_>>();
+        info!("OK! Succesfully collected rooms");
 
         for user_and_room in rooms {
+            info!("Trying to build an embed");
             let embed = build_embed_for_target_choice(
                 ctx,
                 &self.players.keys().map(|k| *k).collect::<Vec<_>>(),
                 "Please select a partner for your secret meeting",
             )
             .await?;
+            info!("Embed built successfuly");
 
+            info!("Trying to send messages...");
             let msg = user_and_room
                 .1
                 .send_message(ctx, |m| m.set_embed(embed))
                 .await?;
+            info!("We succeeded. Room={}", user_and_room.1.mention());
 
             static REACTIONS: [&str; 6] = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣"];
             react_with(ctx, &msg, &REACTIONS).await?;
