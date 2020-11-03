@@ -1,3 +1,5 @@
+use crate::data::Prefix;
+
 use super::prelude::*;
 
 #[command]
@@ -53,5 +55,27 @@ There are many commands you can use `!help` to discover them all.
             })
         })
         .await?;
+    Ok(())
+}
+
+#[command]
+#[aliases("intro")]
+#[description("Gives the user a short intro to what is happening")]
+pub async fn info(ctx: &Context, msg: &Message) -> CommandResult {
+    let data = ctx.data.read().await;
+    let prefix = data.get::<Prefix>().unwrap();
+
+    msg
+        .channel_id
+        .say(
+            ctx,
+            format!(r#"
+Hello {0}! You are playing Kingdom Royale! Try saying {1}help real quick. That should show you all the commands I can do. If you wanna see info about a specific command, just do {1}help <command name>"#,
+                            msg.author.mention(),
+                            prefix,
+                    )
+            )
+        .await?;
+
     Ok(())
 }

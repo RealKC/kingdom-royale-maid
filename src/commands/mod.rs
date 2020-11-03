@@ -44,6 +44,7 @@ pub struct Random;
     roles,
     role_info,
     rules,
+    info,
     inventory
 )]
 pub struct Game;
