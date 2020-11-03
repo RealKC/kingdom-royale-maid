@@ -1,3 +1,4 @@
+mod delete_category;
 pub mod game;
 pub mod help;
 pub mod meta;
@@ -7,6 +8,7 @@ mod test_cmds;
 mod tos;
 
 use crate::commands::meta::*;
+use delete_category::*;
 use game::*;
 use random::*;
 use stats::*;
@@ -23,7 +25,7 @@ use std::collections::HashMap;
 pub struct Meta;
 
 #[group]
-#[commands(say, commands)]
+#[commands(say, commands, delete_category)]
 pub struct Random;
 
 #[group]
