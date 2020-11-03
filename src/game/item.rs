@@ -80,6 +80,10 @@ impl Items {
         }
     }
 
+    pub fn iter(&self) -> std::slice::Iter<'_, (Count, Item)> {
+        self.items.iter()
+    }
+
     #[instrument]
     pub fn get_item(&self, item_name: &str) -> &(Count, Item) {
         for item in self.items.iter() {

@@ -43,7 +43,8 @@ pub struct Random;
     stab,
     roles,
     info,
-    rules
+    rules,
+    inventory
 )]
 pub struct Game;
 
