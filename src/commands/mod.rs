@@ -42,7 +42,7 @@ pub struct Random;
     substitute,
     stab,
     roles,
-    info,
+    role_info,
     rules,
     inventory
 )]

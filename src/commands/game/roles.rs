@@ -143,10 +143,11 @@ pub async fn roles(ctx: &Context, msg: &Message) -> CommandResult {
     Ok(())
 }
 
-#[command]
+#[command("roleinfo")]
 #[only_in(guilds)]
 #[description("Shows information about a specific role")]
-pub async fn info(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
+#[aliases("rinfo")]
+pub async fn role_info(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let role = args.remains();
     if role.is_none() {
         msg.reply_err(ctx, "you need to write a role you want info about".into())
