@@ -49,7 +49,10 @@ pub async fn give_item(ctx: &Context, msg: &Message, mut args: Args) -> CommandR
     if target.is_err() {
         msg.reply_err(
             ctx,
-            "you need to specify a valid user to give an item to.".into(),
+            r#"
+you need to specify a valid user to give an item to.
+
+Note that the syntax of this command is `!give <TARGET> <WHAT>`, you'd use it like: `!give @MyFriend food`"#.into(),
         )
         .await?;
         return Ok(());
@@ -58,7 +61,10 @@ pub async fn give_item(ctx: &Context, msg: &Message, mut args: Args) -> CommandR
 
     let what = args.remains();
     if what.is_none() {
-        msg.reply_err(ctx, "you need to specify an item to give it away".into())
+        msg.reply_err(ctx, r#"
+you need to specify an item to give it away.
+
+Note that the syntax of this command is `!give <TARGET> <WHAT>`, you'd use it like: `!give @MyFriend food`"#.into())
             .await?;
         return Ok(());
     }
