@@ -60,6 +60,22 @@ pub async fn stab(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult
         return Err(target.unwrap_err().into());
     }
     let target = target.unwrap();
+
+    if target == game.host() {
+        msg.reply_err(
+            ctx,
+            "you can't stab the host! That's rather rude towards them, isn't it?".into(),
+        )
+        .await?;
+        return Ok(());
+    }
+
+    if target == ctx.cache.current_user_id().await {
+        msg.reply_err(ctx, "ara ara~, you can't stab me~".into())
+            .await?;
+        return Ok(());
+    }
+
     if game.players().contains_key(&target) {
         msg.reply_err(ctx, "you can't stab someone not in the game!".into())
             .await?;
