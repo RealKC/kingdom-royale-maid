@@ -33,6 +33,7 @@ pub struct Game {
     king_murder_target: UserId,
     day: u8,
     king_substitution_status: SubstitutionStatus,
+    delete_rooms_category_on_game_end: bool,
 }
 
 impl Game {
@@ -42,6 +43,7 @@ impl Game {
         meeting_room: ChannelId,
         announcement_channel: ChannelId,
         player_role: RoleId,
+        delete_rooms_category_on_game_end: bool,
     ) -> Self {
         Self {
             guild,
@@ -55,6 +57,7 @@ impl Game {
             king_murder_target: Default::default(),
             day: 1,
             king_substitution_status: SubstitutionStatus::HasNot,
+            delete_rooms_category_on_game_end,
         }
     }
 
@@ -210,12 +213,29 @@ And a heavy-duty knife.
 
     pub async fn end(&mut self, ctx: &Context) -> Result {
         if !self.players.is_empty() {
+            let mut rooms_category = None;
             for player in self.players.iter() {
                 self.guild
                     .member(ctx, player.0)
                     .await?
                     .remove_role(ctx, self.player_role)
                     .await?;
+
+                if self.delete_rooms_category_on_game_end {
+                    info!("Deleting a room...");
+                    let channel = player.1.room().to_channel(ctx).await?.guild().unwrap();
+                    if rooms_category.is_none() {
+                        rooms_category = channel.category_id;
+                    }
+                    channel.delete(ctx).await?;
+                    info!("Room deleted.")
+                }
+            }
+
+            if self.delete_rooms_category_on_game_end && rooms_category.is_some() {
+                info!("Deleting the category...");
+                rooms_category.unwrap().delete(ctx).await?;
+                info!("Deleted the category.")
             }
         }
 
