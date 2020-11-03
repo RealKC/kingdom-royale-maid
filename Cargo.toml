@@ -27,6 +27,5 @@ dotenv = "0.15"
 image = "0.23.10"
 
 [dependencies.serenity]
-git = "https://github.com/serenity-rs/serenity"
-branch = "current"
+version = "0.9"
 features = ["collector"]
