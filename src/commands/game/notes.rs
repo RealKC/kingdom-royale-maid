@@ -194,3 +194,72 @@ pub async fn write_note(ctx: &Context, msg: &Message, args: Args) -> CommandResu
 
     Ok(())
 }
+
+#[command("shownote")]
+#[aliases("shn")]
+#[description(
+    r#"
+Shows a note at "page" N in the current channel.
+
+Usage: !shownote N"#
+)]
+pub async fn show_note(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
+    let page = args.parse::<usize>();
+
+    let data = ctx.data.read().await;
+    let game = data.get::<GameContainer>();
+
+    if game.is_none() {
+        msg.reply_err(
+            ctx,
+            "you can't show a note from your memo book when there isn't a game running!".into(),
+        )
+        .await?;
+        return Ok(());
+    }
+
+    let game = game.unwrap().read().await;
+
+    if game.state() == GameState::NotStarted {
+        msg.reply_err(
+            ctx,
+            "you can't show a note from your memo book before the game starts".into(),
+        )
+        .await?;
+        return Ok(());
+    }
+
+    let player = game.players().get(&msg.author.id);
+
+    if player.is_none() {
+        msg.reply_err(
+            ctx,
+            "you can't show a note from your memo book when you're not in the game".into(),
+        )
+        .await?;
+        return Ok(());
+    }
+    let player = player.unwrap();
+
+    if page.is_err() {
+        msg.reply_err(ctx, "I couldn't get a number from your message!".into())
+            .await?;
+        return Ok(());
+    }
+    let page = page.unwrap();
+
+    let note = player.items().memo_book().get_note(page);
+
+    if note.is_none() {
+        msg.channel_id
+            .say(
+                ctx,
+                format!("*{} shows an empty page", msg.author.mention()),
+            )
+            .await?;
+    } else {
+        msg.channel_id.say(ctx, &note.unwrap().text).await?;
+    }
+
+    Ok(())
+}
