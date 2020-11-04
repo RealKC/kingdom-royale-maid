@@ -42,6 +42,20 @@ pub enum GameState {
     GameEnded,
 }
 
+impl GameState {
+    pub fn to_time_range(&self) -> Option<String> {
+        match self {
+            GameState::NotStarted | GameState::GameEnded => None,
+            GameState::ABlock => Some("~12".into()),
+            GameState::BBlock => Some("12~14".into()),
+            GameState::CBlock => Some("14~18".into()),
+            GameState::DBlock => Some("18~20".into()),
+            GameState::EBlock => Some("20~22".into()),
+            GameState::FBlock => Some("22~".into()),
+        }
+    }
+}
+
 impl fmt::Display for GameState {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {

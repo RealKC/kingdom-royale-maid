@@ -48,7 +48,8 @@ pub struct Random;
     rules,
     info,
     inventory,
-    notes
+    notes,
+    write_note
 )]
 pub struct Game;
 

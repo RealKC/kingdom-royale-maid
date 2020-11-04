@@ -134,3 +134,63 @@ pub async fn notes(ctx: &Context, msg: &Message) -> CommandResult {
 
     Ok(())
 }
+
+#[command("writenote")]
+#[aliases("wnote", "wn")]
+#[description("Allows you to write a note in your book, note that this consumes a page in it, and you will not be able to write in that page anymore. You may write at most 128 notes, that may not be longer than 512 characters.")]
+pub async fn write_note(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
+    let note = args.rest();
+
+    let data = ctx.data.read().await;
+    let game = data.get::<GameContainer>();
+    if game.is_none() {
+        msg.reply_err(
+            ctx,
+            "you can't write a note to your memo book when a game hasn't started yet".into(),
+        )
+        .await?;
+        return Ok(());
+    }
+    let mut game = game.unwrap().write().await;
+
+    if game.state() == GameState::NotStarted {
+        msg.reply_err(
+            ctx,
+            "you can't write a note to your memo book before the game starts".into(),
+        )
+        .await?;
+        return Ok(());
+    } else if game.state() == GameState::GameEnded {
+        msg.reply_err(
+            ctx,
+            "you can't write a note to your memo book after a game has ended".into(),
+        )
+        .await?;
+        return Ok(());
+    }
+
+    let game_state = game.state();
+    let player = game.players_mut().get_mut(&msg.author.id);
+
+    if player.is_none() {
+        msg.reply_err(
+            ctx,
+            "you can't write a note to your memo book when you're not in the game".into(),
+        )
+        .await?;
+        return Ok(());
+    }
+    let player = player.unwrap();
+
+    let res = player
+        .items_mut()
+        .memo_book_mut()
+        .add_note(note.into(), game_state.to_time_range().unwrap());
+
+    match res {
+        Ok(_) => (),
+        Err(err) => msg.reply_err(ctx, err).await.map(|_| ())?,
+    }
+
+    Ok(())
+}
