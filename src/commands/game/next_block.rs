@@ -28,6 +28,9 @@ pub async fn next_block(ctx: &Context, msg: &Message) -> CommandResult {
             }
 
             game.transition_to_next_state(ctx).await?;
+            msg.channel_id
+                .say(ctx, format!("☑️ New time block is {}", game.state()))
+                .await?;
         }
         None => {
             msg.reply_err(
