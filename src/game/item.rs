@@ -126,33 +126,48 @@ impl Items {
 #[derive(Debug)]
 pub struct MemoBook {
     notes: Vec<Note>,
-    ripped_notes: u8,
+    notes_ripped_from_self: u32,
+    ripped_notes_gotten_from_others: u32,
 }
 
 #[derive(Debug)]
 pub struct Note {
     pub text: String,
     pub when: String,
+    pub ripped: bool,
 }
 
 impl MemoBook {
-    const MAX_NOTES: u8 = 128; // PONDER: Should this be configurable per game?
+    const MAX_NOTES: u32 = 128; // PONDER: Should this be configurable per game?
 
     pub fn new() -> Self {
         Self {
             notes: vec![],
-            ripped_notes: 0,
+            notes_ripped_from_self: 0,
+            ripped_notes_gotten_from_others: 0,
         }
     }
 
     pub fn add_note(&mut self, text: String, when: String) -> Result<(), String> {
-        if self.notes.len() < (Self::MAX_NOTES - self.ripped_notes) as usize {
-            self.notes.push(Note { text, when });
+        if self.notes.len() < (Self::MAX_NOTES - self.notes_ripped_from_self) as usize {
+            self.notes.push(Note {
+                text,
+                when,
+                ripped: false,
+            });
         } else {
             return Err("you can't add any more notes in your memo book".into());
         }
 
         Ok(())
+    }
+
+    pub fn add_ripped_note(&mut self, note: Note) {
+        self.ripped_notes_gotten_from_others;
+        self.notes.push(Note {
+            ripped: true,
+            ..note
+        });
     }
 
     pub fn number_of_written_notes(&self) -> usize {
@@ -164,7 +179,8 @@ impl MemoBook {
     }
 
     pub fn rip_note(&mut self, idx: usize) -> Option<Note> {
-        if idx < (Self::MAX_NOTES - self.ripped_notes) as usize {
+        self.notes_ripped_from_self += 1;
+        if idx < (Self::MAX_NOTES - self.notes_ripped_from_self) as usize {
             Some(self.notes.remove(idx))
         } else {
             None

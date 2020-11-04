@@ -1,11 +1,15 @@
 use std::time::Duration;
 
 use futures::StreamExt;
-use serenity::builder::CreateEmbed;
+use serenity::{builder::CreateEmbed, model::id::UserId};
 
 use super::prelude::*;
 use crate::{
-    game::{item::MemoBook, GameState},
+    data::Prefix,
+    game::{
+        item::{MemoBook, Note},
+        GameState,
+    },
     helpers::react::react_with,
 };
 
@@ -259,6 +263,100 @@ pub async fn show_note(ctx: &Context, msg: &Message, args: Args) -> CommandResul
             .await?;
     } else {
         msg.channel_id.say(ctx, &note.unwrap().text).await?;
+    }
+
+    Ok(())
+}
+
+#[command("ripnote")]
+#[description(r#"
+Allows you to rip a note out of your memobook and give it to someone. Note that ripping a note will **permanently** decrease the amount of notes you can write.
+
+Usage: !ripnote <page> <user mention>
+
+Example: !ripnote 5 @KC
+"#)]
+pub async fn rip_note(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
+    let page = args.single::<usize>();
+    let target = args.single::<UserId>();
+
+    let data = ctx.data.read().await;
+    let game = data.get::<GameContainer>();
+    if game.is_none() {
+        msg.reply_err(
+            ctx,
+            "you can't rip a note out of your memo book when there's no game running".into(),
+        )
+        .await?;
+        return Ok(());
+    }
+    let mut game = game.unwrap().write().await;
+
+    if page.is_err() {
+        msg.reply_err(
+            ctx,
+            format!(
+                "I couldn't get a number from your message. Try {}help ripnote",
+                data.get::<Prefix>().unwrap()
+            ),
+        )
+        .await?;
+        return Ok(());
+    }
+    let page = page.unwrap();
+
+    if target.is_err() {
+        msg.reply_err(
+            ctx,
+            format!(
+                "I couldn't get a user from your message. Try {}help ripnote",
+                data.get::<Prefix>().unwrap()
+            ),
+        )
+        .await?;
+        return Ok(());
+    }
+    let target = target.unwrap();
+
+    let target_is_in_game = {
+        let them = game.players().get(&target);
+        them.is_some()
+    };
+
+    let game_state = game.state();
+
+    let note = {
+        let myself = game.players_mut().get_mut(&msg.author.id);
+        if myself.is_none() {
+            msg.reply_err(
+                ctx,
+                "you can't give a note when you're not in the game".into(),
+            )
+            .await?;
+            return Ok(());
+        }
+
+        if !target_is_in_game {
+            msg.reply_err(
+                ctx,
+                "you can't give a note to someone who's not in the game".into(),
+            )
+            .await?;
+            return Ok(());
+        }
+
+        myself.unwrap().items_mut().memo_book_mut().rip_note(page)
+    };
+
+    {
+        let them = game.players_mut().get_mut(&target).unwrap();
+        them.items_mut()
+            .memo_book_mut()
+            .add_ripped_note(note.unwrap_or(Note {
+                text: format!("*<An empty page from {}>*", msg.author.mention()),
+                when: game_state.to_time_range().unwrap(),
+                ripped: true,
+            }));
     }
 
     Ok(())

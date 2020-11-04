@@ -50,7 +50,8 @@ pub struct Random;
     inventory,
     notes,
     write_note,
-    show_note
+    show_note,
+    rip_note
 )]
 pub struct Game;
 
