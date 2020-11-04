@@ -203,7 +203,7 @@ Shows a note at "page" N in the current channel.
 
 Usage: !shownote N"#
 )]
-pub async fn show_note(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
+pub async fn show_note(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let page = args.parse::<usize>();
 
     let data = ctx.data.read().await;
