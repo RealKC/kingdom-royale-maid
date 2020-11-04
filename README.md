@@ -15,9 +15,10 @@ entertaining.
 1. You will need to make a Discord application and turn it into a bot. (Google
 is your friend here)
 2. You will need to [install Rust](https://www.rust-lang.org/learn/get-started)
-3. If all went well, you can then simply run it by writing in a terminal, the
+3. Copy the contents of `.env.example` into a new file called `.env` in the same directory as the former, and fill in the necessary data.
+4. If all went well, you can then simply run it by writing in a terminal, the
 following
 
 ```sh
-DISCORD_TOKEN=<your bots discord token> MAID_CDN_CHANNEL=<a channel where the bot can send images without any issues> cargo run
+cargo run
 ```
