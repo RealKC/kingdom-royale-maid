@@ -350,13 +350,24 @@ pub async fn rip_note(ctx: &Context, msg: &Message, mut args: Args) -> CommandRe
 
     {
         let them = game.players_mut().get_mut(&target).unwrap();
-        them.items_mut()
-            .memo_book_mut()
-            .add_ripped_note(note.unwrap_or(Note {
-                text: format!("*<An empty page from {}>*", msg.author.mention()),
-                when: game_state.to_time_range().unwrap(),
-                ripped: true,
-            }));
+        let note = note.unwrap_or(Note {
+            text: format!("*<An empty page from {}>*", msg.author.mention()),
+            when: game_state.to_time_range().unwrap(),
+            ripped: true,
+        });
+
+        them.room()
+            .say(
+                ctx,
+                format!(
+                    "You've received a note from {}. Its contents are {}",
+                    msg.author.mention(),
+                    &note.text
+                ),
+            )
+            .await?;
+
+        them.items_mut().memo_book_mut().add_ripped_note(note);
     }
 
     Ok(())
