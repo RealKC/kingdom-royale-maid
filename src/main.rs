@@ -63,7 +63,7 @@ async fn main() -> CommandResult {
         Err(why) => panic!("Could not access application info: {:?}", why),
     };
 
-    let framework = StandardFramework::new()
+    let mut framework = StandardFramework::new()
         .configure(|c| {
             c.with_whitespace(true)
                 .on_mention(Some(bot_id))
@@ -84,8 +84,11 @@ async fn main() -> CommandResult {
         .help(&MY_HELP)
         .group(&META_GROUP)
         .group(&RANDOM_GROUP)
-        .group(&GAME_GROUP)
         .group(&TESTS_GROUP);
+
+    for group in GAME_GROUP.options.sub_groups {
+        framework = framework.group(group);
+    }
 
     let mut client = Client::builder(&token)
         .event_handler(Handler)

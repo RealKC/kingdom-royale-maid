@@ -30,30 +30,37 @@ pub struct Random;
 
 #[group]
 #[only_in(guilds)]
+#[sub_groups(GameManagement, ItemInteractions, PlayerInteractions, GameInformation)]
+pub struct Game;
+
+#[group("Game Management")]
+#[only_in(guilds)]
 #[commands(
-    new_game,
-    end_game,
     join,
     leave,
-    game_info,
+    new_game,
+    end_game,
     start,
     start_gathering,
     end_gathering,
-    next_block,
-    give_item,
-    substitute,
-    stab,
-    roles,
-    role_info,
-    rules,
-    info,
-    inventory,
-    notes,
-    write_note,
-    show_note,
-    rip_note
+    next_block
 )]
-pub struct Game;
+pub struct GameManagement;
+
+#[group("Item Interactions")]
+#[only_in(guilds)]
+#[commands(give_item, inventory, notes, write_note, show_note, rip_note)]
+pub struct ItemInteractions;
+
+#[group("Player Interactions")]
+#[only_in(guilds)]
+#[commands(substitute, stab)]
+pub struct PlayerInteractions;
+
+#[group("Game Information")]
+#[only_in(guilds)]
+#[commands(game_info, roles, role_info, rules, info)]
+pub struct GameInformation;
 
 #[group]
 #[commands(king_test, rev_test, confirm_murder)]
