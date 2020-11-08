@@ -163,7 +163,7 @@ impl MemoBook {
     }
 
     pub fn add_ripped_note(&mut self, note: Note) {
-        self.ripped_notes_gotten_from_others;
+        self.ripped_notes_gotten_from_others += 1;
         self.notes.push(Note {
             ripped: true,
             ..note
