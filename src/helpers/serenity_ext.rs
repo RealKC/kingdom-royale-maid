@@ -9,6 +9,7 @@ use serenity::{
 
 type Result<T> = std::result::Result<T, Error>;
 
+/// An extension to the serenity Message, contaning nicer formatting for my usecase
 #[async_trait]
 pub trait MaidReply {
     async fn reply_err(&self, cache_http: &Context, content: String) -> Result<Message>;

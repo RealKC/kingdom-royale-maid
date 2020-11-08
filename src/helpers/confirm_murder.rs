@@ -4,6 +4,7 @@ use serenity::{
     prelude::*,
 };
 
+/// Creates an embed containing the avatar of the user passed in, containing some flavour text in the title
 pub async fn build_embed_for_murder_confirmation(
     ctx: &Context,
     user: UserId,
