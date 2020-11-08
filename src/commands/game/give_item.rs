@@ -7,8 +7,14 @@ use serenity::model::id::UserId;
 #[description(
     r#"This command allows you to give some items away. You cannot give away your memo book, ballpoint pen or tablet.
 
-The syntax of this command is `!give <TARGET> <WHAT>`, you'd use it like: `!give @MyFriend food`
+Valid item names are: "food", "food bar", "food bars", "knife", "watch". (without quotes)
+
+Note that you have to mention someone as the target.
+
+(Usage and Sample usage do not include the prefix, but it still must be used)
 "#)]
+#[usage("<target user mention> <item>")]
+#[example("@KC#7788 food")]
 pub async fn give_item(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let data = ctx.data.read().await;
     let game = data.get::<GameContainer>();

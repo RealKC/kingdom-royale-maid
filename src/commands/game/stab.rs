@@ -10,9 +10,11 @@ use serenity::model::id::UserId;
     r#"
 Stab another player
 
-Use this like `!stab @MyArchNemesis`
+(Usage and Sample usage do not include the prefix, but it still must be used)
 "#
 )]
+#[usage("<target user mention>")]
+#[example("@KC#7788")]
 pub async fn stab(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let data = ctx.data.read().await;
     let game = data.get::<GameContainer>();

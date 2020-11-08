@@ -141,7 +141,11 @@ pub async fn notes(ctx: &Context, msg: &Message) -> CommandResult {
 
 #[command("writenote")]
 #[aliases("wnote", "wn")]
-#[description("Allows you to write a note in your book, note that this consumes a page in it, and you will not be able to write in that page anymore. You may write at most 128 notes, that may not be longer than 512 characters.")]
+#[description(r#"Allows you to write a note in your book, note that this consumes a page in it, and you will not be able to write in that page anymore. You may write at most 128 notes, that may not be longer than 512 characters.
+
+(Usage and Sample usage do not include the prefix, but it still must be used)
+"#)]
+#[usage("your note here, can't be too long")]
 pub async fn write_note(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let note = args.rest();
 
@@ -205,8 +209,9 @@ pub async fn write_note(ctx: &Context, msg: &Message, args: Args) -> CommandResu
     r#"
 Shows a note at "page" N in the current channel.
 
-Usage: !shownote N"#
+(Usage and Sample usage do not include the prefix, but it still must be used)"#
 )]
+#[usage("N")]
 pub async fn show_note(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let page = args.parse::<usize>();
 
@@ -272,10 +277,10 @@ pub async fn show_note(ctx: &Context, msg: &Message, args: Args) -> CommandResul
 #[description(r#"
 Allows you to rip a note out of your memobook and give it to someone. Note that ripping a note will **permanently** decrease the amount of notes you can write.
 
-Usage: !ripnote <page> <user mention>
-
-Example: !ripnote 5 @KC
+(Usage and Sample usage do not include the prefix, but it still must be used)
 "#)]
+#[usage("<page> <user mention>")]
+#[example("5 @KC#7788")]
 pub async fn rip_note(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let page = args.single::<usize>();
     let target = args.single::<UserId>();
