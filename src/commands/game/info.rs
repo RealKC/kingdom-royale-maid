@@ -11,19 +11,16 @@ pub async fn rules(ctx: &Context, msg: &Message) -> CommandResult {
             .author
             .nick_in(ctx, guild_id)
             .await
-            .unwrap_or(msg.author.name.clone()),
+            .unwrap_or_else(|| msg.author.name.clone()),
         None => msg.author.name.clone(),
     };
     msg.channel_id
         .send_message(ctx, |m| {
             m.embed(|e| {
                 e.author(|a| {
-                    match msg.author.avatar_url() {
-                        Some(ava) => {
-                            a.icon_url(ava);
-                        }
-                        None => (),
-                    };
+                    if let Some(ava) = msg.author.avatar_url(){
+                        a.icon_url(ava);
+                    }
                     a.name(author_name);
                     a
                 })

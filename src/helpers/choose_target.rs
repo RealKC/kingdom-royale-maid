@@ -28,14 +28,14 @@ mod res {
 /// This is the function used to generate the embed for the King or Revolutionary role action
 pub async fn build_embed_for_target_choice(
     ctx: &Context,
-    players: &Vec<UserId>,
+    players: &[UserId],
     embed_title: &str,
 ) -> Result<CreateEmbed, Error> {
     let avatars = fetch_avatars(ctx, players).await?;
 
     let merged_avatars = merge_avatars(avatars)?;
     let merged_avatars_png = encode_to_png(merged_avatars)?;
-    let foo = AttachmentType::Bytes {
+    let merged_avatars_attachment = AttachmentType::Bytes {
         data: merged_avatars_png.into(),
         filename: "avatars.png".into(),
     };
@@ -43,7 +43,9 @@ pub async fn build_embed_for_target_choice(
     let data = ctx.data.read().await;
     let cdn = data.get::<Cdn>().expect("Where's my CDN");
 
-    let msg = cdn.send_message(ctx, |m| m.add_file(foo)).await?;
+    let msg = cdn
+        .send_message(ctx, |m| m.add_file(merged_avatars_attachment))
+        .await?;
 
     let mut embed = CreateEmbed::default();
     embed.title(embed_title);
@@ -52,7 +54,7 @@ pub async fn build_embed_for_target_choice(
     Ok(embed)
 }
 
-async fn fetch_avatars(ctx: &Context, players: &Vec<UserId>) -> Result<Vec<Image>, Error> {
+async fn fetch_avatars(ctx: &Context, players: &[UserId]) -> Result<Vec<Image>, Error> {
     let data = ctx.data.write().await;
     let reqwest = data.get::<ReqwestClient>().unwrap_or_else(|| {
         error!("Reqwest client wasn't in ctx.data for some reason");

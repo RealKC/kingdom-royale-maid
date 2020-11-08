@@ -42,15 +42,13 @@ pub async fn stab(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult
         )
         .await?;
         return Ok(());
-    } else {
-        if !game.players().contains_key(&msg.author.id) {
-            msg.reply_err(
-                ctx,
-                "you can't stab someone when you're not in the game!".into(),
-            )
-            .await?;
-            return Ok(());
-        }
+    } else if !game.players().contains_key(&msg.author.id) {
+        msg.reply_err(
+            ctx,
+            "you can't stab someone when you're not in the game!".into(),
+        )
+        .await?;
+        return Ok(());
     }
 
     let target = args.single::<UserId>();

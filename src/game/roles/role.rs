@@ -12,10 +12,10 @@ pub enum RoleName {
 
 impl RoleName {
     pub fn is_king_like(&self) -> bool {
-        match self {
-            RoleName::King | RoleName::TheDouble | RoleName::Prince => true,
-            _ => false,
-        }
+        matches!(
+            self,
+            RoleName::King | RoleName::TheDouble | RoleName::Prince
+        )
     }
 }
 

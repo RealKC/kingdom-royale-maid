@@ -164,7 +164,7 @@ fn get_env_config() -> (String, String, String) {
     dotenv::dotenv().expect("Encountered an error that didn't allow parsing the .env file");
 
     let token = dotenv::var("DISCORD_TOKEN").expect("Expected a token in the environment");
-    let prefix = dotenv::var("MAID_PREFIX").unwrap_or("!".into());
+    let prefix = dotenv::var("MAID_PREFIX").unwrap_or_else(|_| "!".into());
     let cdn_channel_id = dotenv::var("MAID_CDN_CHANNEL_ID").expect("Give me my discord cdn pl0x");
 
     (token, prefix, cdn_channel_id)

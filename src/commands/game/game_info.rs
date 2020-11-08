@@ -83,7 +83,7 @@ pub async fn game_info(ctx: &Context, msg: &Message) -> CommandResult {
                         })
                         .title("Kingdom Royale")
                         .fields(fields)
-                        .colour((|| {
+                        .colour({
                             if game.state() == GameState::NotStarted {
                                 if game.can_start() {
                                     0xdea712 // Yellow
@@ -93,7 +93,7 @@ pub async fn game_info(ctx: &Context, msg: &Message) -> CommandResult {
                             } else {
                                 0x0dd910 // Green
                             }
-                        })())
+                        })
                         .footer(|f| {
                             if let Some(ava) = msg.author.avatar_url() {
                                 f.icon_url(ava);

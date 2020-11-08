@@ -13,7 +13,7 @@ pub async fn about(ctx: &Context, msg: &Message) -> CommandResult {
     let owner = owner.to_user(ctx).await?;
 
     let bot_info = ctx.http.get_current_user().await?;
-    let bot_avatar = bot_info.avatar_url().unwrap_or("".to_owned());
+    let bot_avatar = bot_info.avatar_url().unwrap_or_else(|| "".to_owned());
     let bot_name = bot_info.name;
 
     let (kc_name, kc_discrim) = {
@@ -26,7 +26,7 @@ pub async fn about(ctx: &Context, msg: &Message) -> CommandResult {
         .send_message(ctx, |m| {
             m.embed(|e| {
                 e.author(|a| {
-                    let owner_icon = owner.avatar_url().unwrap_or("".to_string());
+                    let owner_icon = owner.avatar_url().unwrap_or_else(|| "".to_string());
                     let owner_name = owner.name;
                     let owner_discrim = owner.discriminator;
                     a.icon_url(owner_icon)

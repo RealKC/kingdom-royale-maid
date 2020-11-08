@@ -363,7 +363,7 @@ And a heavy-duty knife.
             info!("Trying to build an embed");
             let embed = build_embed_for_target_choice(
                 ctx,
-                &self.players.keys().map(|k| *k).collect::<Vec<_>>(),
+                &self.players.keys().copied().collect::<Vec<_>>(),
                 "Please select a partner for your secret meeting",
             )
             .await?;
@@ -388,7 +388,7 @@ And a heavy-duty knife.
             {
                 let emoji = reaction.as_inner_ref().emoji.to_string();
                 if let Ok(idx) = REACTIONS.binary_search(&emoji.as_str()) {
-                    let id = self.players.keys().nth(idx).map(|o| *o);
+                    let id = self.players.keys().nth(idx).copied();
                     match id {
                         Some(id) => {
                             self.players
@@ -448,7 +448,7 @@ And a heavy-duty knife.
 
         for player in &self.players {
             async fn get_suitable_name(user: User, ctx: &Context, game: &Game) -> String {
-                user.nick_in(ctx, game.guild).await.unwrap_or(
+                user.nick_in(ctx, game.guild).await.unwrap_or_else(|| {
                     user.name
                         .chars()
                         .map(|c| {
@@ -460,8 +460,8 @@ And a heavy-duty knife.
                                 c
                             }
                         })
-                        .collect(),
-                )
+                        .collect()
+                })
             }
 
             let guest = player.0.to_user(ctx).await?;
@@ -558,7 +558,7 @@ And a heavy-duty knife.
 
         let embed = build_embed_for_target_choice(
             ctx,
-            &self.players.keys().map(|k| *k).collect::<Vec<_>>(),
+            &self.players.keys().copied().collect::<Vec<_>>(),
             "Please select a target for 「 Murder 」",
         )
         .await?;
@@ -583,7 +583,7 @@ And a heavy-duty knife.
         {
             let emoji = reaction.as_inner_ref().emoji.to_string();
             if let Ok(idx) = REACTIONS.binary_search(&emoji.as_str()) {
-                let id = self.players.keys().nth(idx).map(|o| *o);
+                let id = self.players.keys().nth(idx).copied();
                 match id {
                     Some(id) => {
                         self.king_murder_target = id;
@@ -685,7 +685,7 @@ And a heavy-duty knife.
 
         let embed = build_embed_for_target_choice(
             ctx,
-            &self.players.keys().map(|k| *k).collect::<Vec<_>>(),
+            &self.players.keys().copied().collect::<Vec<_>>(),
             "Please select a target for 「 Murder 」",
         )
         .await?;
@@ -708,7 +708,7 @@ And a heavy-duty knife.
         {
             let emoji = reaction.as_inner_ref().emoji.to_string();
             if let Ok(idx) = REACTIONS.binary_search(&emoji.as_str()) {
-                let id = self.players.keys().nth(idx).map(|o| *o);
+                let id = self.players.keys().nth(idx).copied();
                 match id {
                     Some(id) => {
                         let hit_king =
