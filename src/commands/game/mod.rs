@@ -1,5 +1,6 @@
 mod end_game;
 mod end_gathering;
+mod forceadd;
 mod game_info;
 mod give_item;
 mod info;
@@ -17,6 +18,7 @@ mod substitute;
 
 pub use end_game::*;
 pub use end_gathering::*;
+pub use forceadd::*;
 pub use game_info::*;
 pub use give_item::*;
 pub use info::*;

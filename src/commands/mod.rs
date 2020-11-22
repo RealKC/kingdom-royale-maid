@@ -63,7 +63,7 @@ pub struct PlayerInteractions;
 pub struct GameInformation;
 
 #[group]
-#[commands(king_test, rev_test, confirm_murder)]
+#[commands(king_test, rev_test, confirm_murder, forceadd)]
 pub struct Tests;
 
 pub struct CommandCounter;
