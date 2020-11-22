@@ -18,7 +18,15 @@ use serenity::{
     },
     prelude::*,
 };
+<<<<<<< HEAD
 use std::{collections::BTreeMap, fmt::Write};
+=======
+use serenity::{model::prelude::User, prelude::*};
+use std::{
+    collections::{BTreeMap, HashMap},
+    fmt::Write,
+};
+>>>>>>> 528f0df (wip stuff for secret meeting logs)
 use tracing::{error, info};
 
 type Host = UserId;
@@ -427,6 +435,8 @@ And a heavy-duty knife.
             })
             .await?;
 
+        let mut players_mapped_to_secret_rooms: HashMap<UserId, ChannelId> = Default::default();
+
         for player in &self.players {
             async fn get_suitable_name(user: User, ctx: &Context, game: &Game) -> String {
                 user.nick_in(ctx, game.guild).await.unwrap_or_else(|| {
@@ -475,9 +485,16 @@ And a heavy-duty knife.
                 })
                 .await?;
 
+            players_mapped_to_secret_rooms.insert(guest_id, channel.id);
+
             channel.create_permission(ctx, &guest_perms).await?;
             channel.create_permission(ctx, &host_perms).await?;
             channel.create_permission(ctx, &at_everyone_perms).await?;
+        }
+
+        for player in &mut self.players {
+            let room = players_mapped_to_secret_rooms.get(player.0).unwrap();
+            player.1.add_secret_meeting(self.day, *room);
         }
 
         Ok(())
