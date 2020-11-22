@@ -25,7 +25,7 @@ pub async fn new_game(ctx: &Context, msg: &Message, mut args: Args) -> CommandRe
     let announcement_channel = args.single::<ChannelId>();
     let announcement_channel_id = announcement_channel.unwrap_or(msg.channel_id);
 
-    let delete_rooms_category_on_game_end = args.single::<bool>().unwrap_or(false);
+    let delete_rooms_category_on_game_end = args.single::<bool>().unwrap_or(true);
 
     if data.get::<GameContainer>().is_some() {
         msg.reply_err(
