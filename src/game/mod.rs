@@ -5,6 +5,7 @@ mod game;
 pub mod item;
 mod player;
 mod roles;
+mod tasks;
 
 pub use data::{DeathCause, GameState, JoinError, SubstitutionStatus};
 pub use game::Game;

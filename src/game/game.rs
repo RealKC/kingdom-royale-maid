@@ -18,6 +18,8 @@ use serenity::{model::prelude::User, prelude::*};
 use std::{collections::BTreeMap, fmt::Write};
 use tracing::{error, info};
 
+use super::tasks;
+
 type Host = UserId;
 pub type Result = StdResult<(), Box<(dyn std::error::Error + Send + Sync)>>;
 
@@ -376,35 +378,13 @@ And a heavy-duty knife.
                 .await?;
             info!("We succeeded. Room={}", user_and_room.1.mention());
 
-            static REACTIONS: [&str; 6] = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣"];
-            react_with(ctx, &msg, &REACTIONS).await?;
+            react_with(ctx, &msg, &NUMBER_EMOJIS_ONE_TO_SIX).await?;
 
-            if let Some(reaction) = msg
-                .await_reaction(&ctx)
-                .author_id(user_and_room.0)
-                .channel_id(user_and_room.1)
-                .filter(|r| REACTIONS.contains(&r.emoji.to_string().as_str()))
-                .await
-            {
-                let emoji = reaction.as_inner_ref().emoji.to_string();
-                if let Ok(idx) = REACTIONS.binary_search(&emoji.as_str()) {
-                    let id = self.players.keys().nth(idx).copied();
-                    match id {
-                        Some(id) => {
-                            self.players
-                                .get_mut(&user_and_room.0)
-                                .unwrap()
-                                .set_secret_meeting_partner(id);
-                        }
-                        None => {
-                            error!("Got a wrong reaction somehow");
-                            panic!();
-                        }
-                    }
-                }
-
-                return Ok(());
-            }
+            tokio::task::spawn(tasks::handle_secret_meeting_selection(
+                ctx.clone(),
+                msg,
+                user_and_room,
+            ));
         }
 
         Err("Probably an error to arrive here".into())
@@ -571,32 +551,16 @@ And a heavy-duty knife.
             .send_message(ctx, |m| m.set_embed(embed))
             .await?;
 
-        static REACTIONS: [&str; 6] = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣"];
-        react_with(ctx, &msg, &REACTIONS).await?;
+        react_with(ctx, &msg, &NUMBER_EMOJIS_ONE_TO_SIX).await?;
 
-        if let Some(reaction) = msg
-            .await_reaction(&ctx)
-            .author_id(self.players.get(&king).unwrap().id())
-            .channel_id(self.players.get(&king).unwrap().room())
-            .filter(|r| REACTIONS.contains(&r.emoji.to_string().as_str()))
-            .await
-        {
-            let emoji = reaction.as_inner_ref().emoji.to_string();
-            if let Ok(idx) = REACTIONS.binary_search(&emoji.as_str()) {
-                let id = self.players.keys().nth(idx).copied();
-                match id {
-                    Some(id) => {
-                        self.king_murder_target = id;
-                    }
-                    None => {
-                        error!("Got a wrong reaction somehow");
-                        panic!();
-                    }
-                }
-            }
+        let room_id = msg.channel_id;
 
-            return Ok(());
-        }
+        tokio::task::spawn(tasks::handle_king_choosing_target(
+            ctx.clone(),
+            msg,
+            king,
+            room_id,
+        ));
 
         Err("Probably an error to arrive here".into())
     }
@@ -634,25 +598,15 @@ And a heavy-duty knife.
             .send_message(ctx, |m| m.set_embed(embed))
             .await?;
 
-        static REACTIONS: [&str; 2] = ["🇾", "🇳"];
-        react_with(ctx, &msg, &REACTIONS).await?;
+        react_with(ctx, &msg, &YES_NO_EMOJIS).await?;
 
-        if let Some(reaction) = msg
-            .await_reaction(&ctx)
-            .filter(|r| REACTIONS.contains(&r.emoji.to_string().as_str()))
-            .guild_id(self.guild)
-            .author_id(*sorc_or_knight)
-            .await
-        {
-            let emoji = reaction.as_inner_ref().emoji.to_string();
-            if emoji.as_str() == REACTIONS[0] {
-                let target = self.players.get_mut(&self.king_murder_target).unwrap();
-                target
-                    .set_dead(target.role_name().into(), ctx, self.meeting_room)
-                    .await?;
-            }
-            return Ok(());
-        }
+        let room_id = msg.channel_id;
+        tokio::task::spawn(tasks::handle_assistant_choice(
+            ctx.clone(),
+            msg,
+            *sorc_or_knight,
+            room_id,
+        ));
 
         Err("Reaching here is probably a bug".into())
     }
@@ -663,6 +617,10 @@ And a heavy-duty knife.
 
     pub fn set_king_substitution_status(&mut self, s: SubstitutionStatus) {
         self.king_substitution_status = s;
+    }
+
+    pub fn set_king_murder_target(&mut self, target: UserId) {
+        self.king_murder_target = target;
     }
 
     pub async fn make_revolutionary_assassinate(&mut self, ctx: &Context) -> Result {
