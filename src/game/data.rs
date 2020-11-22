@@ -96,6 +96,8 @@ impl fmt::Display for JoinError {
     }
 }
 
+impl std::error::Error for JoinError {}
+
 #[derive(Copy, Clone, Debug)]
 pub enum LeaveError {
     NotInAGame,

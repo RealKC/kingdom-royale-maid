@@ -15,7 +15,7 @@ pub async fn forceadd(ctx: &Context, msg: &Message, mut args: Args) -> CommandRe
     };
 
     for user in args.iter::<UserId>() {
-        game.join(user?);
+        game.join(user?)?;
     }
 
     Ok(())
