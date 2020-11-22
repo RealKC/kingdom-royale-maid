@@ -49,7 +49,7 @@ pub struct ItemInteractions;
 
 #[group("Player Interactions")]
 #[only_in(guilds)]
-#[commands(substitute, stab)]
+#[commands(substitute, stab, show_meeting_log)]
 pub struct PlayerInteractions;
 
 #[group("Game Information")]

@@ -9,12 +9,15 @@ use serenity::{
     prelude::*,
 };
 
+type SecretMeeting = Option<(UserId, ChannelId)>;
+
 pub struct Player {
     id: UserId,
     role: Box<(dyn Role + Send + Sync)>,
     alive: bool,
     room: ChannelId,
     secret_meeting_partner: Option<UserId>,
+    secret_meeting_channels: Vec<(SecretMeeting, SecretMeeting)>,
     items: Items,
 }
 
@@ -33,6 +36,7 @@ impl Player {
             room,
             alive: true,
             secret_meeting_partner: None,
+            secret_meeting_channels: vec![],
             items: Items::new(watch_colour),
         }
     }
@@ -51,6 +55,26 @@ impl Player {
 
     pub fn set_secret_meeting_partner(&mut self, partner: UserId) {
         self.secret_meeting_partner = Some(partner);
+    }
+
+    pub fn add_secret_meeting(&mut self, day: u8, channel: ChannelId) {
+        let day = day as usize;
+        self.secret_meeting_channels.resize(day, (None, None));
+        let secret_meetings_for_day = self
+            .secret_meeting_channels
+            .get_mut(day)
+            .expect("yeah we done goofed it seems");
+
+        if secret_meetings_for_day.0.is_none() {
+            secret_meetings_for_day.0 = Some((self.secret_meeting_partner.expect("We should have a secret_meeting_partner when we're adding secret rooms to players"), channel));
+        } else {
+            assert!(secret_meetings_for_day.1.is_none());
+            secret_meetings_for_day.1 = Some((self.secret_meeting_partner.expect("We should have a secret_meeting_partner when we're adding secret rooms to players"), channel));
+        }
+    }
+
+    pub fn get_secret_meetings_for_day(&self, day: u8) -> Option<&(SecretMeeting, SecretMeeting)> {
+        self.secret_meeting_channels.get(day as usize)
     }
 
     pub fn is_alive(&self) -> bool {
