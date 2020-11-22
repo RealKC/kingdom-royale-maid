@@ -5,7 +5,7 @@ use image::{
 };
 use serenity::http::AttachmentType;
 use serenity::{builder::CreateEmbed, model::id::UserId, prelude::*};
-use tracing::{error, warn};
+use tracing::{error, info, warn};
 
 type Image = image::RgbaImage;
 
@@ -37,8 +37,10 @@ pub async fn build_embed_for_target_choice(
     players: &[UserId],
     embed_title: &str,
 ) -> Result<CreateEmbed, Error> {
+    info!("Fetching avatars...");
     let avatars = fetch_avatars(ctx, players).await?;
 
+    info!("Merging avatars...");
     let merged_avatars = merge_avatars(avatars)?;
     let merged_avatars_png = encode_to_png(merged_avatars)?;
     let merged_avatars_attachment = AttachmentType::Bytes {
@@ -46,7 +48,9 @@ pub async fn build_embed_for_target_choice(
         filename: "avatars.png".into(),
     };
 
+    info!("build_embed_for_target_choice: trying to lock data");
     let data = ctx.data.read().await;
+    info!("build_embed_for_target_choice: Data locked");
     let cdn = data.get::<Cdn>().expect("Where's my CDN");
 
     let msg = cdn
@@ -61,7 +65,7 @@ pub async fn build_embed_for_target_choice(
 }
 
 async fn fetch_avatars(ctx: &Context, players: &[UserId]) -> Result<Vec<Image>, Error> {
-    let data = ctx.data.write().await;
+    let data = ctx.data.read().await;
     let reqwest = data.get::<ReqwestClient>().unwrap_or_else(|| {
         error!("Reqwest client wasn't in ctx.data for some reason");
         panic!();
