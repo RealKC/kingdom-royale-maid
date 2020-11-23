@@ -52,7 +52,7 @@ pub async fn delete_category(ctx: &Context, msg: &Message, mut args: Args) -> Co
     }
     let category = category.unwrap();
 
-    let category = category.to_channel(ctx).await?;
+    let category = category.to_channel(&ctx.http).await?;
     let category = category.category();
 
     if category.is_none() {
@@ -73,35 +73,51 @@ pub async fn delete_category(ctx: &Context, msg: &Message, mut args: Args) -> Co
         }
     }
 
-    let mut message_string = "You will delete the following channels: ".to_string();
+    let mut message_string = "You will delete the following channels:\n".to_string();
 
     for channel in &channels_to_delete {
         message_string.push_str(&format!("• {}\n", channel.mention()));
     }
 
-    message_string
-        .push_str("\nAre you sure you want to do this? React with 🇾 if so, and with 🇳 if not");
+    message_string.push_str(&format!(
+        "and the category {}({})",
+        category.mention(),
+        category.id
+    ));
 
-    let sent_msg = msg.channel_id.say(ctx, message_string).await?;
+    message_string.push_str(
+        r#"
+Are you sure you want to do this? React with 🇾 if so, and with 🇳 if not.
+⚠️ **This action cannot be reversed**"#,
+    );
+
+    let mut sent_msg = msg.channel_id.say(ctx, message_string).await?;
 
     static REACTIONS: [&str; 2] = ["🇾", "🇳"];
     react_with(ctx, &sent_msg, &REACTIONS).await?;
 
-    if let Some(reaction) = msg
+    if let Some(reaction) = sent_msg
         .await_reaction(&ctx)
         .filter(|r| REACTIONS.contains(&r.emoji.to_string().as_str()))
         .guild_id(msg.guild_id.unwrap())
         .author_id(msg.author.id)
         .await
     {
+        info!("We got woke up");
         let emoji = reaction.as_inner_ref().emoji.to_string();
         if emoji.as_str() == REACTIONS[0] {
             for channel in channels_to_delete {
                 channel.delete(ctx).await?;
             }
         }
-        msg.reply(ctx, "Those channels have been successfully deleted")
-            .await?;
+
+        category.delete(&ctx).await?;
+
+        sent_msg
+            .edit(ctx, |m| {
+                m.content("{}, successfully deleted those channels!")
+            })
+            .await?
     }
 
     Ok(())
