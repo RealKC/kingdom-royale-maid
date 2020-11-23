@@ -361,20 +361,20 @@ And a heavy-duty knife.
             .collect::<Vec<_>>();
         info!("OK! Succesfully collected rooms");
 
-        for user_and_room in rooms {
-            info!("Trying to build an embed");
-            let embed = build_embed_for_target_choice(
-                ctx,
-                &self.players.keys().copied().collect::<Vec<_>>(),
-                "Please select a partner for your secret meeting",
-            )
-            .await?;
-            info!("Embed built successfuly");
+        info!("Trying to build an embed");
+        let embed = build_embed_for_target_choice(
+            ctx,
+            &self.players.keys().copied().collect::<Vec<_>>(),
+            "Please select a partner for your secret meeting",
+        )
+        .await?;
+        info!("Embed built successfuly");
 
+        for user_and_room in rooms {
             info!("Trying to send messages...");
             let msg = user_and_room
                 .1
-                .send_message(ctx, |m| m.set_embed(embed))
+                .send_message(ctx, |m| m.set_embed(embed.clone()))
                 .await?;
             info!("We succeeded. Room={}", user_and_room.1.mention());
 
