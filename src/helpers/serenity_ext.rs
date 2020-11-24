@@ -1,6 +1,6 @@
 use serde_json::json;
-use serenity::async_trait;
 use serenity::{
+    async_trait,
     http::CacheHttp,
     model::{channel::Message, ModelError},
     prelude::*,

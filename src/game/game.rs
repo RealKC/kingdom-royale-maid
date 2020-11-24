@@ -1,24 +1,25 @@
-use crate::game::data::*;
-use crate::game::{player::Player, roles::RoleName, SubstitutionStatus};
-use crate::helpers::{
-    choose_target::build_embed_for_target_choice,
-    confirm_murder::build_embed_for_murder_confirmation, perms, react::react_with,
+use super::tasks;
+use crate::{
+    game::{data::*, player::Player, roles::RoleName, SubstitutionStatus},
+    helpers::{
+        choose_target::build_embed_for_target_choice,
+        confirm_murder::build_embed_for_murder_confirmation, perms, react::react_with,
+    },
 };
+
 use itertools::izip;
-use rand::seq::SliceRandom;
-use rand::thread_rng;
+use rand::{seq::SliceRandom, thread_rng};
 use serenity::{
     builder::CreateEmbed,
     model::{
         channel::ChannelType,
         id::{ChannelId, GuildId, RoleId, UserId},
+        prelude::User,
     },
+    prelude::*,
 };
-use serenity::{model::prelude::User, prelude::*};
 use std::{collections::BTreeMap, fmt::Write};
 use tracing::{error, info};
-
-use super::tasks;
 
 type Host = UserId;
 pub type Result = StdResult<(), Box<(dyn std::error::Error + Send + Sync)>>;

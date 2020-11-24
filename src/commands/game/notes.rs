@@ -1,8 +1,3 @@
-use std::time::Duration;
-
-use futures::StreamExt;
-use serenity::{builder::CreateEmbed, model::id::UserId};
-
 use super::prelude::*;
 use crate::{
     data::Prefix,
@@ -12,6 +7,10 @@ use crate::{
     },
     helpers::react::react_with,
 };
+
+use futures::StreamExt;
+use serenity::{builder::CreateEmbed, model::id::UserId};
+use std::time::Duration;
 
 #[command]
 #[description("Allows you to browse your memo book")]

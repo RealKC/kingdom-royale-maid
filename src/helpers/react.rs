@@ -1,6 +1,8 @@
-use serenity::framework::standard::CommandResult;
-use serenity::model::channel::{Message, ReactionType};
-use serenity::prelude::*;
+use serenity::{
+    framework::standard::CommandResult,
+    model::channel::{Message, ReactionType},
+    prelude::*,
+};
 
 pub async fn react_with(ctx: &Context, msg: &Message, unicodes: &[&str]) -> CommandResult {
     for emoji in unicodes {

@@ -1,4 +1,4 @@
-use crate::game::roles::prelude::*;
+use super::prelude::*;
 
 pub struct Knight;
 

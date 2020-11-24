@@ -1,6 +1,6 @@
 use super::prelude::*;
-use crate::game::item::Item;
-use crate::game::GameState;
+use crate::game::{item::Item, GameState};
+
 use serenity::model::id::UserId;
 
 #[command("give")]

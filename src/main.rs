@@ -1,15 +1,16 @@
 use data::Prefix;
 use serenity::{
-    async_trait, client::bridge::gateway::GatewayIntents, client::bridge::gateway::ShardManager,
-    framework::standard::CommandResult, framework::standard::StandardFramework, http::Http,
+    async_trait,
+    client::bridge::gateway::{GatewayIntents, ShardManager},
+    framework::standard::{CommandResult, StandardFramework},
+    http::Http,
     model::gateway::Ready,
+    prelude::*,
 };
 use std::{
     collections::{HashMap, HashSet},
     sync::Arc,
 };
-
-use serenity::prelude::*;
 use tokio::sync::Mutex;
 use tracing::{error, info, instrument};
 

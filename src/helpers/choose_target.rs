@@ -3,8 +3,7 @@ use crate::data::{Cdn, ReqwestClient};
 use image::{
     self, imageops, load_from_memory_with_format, png::PngEncoder, ColorType, ImageFormat,
 };
-use serenity::http::AttachmentType;
-use serenity::{builder::CreateEmbed, model::id::UserId, prelude::*};
+use serenity::{builder::CreateEmbed, http::AttachmentType, model::id::UserId, prelude::*};
 use tracing::{error, info, warn};
 
 type Image = image::RgbaImage;

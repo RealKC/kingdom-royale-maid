@@ -1,6 +1,8 @@
-use crate::commands::prelude::*;
-use crate::commands::GameContainer;
-use crate::helpers::{confirm_murder::build_embed_for_murder_confirmation, react::react_with};
+use crate::{
+    commands::{prelude::*, GameContainer},
+    helpers::{confirm_murder::build_embed_for_murder_confirmation, react::react_with},
+};
+
 use serenity::model::channel::Message;
 
 #[command("tests")]

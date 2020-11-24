@@ -1,6 +1,6 @@
+use super::prelude::*;
 use crate::data::Prefix;
 
-use super::prelude::*;
 use serenity::model::id::{ChannelId, RoleId};
 
 #[command("newgame")]

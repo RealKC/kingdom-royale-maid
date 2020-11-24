@@ -1,6 +1,6 @@
-use serenity::builder::CreateEmbed;
-
 use super::prelude::*;
+
+use serenity::builder::CreateEmbed;
 
 #[command]
 #[aliases("bag")]

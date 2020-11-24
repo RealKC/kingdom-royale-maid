@@ -1,6 +1,6 @@
+use super::prelude::*;
 use crate::game::{DeathCause, GameState};
 
-use super::prelude::*;
 use rand::{self, distributions::Distribution};
 use serenity::model::id::UserId;
 

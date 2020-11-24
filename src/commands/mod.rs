@@ -15,8 +15,7 @@ use stats::*;
 use test_cmds::*;
 use tos::*;
 
-use serenity::framework::standard::macros::group;
-use serenity::prelude::*;
+use serenity::{framework::standard::macros::group, prelude::*};
 use std::collections::HashMap;
 
 #[group]

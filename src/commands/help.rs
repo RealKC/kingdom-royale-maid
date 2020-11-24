@@ -1,13 +1,13 @@
-use serenity::prelude::*;
+use crate::data::Prefix;
+
 use serenity::{
     framework::standard::{
         help_commands, macros::help, Args, CommandGroup, CommandResult, Delimiter, HelpOptions,
     },
     model::{channel::Message, id::UserId},
+    prelude::*,
 };
 use std::collections::HashSet;
-
-use crate::data::Prefix;
 
 #[help]
 #[individual_command_tip = "Hello! If you want more information about a specific command, just pass the command as argument."]

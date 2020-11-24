@@ -1,8 +1,8 @@
 use super::CommandCounter;
-use serenity::prelude::*;
 use serenity::{
     framework::standard::{macros::command, CommandResult},
     model::channel::Message,
+    prelude::*,
 };
 use std::fmt::Write;
 

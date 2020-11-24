@@ -1,8 +1,8 @@
-use serenity::prelude::*;
 use serenity::{
     framework::standard::{macros::command, Args, CommandResult},
     model::channel::Message,
-    utils::{ContentSafeOptions, content_safe},
+    prelude::*,
+    utils::{content_safe, ContentSafeOptions},
 };
 
 // Repeats what the user passed as argument but ensures that user and role

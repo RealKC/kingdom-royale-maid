@@ -1,8 +1,8 @@
-use serenity::model::id::ChannelId;
-use tracing::info;
-
 use super::prelude::*;
 use crate::helpers::{react::react_with, serenity_ext::MaidReply};
+
+use serenity::model::id::ChannelId;
+use tracing::info;
 
 #[command("delcat")]
 #[only_in(guilds)]

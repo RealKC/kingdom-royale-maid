@@ -1,6 +1,5 @@
-use crate::game::GameState;
-
 use super::prelude::*;
+use crate::game::GameState;
 
 use tracing::info;
 

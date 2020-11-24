@@ -1,8 +1,8 @@
 use crate::commands::CommandCounter;
-use serenity::prelude::*;
 use serenity::{
     framework::standard::{macros::hook, CommandResult, DispatchError},
     model::channel::Message,
+    prelude::*,
 };
 use tracing::info;
 
