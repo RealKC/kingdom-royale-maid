@@ -2,6 +2,7 @@ use super::prelude::*;
 use crate::game::GameState;
 
 #[command("nextblock")]
+#[only_in(guilds)]
 #[description("Forcefully go to the next time block")]
 pub async fn next_block(ctx: &Context, msg: &Message) -> CommandResult {
     let game = ctx.data.read().await;

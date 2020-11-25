@@ -5,6 +5,7 @@ use tracing::info;
 
 #[command]
 #[owners_only]
+#[only_in(guilds)]
 pub async fn forceadd(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     info!("{:?}", msg);
 

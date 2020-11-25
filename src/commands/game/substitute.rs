@@ -2,6 +2,7 @@ use super::prelude::*;
 use crate::game::{RoleName, SubstitutionStatus};
 
 #[command]
+#[only_in(guilds)]
 #[description("This allows the『 King 』to use 「 Substitution 」 once per game.")]
 pub async fn substitute(ctx: &Context, msg: &Message) -> CommandResult {
     let data = ctx.data.read().await;

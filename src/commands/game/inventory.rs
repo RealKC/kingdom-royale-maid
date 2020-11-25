@@ -4,6 +4,7 @@ use serenity::builder::CreateEmbed;
 
 #[command]
 #[aliases("bag")]
+#[only_in(guilds)]
 #[description("Allows you to inspect the items you have in your bag")]
 pub async fn inventory(ctx: &Context, msg: &Message) -> CommandResult {
     let data = ctx.data.read().await;

@@ -4,6 +4,7 @@ use crate::game::{item::Item, GameState};
 use serenity::model::id::UserId;
 
 #[command("give")]
+#[only_in(guilds)]
 #[description(
     r#"This command allows you to give some items away. You cannot give away your memo book, ballpoint pen or tablet.
 

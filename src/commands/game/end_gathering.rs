@@ -2,6 +2,7 @@ use super::prelude::*;
 use crate::game::GameState;
 
 #[command("endgathering")]
+#[only_in(guilds)]
 #[description("Forcefully end a meeting")]
 pub async fn end_gathering(ctx: &Context, msg: &Message) -> CommandResult {
     let data = ctx.data.read().await;

@@ -13,6 +13,7 @@ use serenity::{builder::CreateEmbed, model::id::UserId};
 use std::time::Duration;
 
 #[command]
+#[only_in(guilds)]
 #[description("Allows you to browse your memo book")]
 #[aliases("memobook")]
 pub async fn notes(ctx: &Context, msg: &Message) -> CommandResult {
