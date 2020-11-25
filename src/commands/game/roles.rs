@@ -1,7 +1,10 @@
 use super::prelude::*;
 
 use once_cell::sync::Lazy;
-use serenity::builder::CreateEmbed;
+use serenity::{
+    builder::CreateEmbed,
+    framework::standard::{macros::check, CheckResult, CommandOptions},
+};
 
 // Fancy quotes
 // “” -> for flavour excerpts from the book
@@ -130,9 +133,44 @@ async fn say_role(ctx: &Context, msg: &Message, role: &CreateEmbed) -> CommandRe
     Ok(())
 }
 
+#[check]
+#[name = "IsGood"]
+pub async fn perms_are_good(
+    ctx: &Context,
+    msg: &Message,
+    _: &mut Args,
+    _: &CommandOptions,
+) -> CheckResult {
+    let info = ctx.http.get_current_application_info().await;
+    if let Ok(info) = info {
+        if let Some(team) = info.team {
+            for member in team.members {
+                if member.user.id == msg.author.id {
+                    return CheckResult::Success;
+                }
+            }
+        }
+
+        if info.owner.id == msg.author.id {
+            return CheckResult::Success;
+        }
+
+        if let Some(guild) = msg.guild(ctx).await {
+            if let Ok(member) = guild.member(ctx, msg.author.id).await {
+                let permissions = member.permissions(ctx).await;
+                if let Ok(permissions) = permissions {
+                    return (permissions.administrator() || permissions.manage_messages()).into();
+                }
+            }
+        }
+    }
+
+    CheckResult::new_user("user lacks permissions to run this command (needs either Manage messages/Administrator, or to be the owner of the bot")
+}
+
 #[command]
 #[only_in(guilds)]
-#[owners_only]
+#[checks(IsGood)]
 #[description("Shows information about the 6 roles available in Kingdom Royale")]
 pub async fn roles(ctx: &Context, msg: &Message) -> CommandResult {
     say_role(ctx, msg, &*KING).await?;
