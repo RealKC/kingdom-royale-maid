@@ -1,0 +1,13 @@
+[Unit]
+Description=Kingdom Royale maid
+After=network.target
+Wants=network.target
+
+[Service]
+# Change this if you're running the bot yourself
+ExecStart=/home/kc/maid
+ExecStop=pkill maid
+
+[Install]
+WantedBy=multi-user.target
+
