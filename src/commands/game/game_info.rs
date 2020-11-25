@@ -7,8 +7,8 @@ use serenity::model::misc::Mentionable;
 #[only_in(guilds)]
 #[description("Shows info(such as players and started status) about a game")]
 pub async fn game_info(ctx: &Context, msg: &Message) -> CommandResult {
-    let game = ctx.data.read().await;
-    let game = game.get::<GameContainer>();
+    let data = ctx.data.read().await;
+    let game = data.get::<GameContainer>();
 
     match game {
         Some(game) => {
