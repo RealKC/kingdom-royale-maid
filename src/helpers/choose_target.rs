@@ -39,21 +39,26 @@ pub async fn build_embed_for_target_choice(
     info!("Fetching avatars...");
     let avatars = fetch_avatars(ctx, players).await?;
 
-    info!("Merging avatars...");
-    let merged_avatars = merge_avatars(avatars)?;
-    let merged_avatars_png = encode_to_png(merged_avatars)?;
-    let merged_avatars_attachment = AttachmentType::Bytes {
-        data: merged_avatars_png.into(),
-        filename: "avatars.png".into(),
+    let merged_avatars = tokio::task::spawn_blocking(move || -> Result<AttachmentType, Error> {
+        info!("Merging avatars...");
+        let merged_avatars = merge_avatars(avatars)?;
+        let merged_avatars_png = encode_to_png(merged_avatars)?;
+        Ok(AttachmentType::Bytes {
+            data: merged_avatars_png.into(),
+            filename: "avatars.png".into(),
+        })
+    })
+    .await??;
+
+    let cdn = {
+        info!("build_embed_for_target_choice: trying to lock data");
+        let data = ctx.data.read().await;
+        info!("build_embed_for_target_choice: Data locked");
+        *data.get::<Cdn>().expect("Where's my CDN")
     };
 
-    info!("build_embed_for_target_choice: trying to lock data");
-    let data = ctx.data.read().await;
-    info!("build_embed_for_target_choice: Data locked");
-    let cdn = data.get::<Cdn>().expect("Where's my CDN");
-
     let msg = cdn
-        .send_message(ctx, |m| m.add_file(merged_avatars_attachment))
+        .send_message(ctx, |m| m.add_file(merged_avatars))
         .await?;
 
     let mut embed = CreateEmbed::default();
