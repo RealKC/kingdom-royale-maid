@@ -5,10 +5,10 @@ use typemap_rev::Entry;
 #[command("endgame")]
 #[description("Forcefully end a game")]
 pub async fn end_game(ctx: &Context, msg: &Message) -> CommandResult {
-    let mut map = ctx.data.write().await;
+    let mut data = ctx.data.write().await;
 
     {
-        let game = map.get::<GameContainer>();
+        let game = data.get::<GameContainer>();
         match game {
             Some(game) => {
                 let mut game = game.write().await;
@@ -25,7 +25,7 @@ pub async fn end_game(ctx: &Context, msg: &Message) -> CommandResult {
         }
     }
 
-    let game_entry = map.entry::<GameContainer>();
+    let game_entry = data.entry::<GameContainer>();
     match game_entry {
         Entry::Occupied(game_container) => {
             game_container.remove();
