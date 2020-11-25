@@ -141,29 +141,40 @@ pub async fn perms_are_good(
     _: &mut Args,
     _: &CommandOptions,
 ) -> CheckResult {
+    let mut passed = false;
     let info = ctx.http.get_current_application_info().await;
     if let Ok(info) = info {
         if let Some(team) = info.team {
             for member in team.members {
                 if member.user.id == msg.author.id {
-                    return CheckResult::Success;
+                    passed = true;
                 }
             }
-        }
-
-        if info.owner.id == msg.author.id {
-            return CheckResult::Success;
+        } else if info.owner.id == msg.author.id {
+            passed = true;
         }
 
         if let Some(guild) = msg.guild(ctx).await {
             if let Ok(member) = guild.member(ctx, msg.author.id).await {
                 let permissions = member.permissions(ctx).await;
                 if let Ok(permissions) = permissions {
-                    return (permissions.administrator() || permissions.manage_messages()).into();
+                    passed = permissions.administrator() || permissions.manage_messages();
                 }
             }
         }
     }
+
+    if passed {
+        return CheckResult::Success;
+    }
+
+    // I'd rather bubble the error out, but CheckResult isn't a Result<T, E> alias so.....
+    let _send_msg = msg
+        .reply_err(
+            ctx,
+            "you need either the Manage Messages permission or to be Administrator".into(),
+        )
+        .await;
 
     CheckResult::new_user("user lacks permissions to run this command (needs either Manage messages/Administrator, or to be the owner of the bot")
 }
