@@ -107,7 +107,7 @@ pub async fn game_info(ctx: &Context, msg: &Message) -> CommandResult {
                         format!(
                             "{} | {} day",
                             msg.author.name,
-                            number_to_nice_string(game.day())
+                            cardinal_to_ordinal(game.day())
                         )
                     })
                 });
@@ -119,18 +119,19 @@ pub async fn game_info(ctx: &Context, msg: &Message) -> CommandResult {
     Ok(())
 }
 
-fn number_to_nice_string(num: u8) -> String {
-    let last_digit = num % 10;
-    let teen = num >= 10 && num < 20;
+/// Takes a cardinal number and returns its ordinal version as a string
+fn cardinal_to_ordinal(number: u8) -> String {
+    let last_digit = number % 10;
+    let number_is_teen = number >= 10 && number < 20;
 
-    if teen {
-        format!("{}th", num)
+    if number_is_teen {
+        format!("{}th", number)
     } else {
         match last_digit {
-            1 => format!("{}st", num),
-            2 => format!("{}nd", num),
-            3 => format!("{}rd", num),
-            _ => format!("{}th", num),
+            1 => format!("{}st", number),
+            2 => format!("{}nd", number),
+            3 => format!("{}rd", number),
+            _ => format!("{}th", number),
         }
     }
 }
