@@ -4,8 +4,8 @@ use crate::game::GameState;
 #[command("endgathering")]
 #[description("Forcefully end a meeting")]
 pub async fn end_gathering(ctx: &Context, msg: &Message) -> CommandResult {
-    let game = ctx.data.read().await;
-    let game = game.get::<GameContainer>();
+    let data = ctx.data.read().await;
+    let game = data.get::<GameContainer>();
     match game {
         Some(game) => {
             let mut game = game.write().await;
