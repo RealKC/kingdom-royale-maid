@@ -13,7 +13,8 @@ pub async fn start_gathering(ctx: &Context, msg: &Message) -> CommandResult {
             if msg.author.id != game.host() {
                 msg.reply_err(
                     ctx,
-                    "you can't start a gathering in the meeting room if you're not the host.".into(),
+                    "you can't start a gathering in the meeting room if you're not the host."
+                        .into(),
                 )
                 .await?;
                 return Ok(());
@@ -22,7 +23,8 @@ pub async fn start_gathering(ctx: &Context, msg: &Message) -> CommandResult {
             if game.state() == GameState::NotStarted {
                 msg.reply_err(
                     ctx,
-                    "you can't start a meeting in the big room if the game hasn't started yet".into(),
+                    "you can't start a meeting in the big room if the game hasn't started yet"
+                        .into(),
                 )
                 .await?;
                 return Ok(());
@@ -30,7 +32,7 @@ pub async fn start_gathering(ctx: &Context, msg: &Message) -> CommandResult {
 
             if ![GameState::ABlock, GameState::CBlock].contains(&game.state()) {
                 msg.reply_err(
-                    ctx, 
+                    ctx,
                     "you can't start a gathering in the big room if the current block isn't either the A block or the C block".into()
                 ).await?;
                 return Ok(());
