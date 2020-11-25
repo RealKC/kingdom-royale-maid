@@ -7,6 +7,11 @@ use serenity::model::id::{ChannelId, RoleId};
 #[only_in(guilds)]
 #[description("Creates a new game")]
 pub async fn new_game(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
+    // So, in order to avoid a game being created during our argument parsing[0], we
+    // hold a writer lock during our argument parsing to avoid such a race condition.
+    //
+    // [0] We want to avoid a game being created during argument parsing, so the earliest
+    //     person wanting to make a new game, will actually be the one creating a game.
     let mut data = ctx.data.write().await;
 
     let meeting_room = args.single::<ChannelId>();
