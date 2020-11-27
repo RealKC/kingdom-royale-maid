@@ -12,6 +12,8 @@ entertaining.
 
 ## Cool. How can I host it myself?
 
+Note: kingdom-royale-maid is only supported on Arch Linux and Raspbian.
+
 1. You will need to make a Discord application and turn it into a bot. (Google
 is your friend here)
 2. You will need to [install Rust](https://www.rust-lang.org/learn/get-started)
