@@ -1,5 +1,5 @@
 use super::prelude::*;
-use crate::game::{DeathCause, GameState};
+use crate::game::DeathCause;
 
 use rand::{self, distributions::Distribution};
 use serenity::model::id::UserId;
@@ -15,36 +15,12 @@ Stab another player
 )]
 #[usage("<target user mention>")]
 #[example("@KC#7788")]
+#[checks(StandardGameCheck)]
 pub async fn stab(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let data = ctx.data.read().await;
-    let game = data.get::<GameContainer>();
-    if game.is_none() {
-        msg.reply_err(
-            ctx,
-            "you can't stab someone when there isn't a game running!".into(),
-        )
-        .await?;
-        return Ok(());
-    }
-    let game = game.unwrap();
-    let mut game = game.write().await;
-    if game.state() == GameState::NotStarted {
-        if !game.joined_users().contains(&msg.author.id) {
-            msg.reply_err(
-                ctx,
-                "you can't stab someone when you're not in the game!".into(),
-            )
-            .await?;
-            return Ok(());
-        }
-    } else if game.state() == GameState::GameEnded {
-        msg.reply_err(
-            ctx,
-            "you can't stab someone when the game just ended".into(),
-        )
-        .await?;
-        return Ok(());
-    } else if !game.players().contains_key(&msg.author.id) {
+    let mut game = expect_game_mut!(data);
+
+    if !game.players().contains_key(&msg.author.id) {
         msg.reply_err(
             ctx,
             "you can't stab someone when you're not in the game!".into(),

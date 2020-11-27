@@ -4,34 +4,16 @@ use crate::game::GameState;
 #[command("endgathering")]
 #[only_in(guilds)]
 #[description("Forcefully end a meeting")]
+#[checks(StandardGameCheck)]
 pub async fn end_gathering(ctx: &Context, msg: &Message) -> CommandResult {
     let data = ctx.data.read().await;
 
-    let game = data.get::<GameContainer>();
-    if game.is_none() {
-        msg.reply_err(
-            ctx,
-            "you can't end a gathering if there's no game running!".into(),
-        )
-        .await?;
-        return Ok(());
-    }
-    let game = game.unwrap();
-    let mut game = game.write().await;
+    let mut game = expect_game_mut!(data);
 
     if msg.author.id != game.host() {
         msg.reply_err(
             ctx,
             "you can't end a gathering in the meeting room if you're not the host.".into(),
-        )
-        .await?;
-        return Ok(());
-    }
-
-    if game.state() == GameState::NotStarted {
-        msg.reply_err(
-            ctx,
-            "you can't end a meeting in the big room if the game hasn't started yet".into(),
         )
         .await?;
         return Ok(());

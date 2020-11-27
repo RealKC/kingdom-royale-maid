@@ -16,28 +16,11 @@ use std::time::Duration;
 #[only_in(guilds)]
 #[description("Allows you to browse your memo book")]
 #[aliases("memobook")]
+#[checks(GameCheckAllowGameEnded)]
 pub async fn notes(ctx: &Context, msg: &Message) -> CommandResult {
     let data = ctx.data.read().await;
 
-    let game = data.get::<GameContainer>();
-    if game.is_none() {
-        msg.reply_err(
-            ctx,
-            "you can't take a look into your memo book when there isn't a game running on".into(),
-        )
-        .await?;
-        return Ok(());
-    }
-    let game = game.unwrap().read().await;
-
-    if game.state() == GameState::NotStarted {
-        msg.reply_err(
-            ctx,
-            "you can't take a look into your memo book before the game starts".into(),
-        )
-        .await?;
-        return Ok(());
-    }
+    let game = expect_game!(data);
 
     let player = game.players().get(&msg.author.id);
     if player.is_none() {

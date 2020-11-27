@@ -1,5 +1,5 @@
 use super::prelude::*;
-use crate::game::{item::Item, GameState};
+use crate::game::item::Item;
 
 use serenity::model::id::UserId;
 
@@ -16,38 +16,18 @@ Note that you have to mention someone as the target.
 "#)]
 #[usage("<target user mention> <item>")]
 #[example("@KC#7788 food")]
+#[checks(StandardGameCheck)]
 pub async fn give_item(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let data = ctx.data.read().await;
-    let game = data.get::<GameContainer>();
-    if game.is_none() {
-        msg.reply_err(
-            ctx,
-            "you can't give items when there's no game running".into(),
-        )
-        .await?;
-        return Ok(());
-    }
 
-    let mut game = game.unwrap().write().await;
-    let game_state = game.state();
+    let mut game = expect_game_mut!(data);
+
     let players = game.players_mut();
 
     let giver = msg.author.id;
     let giver = players.get_mut(&giver);
     if giver.is_none() {
         msg.reply_err(ctx, "you can't give items when you're not in a game".into())
-            .await?;
-        return Ok(());
-    }
-
-    if game_state == GameState::NotStarted {
-        msg.reply_err(ctx, "you can't give items before a game starts".into())
-            .await?;
-        return Ok(());
-    }
-
-    if game_state == GameState::GameEnded {
-        msg.reply_err(ctx, "you can't give items after a game has ended".into())
             .await?;
         return Ok(());
     }

@@ -1,3 +1,4 @@
+// Command modules
 mod end_game;
 mod end_gathering;
 mod forceadd;
@@ -33,16 +34,27 @@ pub use stab::*;
 pub use start::*;
 pub use start_gathering::*;
 pub use substitute::*;
-pub struct GameContainer;
+
+mod checks;
+#[macro_use]
+mod macros;
 
 use super::prelude::*;
 pub use crate::game::Game;
+
+pub struct GameContainer;
 
 impl TypeMapKey for GameContainer {
     type Value = Arc<RwLock<Game>>;
 }
 
 mod prelude {
-    pub use super::GameContainer;
-    pub use crate::{commands::prelude::*, game::Game, helpers::serenity_ext::MaidReply};
+    pub use super::{
+        checks::{GAMECHECKALLOWGAMEENDED_CHECK, STANDARDGAMECHECK_CHECK},
+        GameContainer,
+    };
+    pub use crate::{
+        commands::prelude::*, expect_game, expect_game_mut, game::Game,
+        helpers::serenity_ext::MaidReply,
+    };
 }
