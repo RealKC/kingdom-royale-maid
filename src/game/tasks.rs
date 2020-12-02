@@ -102,8 +102,7 @@ pub async fn handle_assistant_choice(
         .channel_id(room_id)
         .await
     {
-        let emoji = reaction.as_inner_ref().emoji.to_string();
-        if emoji.as_str() == YES_NO_EMOJIS[0] {
+        if reaction.as_inner_ref().emoji.unicode_eq(YES_NO_EMOJIS[0]) {
             let data = ctx.data.read().await;
             let game = data.get::<GameContainer>();
             if game.is_none() {

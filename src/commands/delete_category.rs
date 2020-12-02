@@ -103,8 +103,7 @@ Are you sure you want to do this? React with 🇾 if so, and with 🇳 if not.
         .await
     {
         info!("We got woke up");
-        let emoji = reaction.as_inner_ref().emoji.to_string();
-        if emoji.as_str() == REACTIONS[0] {
+        if reaction.as_inner_ref().emoji.unicode_eq(REACTIONS[0]) {
             for channel in channels_to_delete {
                 channel.delete(ctx).await?;
             }
