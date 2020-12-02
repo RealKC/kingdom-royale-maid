@@ -113,7 +113,10 @@ Are you sure you want to do this? React with 🇾 if so, and with 🇳 if not.
 
         sent_msg
             .edit(ctx, |m| {
-                m.content("{}, successfully deleted those channels!")
+                m.content(format!(
+                    "{}, successfully deleted those channels!",
+                    msg.author
+                ))
             })
             .await?
     }
