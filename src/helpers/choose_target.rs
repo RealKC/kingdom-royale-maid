@@ -23,7 +23,7 @@ mod res {
     pub fn get_background() -> Result<Image, Error> {
         let res = ResFolder::get("avatars.png").unwrap();
         let dynimg = load_from_memory_with_format(&*res, ImageFormat::Png)?;
-        Ok(dynimg.to_rgba())
+        Ok(dynimg.to_rgba8())
     }
 }
 
@@ -91,7 +91,7 @@ async fn fetch_avatars(ctx: &Context, players: &[UserId]) -> Result<Vec<Image>, 
 
         let image = load_from_memory_with_format(&raw_image, image_format)?;
 
-        let image = image.into_rgba();
+        let image = image.into_rgba8();
         avatars.push(image);
     }
 
