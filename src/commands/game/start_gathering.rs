@@ -9,18 +9,18 @@ pub async fn start_gathering(ctx: &Context, msg: &Message) -> CommandResult {
     let data = ctx.data.read().await;
     let mut game = expect_game_mut!(data);
     if msg.author.id != game.host() {
-        msg.reply_err(
+        msg.reply(
             ctx,
-            "you can't start a gathering in the meeting room if you're not the host.".into(),
+            "You can't start a gathering in the meeting room if you're not the host.",
         )
         .await?;
         return Ok(());
     }
 
     if ![GameState::ABlock, GameState::CBlock].contains(&game.state()) {
-        msg.reply_err(
+        msg.reply(
                     ctx,
-                    "you can't start a gathering in the big room if the current block isn't either the A block or the C block".into()
+                    "You can't start a gathering in the big room if the current block isn't either the A block or the C block"
                 ).await?;
         return Ok(());
     }

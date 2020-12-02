@@ -11,12 +11,9 @@ pub async fn start(ctx: &Context, msg: &Message) -> CommandResult {
         Some(game) => {
             let mut game = game.write().await;
             if msg.author.id != game.host() {
-                msg.reply_err(
-                    ctx,
-                    "you can't start a game that you aren't the host of.".into(),
-                )
-                .await
-                .map(|_| ())?;
+                msg.reply(ctx, "You can't start a game that you aren't the host of.")
+                    .await
+                    .map(|_| ())?;
             } else if game.can_start() {
                 msg.channel_id
                     .say(ctx, "Starting the game...")
@@ -25,16 +22,12 @@ pub async fn start(ctx: &Context, msg: &Message) -> CommandResult {
 
                 game.start(ctx).await?;
             } else {
-                msg.channel_id
-                    .say(ctx, "You can't start a game if there's less than 6 players")
+                msg.reply_ping(ctx, "You can't start a game if there's less than 6 players")
                     .await?;
             }
         }
         None => msg
-            .reply_err(
-                ctx,
-                "you can't start a game if there isn't one running!".into(),
-            )
+            .reply(ctx, "You can't start a game if there isn't one running!")
             .await
             .map(|_| ())?,
     }

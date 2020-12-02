@@ -53,8 +53,5 @@ mod prelude {
         checks::{GAMECHECKALLOWGAMEENDED_CHECK, STANDARDGAMECHECK_CHECK},
         GameContainer,
     };
-    pub use crate::{
-        commands::prelude::*, expect_game, expect_game_mut, game::Game,
-        helpers::serenity_ext::MaidReply,
-    };
+    pub use crate::{commands::prelude::*, expect_game, expect_game_mut, game::Game};
 }

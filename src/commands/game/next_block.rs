@@ -9,9 +9,9 @@ pub async fn next_block(ctx: &Context, msg: &Message) -> CommandResult {
     let mut game = expect_game_mut!(data);
 
     if msg.author.id != game.host() {
-        msg.reply_err(
+        msg.reply(
             ctx,
-            "you can't go to the next time block if you're not the host.".into(),
+            "You can't go to the next time block if you're not the host.",
         )
         .await?;
         return Ok(());

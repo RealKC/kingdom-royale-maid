@@ -17,36 +17,32 @@ pub async fn join(ctx: &Context, msg: &Message) -> CommandResult {
         member_may_have_admin_perms |= msg.guild(ctx).await.unwrap().owner_id == msg.author.id;
 
         if member_may_have_admin_perms {
-            msg.reply_err(
+            msg.reply(
                 ctx,
-                "you can't join a game if you're the Owner of a server or an administrator!".into(),
+                "You can't join a game if you're the Owner of a server or an administrator!",
             )
             .await?;
         } else {
             let result = game.join(msg.author.id);
             if result.is_ok() {
                 info!("Successfully added a new user to the game");
-                msg.reply_err(
+                msg.reply(
                     ctx,
                     format!(
-                        "you've joined {}'s Kingdom Royale game.",
+                        "You've joined {}'s Kingdom Royale game.",
                         game.host().to_user(ctx).await?
                     ),
                 )
                 .await?;
             } else {
                 info!("Couldn't add new user, error is {:?}", result.unwrap_err());
-                msg.reply_err(ctx, format!("{}", result.unwrap_err()))
-                    .await?;
+                msg.reply(ctx, format!("{}", result.unwrap_err())).await?;
             }
         }
     } else {
         info!("User tried joining nonexistent user");
-        msg.reply_err(
-            ctx,
-            "you can't join a game if there aren't any in progress".into(),
-        )
-        .await?;
+        msg.reply(ctx, "you can't join a game if there aren't any in progress")
+            .await?;
     }
     Ok(())
 }

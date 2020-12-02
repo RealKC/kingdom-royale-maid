@@ -14,7 +14,7 @@ pub async fn leave(ctx: &Context, msg: &Message) -> CommandResult {
     if game.is_some() {
         let mut game = game.unwrap().write().await;
         if game.state() != GameState::NotStarted || game.state() != GameState::GameEnded {
-            msg.reply_err(ctx, "you can't leave a game that has started!".into())
+            msg.reply(ctx, "You can't leave a game that has started!")
                 .await?;
             info!("User tried leaving running game");
             return Ok(());
@@ -22,7 +22,7 @@ pub async fn leave(ctx: &Context, msg: &Message) -> CommandResult {
             let result = game.leave(msg.author.id);
             if result.is_ok() {
                 info!("A user succesfully left a game");
-                msg.reply_err(ctx, "you've successfully left the game :c".into())
+                msg.reply(ctx, "You've successfully left the game :c")
                     .await?;
             } else {
                 info!("User couldn't leave, error is {:?}", result.unwrap_err());
@@ -30,7 +30,7 @@ pub async fn leave(ctx: &Context, msg: &Message) -> CommandResult {
             }
         }
     } else {
-        msg.reply_err(ctx, "you can't leave a game if you aren't in one!".into())
+        msg.reply(ctx, "You can't leave a game if you aren't in one!")
             .await?;
     }
     Ok(())

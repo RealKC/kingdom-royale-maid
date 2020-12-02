@@ -156,7 +156,7 @@ impl MemoBook {
                 ripped: false,
             });
         } else {
-            return Err("you can't add any more notes in your memo book".into());
+            return Err("You can't add any more notes in your memo book!".into());
         }
 
         Ok(())

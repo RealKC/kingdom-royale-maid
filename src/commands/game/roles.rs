@@ -170,9 +170,9 @@ pub async fn perms_are_good(
 
     // I'd rather bubble the error out, but checks return a Result<(), Reason>.....
     let _send_msg = msg
-        .reply_err(
+        .reply(
             ctx,
-            "you need either the Manage Messages permission or to be Administrator".into(),
+            "You need either the Manage Messages permission or to be Administrator",
         )
         .await;
 
@@ -200,7 +200,7 @@ pub async fn roles(ctx: &Context, msg: &Message) -> CommandResult {
 pub async fn role_info(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let role = args.remains();
     if role.is_none() {
-        msg.reply_err(ctx, "you need to write a role you want info about".into())
+        msg.reply(ctx, "You need to write a role you want info about")
             .await?;
         return Ok(());
     }
@@ -213,7 +213,7 @@ pub async fn role_info(ctx: &Context, msg: &Message, args: Args) -> CommandResul
         "knight" => say_role(ctx, msg, &*KNIGHT).await?,
         "revolutionary" => say_role(ctx, msg, &*REVOLUTIONARY).await?,
         _ => msg
-            .reply_err(ctx, "that's not a valid role!".into())
+            .reply(ctx, "That's not a valid role!")
             .await
             .map(|_| ())?,
     };

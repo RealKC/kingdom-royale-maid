@@ -27,19 +27,19 @@ pub async fn give_item(ctx: &Context, msg: &Message, mut args: Args) -> CommandR
     let giver = msg.author.id;
     let giver = players.get_mut(&giver);
     if giver.is_none() {
-        msg.reply_err(ctx, "you can't give items when you're not in a game".into())
+        msg.reply(ctx, "You can't give items when you're not in a game")
             .await?;
         return Ok(());
     }
 
     let target = args.single::<UserId>();
     if target.is_err() {
-        msg.reply_err(
+        msg.reply(
             ctx,
             r#"
-you need to specify a valid user to give an item to.
+You need to specify a valid user to give an item to.
 
-Note that the syntax of this command is `!give <TARGET> <WHAT>`, you'd use it like: `!give @MyFriend food`"#.into(),
+Note that the syntax of this command is `!give <TARGET> <WHAT>`, you'd use it like: `!give @MyFriend food`"#,
         )
         .await?;
         return Ok(());
@@ -48,10 +48,10 @@ Note that the syntax of this command is `!give <TARGET> <WHAT>`, you'd use it li
 
     let what = args.remains();
     if what.is_none() {
-        msg.reply_err(ctx, r#"
-you need to specify an item to give it away.
+        msg.reply(ctx, r#"
+You need to specify an item to give it away.
 
-Note that the syntax of this command is `!give <TARGET> <WHAT>`, you'd use it like: `!give @MyFriend food`"#.into())
+Note that the syntax of this command is `!give <TARGET> <WHAT>`, you'd use it like: `!give @MyFriend food`"#)
             .await?;
         return Ok(());
     }
@@ -62,12 +62,12 @@ Note that the syntax of this command is `!give <TARGET> <WHAT>`, you'd use it li
         watch_name = Some(giver.items().get_item("watch").1.name.clone());
         let what = parse_item(what, watch_name.as_ref().unwrap().as_ref());
         if what.is_err() {
-            msg.reply_err(ctx, what.unwrap_err()).await?;
+            msg.reply(ctx, what.unwrap_err()).await?;
             return Ok(());
         }
         let giver_item = giver.items_mut().get_item_mut(what.unwrap().as_ref());
         if giver_item.0 == 0 {
-            msg.reply_err(ctx, "you can't give away items you don't have".into())
+            msg.reply(ctx, "You can't give away items you don't have")
                 .await?;
             return Ok(());
         }
@@ -77,9 +77,9 @@ Note that the syntax of this command is `!give <TARGET> <WHAT>`, you'd use it li
 
     let target = players.get_mut(&target);
     if target.is_none() {
-        msg.reply_err(
+        msg.reply(
             ctx,
-            "you can't give an item to someone who's not in the game".into(),
+            "You can't give an item to someone who's not in the game",
         )
         .await?;
         return Ok(());
@@ -87,7 +87,7 @@ Note that the syntax of this command is `!give <TARGET> <WHAT>`, you'd use it li
     if let Some(target) = target {
         let what = parse_item(what, watch_name.unwrap().as_ref());
         if what.is_err() {
-            msg.reply_err(ctx, what.unwrap_err()).await?;
+            msg.reply(ctx, what.unwrap_err()).await?;
             return Ok(());
         }
 
@@ -112,6 +112,6 @@ fn parse_item(name: &str, watch: &str) -> Result<String, String> {
         "food" | "food bar" | "food bars" => Ok(Item::FOOD_NAME.into()),
         "knife" => Ok("Knife".into()),
         "watch" => Ok(watch.into()),
-        _ => Err(format!("you can't give away a '{}'", name)),
+        _ => Err(format!("You can't give away a '{}'", name)),
     }
 }

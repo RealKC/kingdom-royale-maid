@@ -11,18 +11,18 @@ pub async fn end_gathering(ctx: &Context, msg: &Message) -> CommandResult {
     let mut game = expect_game_mut!(data);
 
     if msg.author.id != game.host() {
-        msg.reply_err(
+        msg.reply(
             ctx,
-            "you can't end a gathering in the meeting room if you're not the host.".into(),
+            "You can't end a gathering in the meeting room if you're not the host.",
         )
         .await?;
         return Ok(());
     }
 
     if ![GameState::BBlock, GameState::DBlock].contains(&game.state()) {
-        msg.reply_err(
+        msg.reply(
             ctx,
-              "you can't end a gathering in the big room if the current block isn't either the A block or the C block".into()
+            "You can't end a gathering in the big room if the current block isn't either the A block or the C block"
         )
         .await?;
         return Ok(());

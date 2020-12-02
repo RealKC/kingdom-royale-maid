@@ -21,10 +21,7 @@ pub async fn standard_game(
         match game.state() {
             GameState::NotStarted => {
                 let sent = msg
-                    .reply_err(
-                        ctx,
-                        error_messages::GAME_NOT_STARTED[command.names[0]].into(),
-                    )
+                    .reply(ctx, error_messages::GAME_NOT_STARTED[command.names[0]])
                     .await;
                 return Err(Reason::Log(format!(
                     "\nStandardGameCheck: Game wasn't started. Error when sending message (if any): {:?}",
@@ -37,7 +34,7 @@ pub async fn standard_game(
             }
             GameState::GameEnded => {
                 let sent = msg
-                    .reply_err(ctx, error_messages::GAME_ENDED[command.names[0]].into())
+                    .reply(ctx, error_messages::GAME_ENDED[command.names[0]])
                     .await;
                 return Err(Reason::Log(format!(
                         "\nStandardGameCheck: Game has ended. Error when sending message (if any): {:?}",
@@ -52,10 +49,7 @@ pub async fn standard_game(
         };
     } else {
         let sent = msg
-            .reply_err(
-                ctx,
-                error_messages::NEEDS_GAME_TO_EXIST[command.names[0]].into(),
-            )
+            .reply(ctx, error_messages::NEEDS_GAME_TO_EXIST[command.names[0]])
             .await;
         return Err(Reason::Log(format!(
             "\nStandardGameCheck: No game exists. Error when sending message (if any): {:?}",
@@ -85,10 +79,7 @@ pub async fn game_check_allow_game_ended(
 
         if game.state() == GameState::NotStarted {
             let sent = msg
-                .reply_err(
-                    ctx,
-                    error_messages::GAME_NOT_STARTED[command.names[0]].into(),
-                )
+                .reply(ctx, error_messages::GAME_NOT_STARTED[command.names[0]])
                 .await;
             return Err(Reason::Log(format!(
                 "\nStandardGameCheck: Game wasn't started. Error when sending message (if any): {:?}",
@@ -101,10 +92,7 @@ pub async fn game_check_allow_game_ended(
         }
     } else {
         let sent = msg
-            .reply_err(
-                ctx,
-                error_messages::NEEDS_GAME_TO_EXIST[command.names[0]].into(),
-            )
+            .reply(ctx, error_messages::NEEDS_GAME_TO_EXIST[command.names[0]])
             .await;
         return Err(Reason::Log(format!(
             "\nStandardGameCheck: No game exists. Error when sending message (if any): {:?}",
@@ -127,32 +115,32 @@ mod error_messages {
 
         map.insert(
             "endgathering",
-            "you can't end a gathering if there's no game running!",
+            "You can't end a gathering if there's no game running!",
         );
-        map.insert("give", "you can't give items when there's no game running!");
+        map.insert("give", "You can't give items when there's no game running!");
         map.insert(
             "inventory",
-            "you can't look into your bag when there's no game running",
+            "You can't look into your bag when there's no game running",
         );
         map.insert(
             "nextblock",
-            "you can't go to the next time block if there's no game running!",
+            "You can't go to the next time block if there's no game running!",
         );
         map.insert(
             "notes",
-            "you can't take a look into your memo book when there isn't a game running on!",
+            "You can't take a look into your memo book when there isn't a game running on!",
         );
         map.insert(
             "stab",
-            "you can't stab someone when there isn't a game running!",
+            "You can't stab someone when there isn't a game running!",
         );
         map.insert(
             "startgathering",
-            "you can't start a gathering if there's no game running!",
+            "You can't start a gathering if there's no game running!",
         );
         map.insert(
             "substitute",
-            "you can't 「 substitute 」 with someone when you're not in a game!",
+            "You can't 「 substitute 」 with someone when you're not in a game!",
         );
 
         map
@@ -163,32 +151,32 @@ mod error_messages {
 
         map.insert(
             "endgathering",
-            "you can't end a meeting in the big room if the game hasn't started yet!",
+            "You can't end a meeting in the big room if the game hasn't started yet!",
         );
-        map.insert("give", "you can't give items when there's no game running!");
+        map.insert("give", "You can't give items when there's no game running!");
         map.insert(
             "inventory",
-            "you can't look into your bag when there's no game running",
+            "You can't look into your bag when there's no game running",
         );
         map.insert(
             "nextblock",
-            "you can't go to the next time block if there's no game running!",
+            "You can't go to the next time block if there's no game running!",
         );
         map.insert(
             "notes",
-            "you can't take a look into your memo book when there isn't a game running on!",
+            "You can't take a look into your memo book when there isn't a game running on!",
         );
         map.insert(
             "stab",
-            "you can't stab someone when there isn't a game running!",
+            "You can't stab someone when there isn't a game running!",
         );
         map.insert(
             "startgathering",
-            "you can't start a gathering if there's no game running!",
+            "You can't start a gathering if there's no game running!",
         );
         map.insert(
             "substitute",
-            "you can't 「 substitute 」 with someone when you're not in a game!",
+            "You can't 「 substitute 」 with someone when you're not in a game!",
         );
 
         map
@@ -199,21 +187,21 @@ mod error_messages {
 
         map.insert(
             "endgathering",
-            "you can't end a meeting in the big room if the game has ended!",
+            "You can't end a meeting in the big room if the game has ended!",
         );
-        map.insert("give", "you can't give items after a game has ended!");
+        map.insert("give", "You can't give items after a game has ended!");
         map.insert(
             "nextblock",
-            "you can't go to the next time block if the game has ended.",
+            "You can't go to the next time block if the game has ended.",
         );
-        map.insert("stab", "you can't stab someone after a game has ended!");
+        map.insert("stab", "You can't stab someone after a game has ended!");
         map.insert(
             "startgathering",
-            "you can't start a meeting in the big room after the game has ended!",
+            "You can't start a meeting in the big room after the game has ended!",
         );
         map.insert(
             "substitute",
-            "you can't 「 substitute 」 with someone after the game has ended!",
+            "You can't 「 substitute 」 with someone after the game has ended!",
         );
 
         map

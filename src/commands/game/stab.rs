@@ -21,39 +21,35 @@ pub async fn stab(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult
     let mut game = expect_game_mut!(data);
 
     if !game.players().contains_key(&msg.author.id) {
-        msg.reply_err(
-            ctx,
-            "you can't stab someone when you're not in the game!".into(),
-        )
-        .await?;
+        msg.reply(ctx, "You can't stab someone when you're not in the game!")
+            .await?;
         return Ok(());
     }
 
     let target = args.single::<UserId>();
     if target.is_err() {
-        msg.reply_err(ctx, "I couldn't get a user ID from your message!".into())
+        msg.reply(ctx, "I couldn't get a user ID from your message!")
             .await?;
         return Err(target.unwrap_err().into());
     }
     let target = target.unwrap();
 
     if target == game.host() {
-        msg.reply_err(
+        msg.reply(
             ctx,
-            "you can't stab the host! That's rather rude towards them, isn't it?".into(),
+            "You can't stab the host! That's rather rude towards them, isn't it?",
         )
         .await?;
         return Ok(());
     }
 
     if target == ctx.cache.current_user_id().await {
-        msg.reply_err(ctx, "ara ara~, you can't stab me~".into())
-            .await?;
+        msg.reply(ctx, "Ara ara~, you can't stab me~").await?;
         return Ok(());
     }
 
     if game.players().contains_key(&target) {
-        msg.reply_err(ctx, "you can't stab someone not in the game!".into())
+        msg.reply(ctx, "You can't stab someone not in the game!")
             .await?;
         return Ok(());
     }
@@ -73,7 +69,7 @@ pub async fn stab(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult
         && !target_perms.read_message_history()
         && !target_perms.send_messages()
     {
-        msg.reply_err(ctx, "you can't kill a player that's not in this room! ... you sure are blood thirsty though...".into()).await?;
+        msg.reply(ctx, "You can't kill a player that's not in this room! ... you sure are blood thirsty though...").await?;
         return Ok(());
     }
 

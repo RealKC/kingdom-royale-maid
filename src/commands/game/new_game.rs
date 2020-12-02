@@ -33,11 +33,8 @@ pub async fn new_game(ctx: &Context, msg: &Message, mut args: Args) -> CommandRe
     let delete_rooms_category_on_game_end = args.single::<bool>().unwrap_or(true);
 
     if data.get::<GameContainer>().is_some() {
-        msg.reply_err(
-            ctx,
-            ", you cannot start a game if one is already running".into(),
-        )
-        .await?;
+        msg.reply(ctx, "You cannot start a game if one is already running")
+            .await?;
     } else {
         data.insert::<GameContainer>(Arc::new(RwLock::new(Game::new(
             msg.guild_id.unwrap(),
@@ -47,14 +44,16 @@ pub async fn new_game(ctx: &Context, msg: &Message, mut args: Args) -> CommandRe
             player_role_id,
             delete_rooms_category_on_game_end,
         ))));
-        msg.reply(
-            ctx,
-            format!(
-                "has started a new game. You can join it by typing {}join",
-                data.get::<Prefix>().unwrap()
-            ),
-        )
-        .await?;
+        msg.channel_id
+            .say(
+                ctx,
+                format!(
+                    "{} has started a new game. You can join it by typing {}join",
+                    msg.author.name,
+                    data.get::<Prefix>().unwrap()
+                ),
+            )
+            .await?;
     }
     Ok(())
 }

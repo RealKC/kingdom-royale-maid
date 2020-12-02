@@ -16,11 +16,8 @@ pub async fn end_game(ctx: &Context, msg: &Message) -> CommandResult {
                 game.end(ctx).await?;
             }
             None => {
-                msg.reply_err(
-                    ctx,
-                    "you can't end a game if there isn't one running".into(),
-                )
-                .await?;
+                msg.reply(ctx, "You can't end a game if there isn't one running")
+                    .await?;
                 return Ok(());
             }
         }

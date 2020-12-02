@@ -14,9 +14,9 @@ pub async fn inventory(ctx: &Context, msg: &Message) -> CommandResult {
 
     let player = game.players().get(&msg.author.id);
     if player.is_none() {
-        msg.reply_err(
+        msg.reply(
             ctx,
-            "you can't look into your bag when you aren't in the game".into(),
+            "You can't look into your bag when you aren't in the game",
         )
         .await?;
         return Ok(());

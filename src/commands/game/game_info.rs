@@ -11,9 +11,9 @@ pub async fn game_info(ctx: &Context, msg: &Message) -> CommandResult {
     let game = data.get::<GameContainer>();
 
     if game.is_none() {
-        msg.reply_err(
+        msg.reply(
             ctx,
-            "you can't get info about a game if there's none running!".into(),
+            "You can't get info about a game if there's none running!",
         )
         .await?;
         return Ok(());

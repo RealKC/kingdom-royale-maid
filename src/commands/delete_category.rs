@@ -1,5 +1,5 @@
 use super::prelude::*;
-use crate::helpers::{react::react_with, serenity_ext::MaidReply};
+use crate::helpers::react::react_with;
 
 use serenity::model::id::ChannelId;
 use tracing::info;
@@ -12,10 +12,9 @@ pub async fn delete_category(ctx: &Context, msg: &Message, mut args: Args) -> Co
     let author = guild.member(ctx, msg.author.id).await?;
 
     if !author.permissions(ctx).await?.manage_channels() {
-        msg.reply_err(
+        msg.reply(
             ctx,
-            "you can't delete a category if you don't have the \"Manage Channels\" permission"
-                .into(),
+            "You can't delete a category if you don't have the \"Manage Channels\" permission",
         )
         .await?;
         return Ok(());
@@ -28,9 +27,9 @@ pub async fn delete_category(ctx: &Context, msg: &Message, mut args: Args) -> Co
         .await?
         .manage_channels()
     {
-        msg.reply_err(
+        msg.reply(
             ctx,
-            "I can't delete channels when I lack the \"Manage Channels\" permission".into(),
+            "I can't delete channels when I lack the \"Manage Channels\" permission",
         )
         .await?;
         return Ok(());
@@ -39,7 +38,7 @@ pub async fn delete_category(ctx: &Context, msg: &Message, mut args: Args) -> Co
     let category = args.single::<ChannelId>();
     if category.is_err() {
         let err = category.err();
-        msg.reply_err(
+        msg.reply(
             ctx,
             format!(
                 "I couldn't get a channel ID from your message. I got this error: {:?}",
@@ -56,9 +55,9 @@ pub async fn delete_category(ctx: &Context, msg: &Message, mut args: Args) -> Co
     let category = category.category();
 
     if category.is_none() {
-        msg.reply_err(
+        msg.reply(
             ctx,
-            "you didn't actually pass me a category. I can only delete categories".into(),
+            "You didn't actually pass me a category. I can only delete categories",
         )
         .await?;
         return Ok(());

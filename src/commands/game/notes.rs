@@ -24,9 +24,9 @@ pub async fn notes(ctx: &Context, msg: &Message) -> CommandResult {
 
     let player = game.players().get(&msg.author.id);
     if player.is_none() {
-        msg.reply_err(
+        msg.reply(
             ctx,
-            "you can't take a look at your note when you're not part of the game".into(),
+            "You can't take a look at your note when you're not part of the game",
         )
         .await?;
         return Ok(());
@@ -135,9 +135,9 @@ pub async fn write_note(ctx: &Context, msg: &Message, args: Args) -> CommandResu
     let data = ctx.data.read().await;
     let game = data.get::<GameContainer>();
     if game.is_none() {
-        msg.reply_err(
+        msg.reply(
             ctx,
-            "you can't write a note to your memo book when a game hasn't started yet".into(),
+            "You can't write a note to your memo book when a game hasn't started yet",
         )
         .await?;
         return Ok(());
@@ -145,16 +145,16 @@ pub async fn write_note(ctx: &Context, msg: &Message, args: Args) -> CommandResu
     let mut game = game.unwrap().write().await;
 
     if game.state() == GameState::NotStarted {
-        msg.reply_err(
+        msg.reply(
             ctx,
-            "you can't write a note to your memo book before the game starts".into(),
+            "You can't write a note to your memo book before the game starts",
         )
         .await?;
         return Ok(());
     } else if game.state() == GameState::GameEnded {
-        msg.reply_err(
+        msg.reply(
             ctx,
-            "you can't write a note to your memo book after a game has ended".into(),
+            "You can't write a note to your memo book after a game has ended",
         )
         .await?;
         return Ok(());
@@ -164,9 +164,9 @@ pub async fn write_note(ctx: &Context, msg: &Message, args: Args) -> CommandResu
     let player = game.players_mut().get_mut(&msg.author.id);
 
     if player.is_none() {
-        msg.reply_err(
+        msg.reply(
             ctx,
-            "you can't write a note to your memo book when you're not in the game".into(),
+            "You can't write a note to your memo book when you're not in the game",
         )
         .await?;
         return Ok(());
@@ -180,7 +180,7 @@ pub async fn write_note(ctx: &Context, msg: &Message, args: Args) -> CommandResu
 
     match res {
         Ok(_) => (),
-        Err(err) => msg.reply_err(ctx, err).await.map(|_| ())?,
+        Err(err) => msg.reply(ctx, err).await.map(|_| ())?,
     }
 
     Ok(())
@@ -202,9 +202,9 @@ pub async fn show_note(ctx: &Context, msg: &Message, args: Args) -> CommandResul
     let game = data.get::<GameContainer>();
 
     if game.is_none() {
-        msg.reply_err(
+        msg.reply(
             ctx,
-            "you can't show a note from your memo book when there isn't a game running!".into(),
+            "You can't show a note from your memo book when there isn't a game running!",
         )
         .await?;
         return Ok(());
@@ -213,9 +213,9 @@ pub async fn show_note(ctx: &Context, msg: &Message, args: Args) -> CommandResul
     let game = game.unwrap().read().await;
 
     if game.state() == GameState::NotStarted {
-        msg.reply_err(
+        msg.reply(
             ctx,
-            "you can't show a note from your memo book before the game starts".into(),
+            "You can't show a note from your memo book before the game starts",
         )
         .await?;
         return Ok(());
@@ -224,9 +224,9 @@ pub async fn show_note(ctx: &Context, msg: &Message, args: Args) -> CommandResul
     let player = game.players().get(&msg.author.id);
 
     if player.is_none() {
-        msg.reply_err(
+        msg.reply(
             ctx,
-            "you can't show a note from your memo book when you're not in the game".into(),
+            "You can't show a note from your memo book when you're not in the game",
         )
         .await?;
         return Ok(());
@@ -234,7 +234,7 @@ pub async fn show_note(ctx: &Context, msg: &Message, args: Args) -> CommandResul
     let player = player.unwrap();
 
     if page.is_err() {
-        msg.reply_err(ctx, "I couldn't get a number from your message!".into())
+        msg.reply(ctx, "I couldn't get a number from your message!")
             .await?;
         return Ok(());
     }
@@ -271,9 +271,9 @@ pub async fn rip_note(ctx: &Context, msg: &Message, mut args: Args) -> CommandRe
     let data = ctx.data.read().await;
     let game = data.get::<GameContainer>();
     if game.is_none() {
-        msg.reply_err(
+        msg.reply(
             ctx,
-            "you can't rip a note out of your memo book when there's no game running".into(),
+            "You can't rip a note out of your memo book when there's no game running",
         )
         .await?;
         return Ok(());
@@ -281,7 +281,7 @@ pub async fn rip_note(ctx: &Context, msg: &Message, mut args: Args) -> CommandRe
     let mut game = game.unwrap().write().await;
 
     if page.is_err() {
-        msg.reply_err(
+        msg.reply(
             ctx,
             format!(
                 "I couldn't get a number from your message. Try {}help ripnote",
@@ -294,7 +294,7 @@ pub async fn rip_note(ctx: &Context, msg: &Message, mut args: Args) -> CommandRe
     let page = page.unwrap();
 
     if target.is_err() {
-        msg.reply_err(
+        msg.reply(
             ctx,
             format!(
                 "I couldn't get a user from your message. Try {}help ripnote",
@@ -316,18 +316,15 @@ pub async fn rip_note(ctx: &Context, msg: &Message, mut args: Args) -> CommandRe
     let note = {
         let myself = game.players_mut().get_mut(&msg.author.id);
         if myself.is_none() {
-            msg.reply_err(
-                ctx,
-                "you can't give a note when you're not in the game".into(),
-            )
-            .await?;
+            msg.reply(ctx, "You can't give a note when you're not in the game")
+                .await?;
             return Ok(());
         }
 
         if !target_is_in_game {
-            msg.reply_err(
+            msg.reply(
                 ctx,
-                "you can't give a note to someone who's not in the game".into(),
+                "You can't give a note to someone who's not in the game",
             )
             .await?;
             return Ok(());
