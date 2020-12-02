@@ -46,27 +46,20 @@ pub async fn stats(ctx: &Context, msg: &Message) -> CommandResult {
         let mut pss: u64 = 0;
         let mut uss: u64 = 0;
         for (_, data) in smaps {
-            pss += data.key_value_pairs.get("Pss".into()).unwrap_or(&0);
-            uss += data
-                .key_value_pairs
-                .get("Private_Clean".into())
-                .unwrap_or(&0)
-                + data
-                    .key_value_pairs
-                    .get("Private_Dirty".into())
-                    .unwrap_or(&0);
+            pss += data.key_value_pairs.get("Pss").unwrap_or(&0);
+            uss += data.key_value_pairs.get("Private_Clean").unwrap_or(&0)
+                + data.key_value_pairs.get("Private_Dirty").unwrap_or(&0);
         }
 
         (uss, pss, myself.stat.rss)
     };
 
-    let startup_time = ctx
+    let startup_time = *ctx
         .data
         .read()
         .await
         .get::<StartupTime>()
-        .expect("ctx.data should always have a StartupTime in it")
-        .clone();
+        .expect("ctx.data should always have a StartupTime in it");
 
     let mut embed = CreateEmbed::default();
 
