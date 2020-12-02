@@ -2,7 +2,7 @@ use crate::game::GameState;
 
 use super::prelude::*;
 
-use serenity::framework::standard::{macros::check, CheckResult, CommandOptions};
+use serenity::framework::standard::{macros::check, CommandOptions, Reason};
 
 // This is the standard check ran before most game commands, it ensures that these commands have a valid game to work with.
 #[check]
@@ -12,7 +12,7 @@ pub async fn standard_game(
     msg: &Message,
     _: &mut Args,
     command: &CommandOptions,
-) -> CheckResult {
+) -> Result<(), Reason> {
     let data = ctx.data.read().await;
     let game = data.get::<GameContainer>();
     if let Some(game) = game {
@@ -26,27 +26,27 @@ pub async fn standard_game(
                         error_messages::GAME_NOT_STARTED[command.names[0]].into(),
                     )
                     .await;
-                return CheckResult::new_log(format!(
+                return Err(Reason::Log(format!(
                     "\nStandardGameCheck: Game wasn't started. Error when sending message (if any): {:?}",
                     if sent.is_err() {
                         Some(sent.err())
                     } else {
                         None
                     }
-                ));
+                )));
             }
             GameState::GameEnded => {
                 let sent = msg
                     .reply_err(ctx, error_messages::GAME_ENDED[command.names[0]].into())
                     .await;
-                return CheckResult::new_log(format!(
+                return Err(Reason::Log(format!(
                         "\nStandardGameCheck: Game has ended. Error when sending message (if any): {:?}",
                         if sent.is_err() {
                             Some(sent.err())
                         } else {
                             None
                         }
-                    ));
+                    )));
             }
             _ => (),
         };
@@ -57,17 +57,17 @@ pub async fn standard_game(
                 error_messages::NEEDS_GAME_TO_EXIST[command.names[0]].into(),
             )
             .await;
-        return CheckResult::new_log(format!(
+        return Err(Reason::Log(format!(
             "\nStandardGameCheck: No game exists. Error when sending message (if any): {:?}",
             if sent.is_err() {
                 Some(sent.err())
             } else {
                 None
             }
-        ));
+        )));
     }
 
-    CheckResult::Success
+    Ok(())
 }
 
 #[check]
@@ -77,7 +77,7 @@ pub async fn game_check_allow_game_ended(
     msg: &Message,
     _: &mut Args,
     command: &CommandOptions,
-) -> CheckResult {
+) -> Result<(), Reason> {
     let data = ctx.data.read().await;
     let game = data.get::<GameContainer>();
     if let Some(game) = game {
@@ -90,14 +90,14 @@ pub async fn game_check_allow_game_ended(
                     error_messages::GAME_NOT_STARTED[command.names[0]].into(),
                 )
                 .await;
-            return CheckResult::new_log(format!(
+            return Err(Reason::Log(format!(
                 "\nStandardGameCheck: Game wasn't started. Error when sending message (if any): {:?}",
                 if sent.is_err() {
                     Some(sent.err())
                 } else {
                     None
                 }
-            ));
+            )));
         }
     } else {
         let sent = msg
@@ -106,16 +106,16 @@ pub async fn game_check_allow_game_ended(
                 error_messages::NEEDS_GAME_TO_EXIST[command.names[0]].into(),
             )
             .await;
-        return CheckResult::new_log(format!(
+        return Err(Reason::Log(format!(
             "\nStandardGameCheck: No game exists. Error when sending message (if any): {:?}",
             if sent.is_err() {
                 Some(sent.err())
             } else {
                 None
             }
-        ));
+        )));
     }
-    CheckResult::Success
+    Ok(())
 }
 
 mod error_messages {

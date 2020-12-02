@@ -3,7 +3,7 @@ use super::prelude::*;
 use once_cell::sync::Lazy;
 use serenity::{
     builder::CreateEmbed,
-    framework::standard::{macros::check, CheckResult, CommandOptions},
+    framework::standard::{macros::check, CommandOptions, Reason},
 };
 
 // Fancy quotes
@@ -140,7 +140,7 @@ pub async fn perms_are_good(
     msg: &Message,
     _: &mut Args,
     _: &CommandOptions,
-) -> CheckResult {
+) -> Result<(), Reason> {
     let mut passed = false;
     let info = ctx.http.get_current_application_info().await;
     if let Ok(info) = info {
@@ -165,10 +165,10 @@ pub async fn perms_are_good(
     }
 
     if passed {
-        return CheckResult::Success;
+        return Ok(());
     }
 
-    // I'd rather bubble the error out, but CheckResult isn't a Result<T, E> alias so.....
+    // I'd rather bubble the error out, but checks return a Result<(), Reason>.....
     let _send_msg = msg
         .reply_err(
             ctx,
@@ -176,7 +176,7 @@ pub async fn perms_are_good(
         )
         .await;
 
-    CheckResult::new_user("user lacks permissions to run this command (needs either Manage messages/Administrator, or to be the owner of the bot")
+    Err(Reason::User("user lacks permissions to run this command (needs either Manage messages/Administrator, or to be the owner of the bot".into()))
 }
 
 #[command]
