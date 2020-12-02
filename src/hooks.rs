@@ -1,4 +1,3 @@
-use crate::commands::CommandCounter;
 use serenity::{
     framework::standard::{macros::hook, CommandResult, DispatchError},
     model::channel::Message,
@@ -13,15 +12,16 @@ pub async fn before(ctx: &Context, msg: &Message, command_name: &str) -> bool {
         command_name, msg.author.name
     );
 
-    // Increment the number of times this command has been run once. If
-    // the command's name does not exist in the counter, add a default
-    // value of 0.
-    let mut data = ctx.data.write().await;
-    let counter = data
-        .get_mut::<CommandCounter>()
-        .expect("Expected CommandCounter in TypeMap.");
-    let entry = counter.entry(command_name.to_string()).or_insert(0);
-    *entry += 1;
+    use crate::data::stats::CommandStatisticsContainer;
+
+    ctx.data
+        .read()
+        .await
+        .get::<CommandStatisticsContainer>()
+        .expect("ctx.data should have a CommandStatisticsContainer in it. Always")
+        .write()
+        .await
+        .add_invocation(command_name);
 
     true // if `before` returns false, command processing doesn't happen.
 }

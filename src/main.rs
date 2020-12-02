@@ -20,7 +20,7 @@ mod data;
 mod game;
 mod helpers;
 
-use crate::data::{Cdn, Reqwest, ReqwestClient};
+use crate::data::{stats, Cdn, Reqwest, ReqwestClient};
 
 struct ShardManagerContainer;
 
@@ -41,6 +41,8 @@ impl EventHandler for Handler {
 #[instrument]
 async fn main() -> CommandResult {
     tracing_subscriber::fmt::init();
+
+    let startup_time = std::time::Instant::now();
 
     let (token, prefix, cdn_channel_id) = get_env_config();
 
@@ -110,7 +112,8 @@ async fn main() -> CommandResult {
         use serenity::model::id::ChannelId;
 
         let mut data = client.data.write().await;
-        data.insert::<CommandCounter>(HashMap::default());
+        data.insert::<stats::CommandStatisticsContainer>(Default::default());
+        data.insert::<stats::StartupTime>(startup_time);
         data.insert::<ShardManagerContainer>(Arc::clone(&client.shard_manager));
         data.insert::<ReqwestClient>(reqwest_client);
         data.insert::<Cdn>(ChannelId(str::parse::<u64>(&cdn_channel_id)?));

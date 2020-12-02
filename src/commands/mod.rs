@@ -15,8 +15,7 @@ use stats::*;
 use test_cmds::*;
 use tos::*;
 
-use serenity::{framework::standard::macros::group, prelude::*};
-use std::collections::HashMap;
+use serenity::framework::standard::macros::group;
 
 #[group]
 #[only_in(guilds)]
@@ -59,12 +58,6 @@ pub struct GameInformation;
 #[group]
 #[commands(king_test, rev_test, confirm_murder, forceadd)]
 pub struct Tests;
-
-pub struct CommandCounter;
-
-impl TypeMapKey for CommandCounter {
-    type Value = HashMap<String, u64>;
-}
 
 mod prelude {
     pub use serenity::framework::standard::{macros::command, Args, CommandResult};
