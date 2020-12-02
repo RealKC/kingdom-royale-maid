@@ -24,13 +24,8 @@ use std::collections::HashMap;
 pub struct Meta;
 
 #[group]
-#[commands(say, commands, delete_category)]
+#[commands(say, stats, delete_category)]
 pub struct Random;
-
-#[group]
-#[only_in(guilds)]
-#[sub_groups(GameManagement, ItemInteractions, PlayerInteractions, GameInformation)]
-pub struct Game;
 
 #[group("Game Management")]
 #[only_in(guilds)]

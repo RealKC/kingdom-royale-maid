@@ -7,10 +7,7 @@ use serenity::{
     model::gateway::Ready,
     prelude::*,
 };
-use std::{
-    collections::{HashMap, HashSet},
-    sync::Arc,
-};
+use std::{collections::HashSet, sync::Arc};
 use tokio::sync::Mutex;
 use tracing::{error, info, instrument};
 
@@ -64,7 +61,7 @@ async fn main() -> CommandResult {
         Err(why) => panic!("Could not access application info: {:?}", why),
     };
 
-    let mut framework = StandardFramework::new()
+    let framework = StandardFramework::new()
         .configure(|c| {
             c.with_whitespace(true)
                 .on_mention(Some(bot_id))
@@ -85,11 +82,13 @@ async fn main() -> CommandResult {
         .help(&MY_HELP)
         .group(&META_GROUP)
         .group(&RANDOM_GROUP)
-        .group(&TESTS_GROUP);
-
-    for group in GAME_GROUP.options.sub_groups {
-        framework = framework.group(group);
-    }
+        .group(&TESTS_GROUP)
+        .group(&RANDOM_GROUP)
+        .group(&META_GROUP)
+        .group(&GAMEMANAGEMENT_GROUP)
+        .group(&ITEMINTERACTIONS_GROUP)
+        .group(&PLAYERINTERACTIONS_GROUP)
+        .group(&GAMEINFORMATION_GROUP);
 
     let mut client = Client::builder(&token)
         .event_handler(Handler)
