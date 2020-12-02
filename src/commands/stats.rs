@@ -46,9 +46,9 @@ pub async fn stats(ctx: &Context, msg: &Message) -> CommandResult {
         let mut pss: u64 = 0;
         let mut uss: u64 = 0;
         for (_, data) in smaps {
-            pss += data.key_value_pairs.get("Pss").unwrap_or(&0);
-            uss += data.key_value_pairs.get("Private_Clean").unwrap_or(&0)
-                + data.key_value_pairs.get("Private_Dirty").unwrap_or(&0);
+            pss += data.map.get("Pss").unwrap_or(&0);
+            uss += data.map.get("Private_Clean").unwrap_or(&0)
+                + data.map.get("Private_Dirty").unwrap_or(&0);
         }
 
         (uss, pss, myself.stat.rss)
