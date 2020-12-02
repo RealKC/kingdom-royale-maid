@@ -35,5 +35,7 @@ git = "https://github.com/RealKC/procfs"
 branch = "feature/smaps"
 
 [dependencies.serenity]
-version = "0.9"
+git = "https://github.com/serenity-rs/serenity"
+branch = "current"
+# version = "0.9"
 features = ["collector"]
