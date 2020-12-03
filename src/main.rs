@@ -82,8 +82,6 @@ async fn main() -> CommandResult {
         })
         .await
         .help(&MY_HELP)
-        .group(&META_GROUP)
-        .group(&RANDOM_GROUP)
         .group(&TESTS_GROUP)
         .group(&RANDOM_GROUP)
         .group(&META_GROUP)
