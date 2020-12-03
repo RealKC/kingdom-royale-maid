@@ -655,60 +655,16 @@ And a heavy-duty knife.
             .send_message(ctx, |m| m.set_embed(embed))
             .await?;
 
-        static REACTIONS: [&str; 6] = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣"];
-        react_with(ctx, &msg, &REACTIONS).await?;
+        react_with(ctx, &msg, &NUMBER_EMOJIS_ONE_TO_SIX).await?;
 
-        if let Some(reaction) = msg
-            .await_reaction(&ctx)
-            .author_id(*revolutionary.0)
-            .channel_id(revolutionary.1.room())
-            .filter(|r| REACTIONS.contains(&r.emoji.to_string().as_str()))
-            .await
-        {
-            let emoji = reaction.as_inner_ref().emoji.to_string();
-            if let Ok(idx) = REACTIONS.binary_search(&emoji.as_str()) {
-                let id = self.players.keys().nth(idx).copied();
-                match id {
-                    Some(id) => {
-                        let hit_king =
-                            self.players().get(&id).unwrap().role_name() == RoleName::King;
-                        if hit_king
-                            && self.king_substitution_status == SubstitutionStatus::CurrentlyIs
-                        {
-                            let double = {
-                                let mut res = None;
-                                for player in &mut self.players {
-                                    if player.1.role_name() == RoleName::TheDouble {
-                                        res = Some(player);
-                                        break;
-                                    }
-                                }
-                                res.unwrap()
-                            };
+        tokio::task::spawn(tasks::handle_assassination(
+            ctx.clone(),
+            msg,
+            *revolutionary.0,
+            revolutionary.1.room(),
+        ));
 
-                            double
-                                .1
-                                .set_dead(DeathCause::Assassination, ctx, self.meeting_room)
-                                .await?;
-                        } else {
-                            let player = self.players.get_mut(&id);
-                            player
-                                .unwrap()
-                                .set_dead(DeathCause::Assassination, ctx, self.meeting_room)
-                                .await?;
-                        }
-                    }
-                    None => {
-                        error!("Got a wrong reaction somehow");
-                        panic!();
-                    }
-                }
-            }
-
-            return Ok(());
-        }
-
-        Err("Probably an error to arrive here".into())
+        Ok(())
     }
 
     pub fn all_alive_have_won(&self) -> bool {

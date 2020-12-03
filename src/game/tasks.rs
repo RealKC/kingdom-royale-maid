@@ -8,7 +8,10 @@ use serenity::{
 };
 use tracing::{error, warn};
 
-use super::data::{NUMBER_EMOJIS_ONE_TO_SIX, YES_NO_EMOJIS};
+use super::{
+    data::{NUMBER_EMOJIS_ONE_TO_SIX, YES_NO_EMOJIS},
+    DeathCause, RoleName,
+};
 use crate::commands::game::GameContainer;
 
 pub async fn handle_secret_meeting_selection(
@@ -120,5 +123,78 @@ pub async fn handle_assistant_choice(
         return Ok(());
     }
 
+    Ok(())
+}
+
+pub async fn handle_assassination(
+    ctx: Context,
+    msg: Message,
+    revolutionary_id: UserId,
+    room_id: ChannelId,
+) -> CommandResult {
+    if let Some(reaction) = msg
+        .await_reaction(&ctx)
+        .author_id(revolutionary_id)
+        .channel_id(room_id)
+        .filter(|r| NUMBER_EMOJIS_ONE_TO_SIX.contains(&r.emoji.to_string().as_str()))
+        .await
+    {
+        let game = {
+            let data = ctx.data.read().await;
+
+            data.get::<GameContainer>().cloned()
+        };
+
+        if game.is_none() {
+            warn!("handle_assassination called after game ended");
+            return Ok(());
+        }
+
+        let game = game.unwrap();
+        let mut game = game.write().await;
+
+        let meeting_room = game.meeting_room();
+
+        let emoji = reaction.as_inner_ref().emoji.to_string();
+        if let Ok(idx) = NUMBER_EMOJIS_ONE_TO_SIX.binary_search(&emoji.as_str()) {
+            let id = game.players().keys().nth(idx).copied();
+            match id {
+                Some(id) => {
+                    let hit_king = game.players().get(&id).unwrap().role_name() == RoleName::King;
+                    if hit_king {
+                        if game.king_has_substituted() {
+                            let double = {
+                                let mut res = None;
+                                for player in game.players_mut() {
+                                    if player.1.role_name() == RoleName::TheDouble {
+                                        res = Some(player);
+                                        break;
+                                    }
+                                }
+                                res.unwrap()
+                            };
+
+                            double
+                                .1
+                                .set_dead(DeathCause::Assassination, &ctx, meeting_room)
+                                .await?;
+                        } else {
+                            let player = game.players_mut().get_mut(&id);
+                            player
+                                .unwrap()
+                                .set_dead(DeathCause::Assassination, &ctx, meeting_room)
+                                .await?;
+                        }
+                    }
+                }
+                None => {
+                    error!("Got a wrong reaction somehow");
+                    panic!();
+                }
+            }
+        }
+
+        return Ok(());
+    }
     Ok(())
 }
