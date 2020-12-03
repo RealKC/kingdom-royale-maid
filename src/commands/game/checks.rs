@@ -71,10 +71,12 @@ pub async fn game_check_allow_game_ended(
     Ok(())
 }
 
+/// Module containing statics for different error messages
 mod error_messages {
     use once_cell::sync::Lazy;
     use std::collections::HashMap;
 
+    /// Error messages for commands that need a game to exist in `ctx.data`
     pub static NEEDS_GAME_TO_EXIST: Lazy<HashMap<&str, &str>> = Lazy::new(|| {
         let mut map = HashMap::new();
 
@@ -123,6 +125,7 @@ mod error_messages {
         map
     });
 
+    /// Error messages that need `game.state()` to be different than `GameState::NotStarted`
     pub static GAME_NOT_STARTED: Lazy<HashMap<&str, &str>> = Lazy::new(|| {
         let mut map = HashMap::new();
 
@@ -171,6 +174,7 @@ mod error_messages {
         map
     });
 
+    /// Error messages for commands that need `game.state()` to be different than `GameState::GameEnded`
     pub static GAME_ENDED: Lazy<HashMap<&str, &str>> = Lazy::new(|| {
         let mut map = HashMap::new();
 
