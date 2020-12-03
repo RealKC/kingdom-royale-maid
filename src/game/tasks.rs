@@ -14,6 +14,24 @@ use super::{
 };
 use crate::commands::game::GameContainer;
 
+macro_rules! expect_game {
+    ($ctx:ident, $func: literal) => {{
+        let data = $ctx.data.read().await;
+        let game = data.get::<GameContainer>().cloned();
+
+        if game.is_none() {
+            warn!(
+                "{} woke up but no game is running. (Game likely ended)",
+                $func
+            );
+
+            return Ok(());
+        }
+
+        game.unwrap()
+    }};
+}
+
 pub async fn handle_secret_meeting_selection(
     ctx: Context,
     msg: Message,
@@ -28,12 +46,8 @@ pub async fn handle_secret_meeting_selection(
     {
         let emoji = reaction.as_inner_ref().emoji.to_string();
         if let Ok(idx) = NUMBER_EMOJIS_ONE_TO_SIX.binary_search(&emoji.as_str()) {
-            let data = ctx.data.read().await;
-            let game = data.get::<GameContainer>();
-            if game.is_none() {
-                return Ok(());
-            }
-            let mut game = game.unwrap().write().await;
+            let game = expect_game!(ctx, "handle_secret_meeting_selection");
+            let mut game = game.write().await;
 
             let id = game.players().keys().nth(idx).copied();
             match id {
@@ -68,13 +82,9 @@ pub async fn handle_king_choosing_target(
     {
         let emoji = reaction.as_inner_ref().emoji.to_string();
         if let Ok(idx) = NUMBER_EMOJIS_ONE_TO_SIX.binary_search(&emoji.as_str()) {
-            let data = ctx.data.read().await;
-            let game = data.get::<GameContainer>();
-            if game.is_none() {
-                warn!("handle_king_choosing_target woke up after game ended");
-                return Ok(());
-            }
-            let mut game = game.unwrap().write().await;
+            let game = expect_game!(ctx, "handle_king_choosing_target");
+            let mut game = game.write().await;
+
             let id = game.players_mut().keys().nth(idx).copied();
             match id {
                 Some(id) => {
@@ -106,12 +116,8 @@ pub async fn handle_assistant_choice(
         .await
     {
         if reaction.as_inner_ref().emoji.unicode_eq(YES_NO_EMOJIS[0]) {
-            let data = ctx.data.read().await;
-            let game = data.get::<GameContainer>();
-            if game.is_none() {
-                warn!("handle_assistant_choice woke up after game ended");
-            }
-            let mut game = game.unwrap().write().await;
+            let game = expect_game!(ctx, "handle_assistant_choice");
+            let mut game = game.write().await;
 
             let target_id = game.king_murder_target().id();
             let meeting_room = game.meeting_room();
@@ -139,18 +145,7 @@ pub async fn handle_assassination(
         .filter(|r| NUMBER_EMOJIS_ONE_TO_SIX.contains(&r.emoji.to_string().as_str()))
         .await
     {
-        let game = {
-            let data = ctx.data.read().await;
-
-            data.get::<GameContainer>().cloned()
-        };
-
-        if game.is_none() {
-            warn!("handle_assassination called after game ended");
-            return Ok(());
-        }
-
-        let game = game.unwrap();
+        let game = expect_game!(ctx, "handle_assassination");
         let mut game = game.write().await;
 
         let meeting_room = game.meeting_room();
