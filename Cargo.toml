@@ -10,7 +10,6 @@ license = "AGPL-3.0"
 [dependencies]
 tokio = { version = "0.2", features = ["macros", "signal", "blocking"] }
 futures = "0.3"
-reqwest = "0.10.8"
 
 tracing = "0.1"
 tracing-subscriber = "0.2"
@@ -39,3 +38,8 @@ git = "https://github.com/serenity-rs/serenity"
 branch = "current"
 # version = "0.9"
 features = ["collector"]
+
+[dependencies.reqwest]
+version = "0.10"
+default_features = false
+features = ["rustls-tls"]
