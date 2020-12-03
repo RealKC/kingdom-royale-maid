@@ -3,6 +3,7 @@ pub mod game;
 pub mod help;
 pub mod meta;
 pub mod random;
+mod shutdown;
 pub mod stats;
 mod test_cmds;
 mod tos;
@@ -11,6 +12,7 @@ use crate::commands::meta::*;
 use delete_category::*;
 use game::*;
 use random::*;
+use shutdown::*;
 use stats::*;
 use test_cmds::*;
 use tos::*;
@@ -23,7 +25,7 @@ use serenity::framework::standard::macros::group;
 pub struct Meta;
 
 #[group]
-#[commands(say, stats, delete_category)]
+#[commands(say, stats, delete_category, shutdown)]
 pub struct Random;
 
 #[group("Game Management")]
