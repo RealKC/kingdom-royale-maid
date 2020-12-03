@@ -53,4 +53,10 @@ pub mod stats {
             self.total_command_invocations += 1;
         }
     }
+
+    pub struct SystemVersion;
+
+    impl TypeMapKey for SystemVersion {
+        type Value = String;
+    }
 }

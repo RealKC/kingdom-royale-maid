@@ -1,4 +1,4 @@
-use crate::data::stats::{CommandStatisticsContainer, StartupTime};
+use crate::data::stats::{CommandStatisticsContainer, StartupTime, SystemVersion};
 
 use serenity::{
     builder::CreateEmbed,
@@ -60,6 +60,13 @@ pub async fn stats(ctx: &Context, msg: &Message) -> CommandResult {
         .await
         .get::<StartupTime>()
         .expect("ctx.data should always have a StartupTime in it");
+    let system_version = ctx
+        .data
+        .read()
+        .await
+        .get::<SystemVersion>()
+        .expect("ctx.data should always have a SystemVersion in it")
+        .clone();
 
     let mut embed = CreateEmbed::default();
 
@@ -70,9 +77,13 @@ pub async fn stats(ctx: &Context, msg: &Message) -> CommandResult {
 Total amount of command invocations: {invocations}.
 
 Uptime: {uptime}
+
+**System:**
+```{ver}```
 "#,
             invocations = stats.total_command_invocations,
-            uptime = get_formatted_uptime(startup_time)?
+            uptime = get_formatted_uptime(startup_time)?,
+            ver = system_version
         ))
         .field("Command invocations", command_invocations, true)
         .field(

@@ -7,7 +7,7 @@ use serenity::{
     model::gateway::Ready,
     prelude::*,
 };
-use std::{collections::HashSet, sync::Arc};
+use std::{collections::HashSet, fs::File, io::Read, sync::Arc};
 use tokio::sync::Mutex;
 use tracing::{error, info, instrument};
 
@@ -112,6 +112,7 @@ async fn main() -> CommandResult {
         let mut data = client.data.write().await;
         data.insert::<stats::CommandStatisticsContainer>(Default::default());
         data.insert::<stats::StartupTime>(startup_time);
+        data.insert::<stats::SystemVersion>(read_system_version()?);
         data.insert::<ShardManagerContainer>(Arc::clone(&client.shard_manager));
         data.insert::<ReqwestClient>(reqwest_client);
         data.insert::<Cdn>(ChannelId(str::parse::<u64>(&cdn_channel_id)?));
@@ -153,4 +154,13 @@ fn get_env_config() -> (String, String, String) {
     let cdn_channel_id = dotenv::var("MAID_CDN_CHANNEL_ID").expect("Give me my discord cdn pl0x");
 
     (token, prefix, cdn_channel_id)
+}
+
+fn read_system_version() -> Result<String, std::io::Error> {
+    let mut f = File::open("/proc/version")?;
+    let mut version = String::new();
+
+    f.read_to_string(&mut version)?;
+
+    Ok(version)
 }
