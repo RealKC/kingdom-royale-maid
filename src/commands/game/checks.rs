@@ -107,6 +107,18 @@ mod error_messages {
             "substitute",
             "You can't 「 substitute 」 with someone when you're not in a game!",
         );
+        map.insert(
+            "writenote",
+            "You can't write a note to your memo book when a game hasn't started yet",
+        );
+        map.insert(
+            "shownote",
+            "You can't show a note from your memo book when there isn't a game running!",
+        );
+        map.insert(
+            "ripnote",
+            "You can't rip a note out of your memo book when there's no game running",
+        );
 
         map
     });
@@ -143,6 +155,18 @@ mod error_messages {
             "substitute",
             "You can't 「 substitute 」 with someone when you're not in a game!",
         );
+        map.insert(
+            "writenote",
+            "You can't write a note to your memo book before the game starts",
+        );
+        map.insert(
+            "shownote",
+            "You can't show a note from your memo book before the game starts",
+        );
+        map.insert(
+            "ripnote",
+            "You can't rip a note out of your memo book when the game hasn't started yet",
+        );
 
         map
     });
@@ -167,6 +191,14 @@ mod error_messages {
         map.insert(
             "substitute",
             "You can't 「 substitute 」 with someone after the game has ended!",
+        );
+        map.insert(
+            "writenote",
+            "You can't write a note to your memo book after a game has ended",
+        );
+        map.insert(
+            "ripnote",
+            "You can't rip a note out of your memo book after the game has ended!",
         );
 
         map

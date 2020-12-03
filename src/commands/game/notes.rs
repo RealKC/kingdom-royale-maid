@@ -1,10 +1,7 @@
 use super::prelude::*;
 use crate::{
     data::Prefix,
-    game::{
-        item::{MemoBook, Note},
-        GameState,
-    },
+    game::item::{MemoBook, Note},
     helpers::react::react_with,
 };
 
@@ -129,36 +126,12 @@ pub async fn notes(ctx: &Context, msg: &Message) -> CommandResult {
 (Usage and Sample usage do not include the prefix, but it still must be used)
 "#)]
 #[usage("your note here, can't be too long")]
+#[checks(StandardGameCheck)]
 pub async fn write_note(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let note = args.rest();
 
     let data = ctx.data.read().await;
-    let game = data.get::<GameContainer>();
-    if game.is_none() {
-        msg.reply(
-            ctx,
-            "You can't write a note to your memo book when a game hasn't started yet",
-        )
-        .await?;
-        return Ok(());
-    }
-    let mut game = game.unwrap().write().await;
-
-    if game.state() == GameState::NotStarted {
-        msg.reply(
-            ctx,
-            "You can't write a note to your memo book before the game starts",
-        )
-        .await?;
-        return Ok(());
-    } else if game.state() == GameState::GameEnded {
-        msg.reply(
-            ctx,
-            "You can't write a note to your memo book after a game has ended",
-        )
-        .await?;
-        return Ok(());
-    }
+    let mut game = expect_game_mut!(data);
 
     let game_state = game.state();
     let player = game.players_mut().get_mut(&msg.author.id);
@@ -195,31 +168,12 @@ Shows a note at "page" N in the current channel.
 (Usage and Sample usage do not include the prefix, but it still must be used)"#
 )]
 #[usage("N")]
+#[checks(GameCheckAllowGameEnded)]
 pub async fn show_note(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let page = args.parse::<usize>();
 
     let data = ctx.data.read().await;
-    let game = data.get::<GameContainer>();
-
-    if game.is_none() {
-        msg.reply(
-            ctx,
-            "You can't show a note from your memo book when there isn't a game running!",
-        )
-        .await?;
-        return Ok(());
-    }
-
-    let game = game.unwrap().read().await;
-
-    if game.state() == GameState::NotStarted {
-        msg.reply(
-            ctx,
-            "You can't show a note from your memo book before the game starts",
-        )
-        .await?;
-        return Ok(());
-    }
+    let game = expect_game!(data);
 
     let player = game.players().get(&msg.author.id);
 
@@ -246,7 +200,7 @@ pub async fn show_note(ctx: &Context, msg: &Message, args: Args) -> CommandResul
         msg.channel_id
             .say(
                 ctx,
-                format!("*{} shows an empty page", msg.author.mention()),
+                format!("*{} shows an empty page*", msg.author.mention()),
             )
             .await?;
     } else {
@@ -264,33 +218,14 @@ Allows you to rip a note out of your memobook and give it to someone. Note that 
 "#)]
 #[usage("<page> <user mention>")]
 #[example("5 @KC#7788")]
+#[checks(StandardGameCheck)]
 pub async fn rip_note(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let page = args.single::<usize>();
     let target = args.single::<UserId>();
 
     let data = ctx.data.read().await;
-    let game = data.get::<GameContainer>();
-    if game.is_none() {
-        msg.reply(
-            ctx,
-            "You can't rip a note out of your memo book when there's no game running",
-        )
-        .await?;
-        return Ok(());
-    }
-    let mut game = game.unwrap().write().await;
+    let mut game = expect_game_mut!(data);
 
-    if page.is_err() {
-        msg.reply(
-            ctx,
-            format!(
-                "I couldn't get a number from your message. Try {}help ripnote",
-                data.get::<Prefix>().unwrap()
-            ),
-        )
-        .await?;
-        return Ok(());
-    }
     let page = page.unwrap();
 
     if target.is_err() {
