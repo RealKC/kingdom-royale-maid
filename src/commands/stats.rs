@@ -118,9 +118,19 @@ fn get_formatted_uptime(
     if weeks != 0 {
         Ok(format!(
             "{} weeks, {} days, {}h{}m{}s",
-            weeks, days, hours, minutes, seconds
+            weeks,
+            days % 7,
+            hours % 24,
+            minutes % 60,
+            seconds % 60
         ))
     } else {
-        Ok(format!("{} days, {}h{}m{}s", days, hours, minutes, seconds))
+        Ok(format!(
+            "{} days, {}h{}m{}s",
+            days,
+            hours % 24,
+            minutes % 60,
+            seconds % 60
+        ))
     }
 }
