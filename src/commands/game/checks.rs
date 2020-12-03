@@ -9,7 +9,7 @@ use serenity::framework::standard::{macros::check, CommandOptions, Reason};
 #[name = "StandardGameCheck"]
 pub async fn standard_game(
     ctx: &Context,
-    msg: &Message,
+    _: &Message,
     _: &mut Args,
     command: &CommandOptions,
 ) -> Result<(), Reason> {
@@ -20,45 +20,24 @@ pub async fn standard_game(
 
         match game.state() {
             GameState::NotStarted => {
-                let sent = msg
-                    .reply(ctx, error_messages::GAME_NOT_STARTED[command.names[0]])
-                    .await;
-                return Err(Reason::Log(format!(
-                    "\nStandardGameCheck: Game wasn't started. Error when sending message (if any): {:?}",
-                    if sent.is_err() {
-                        Some(sent.err())
-                    } else {
-                        None
-                    }
-                )));
+                return Err(Reason::UserAndLog {
+                    user: error_messages::GAME_NOT_STARTED[command.names[0]].into(),
+                    log: "Game wasn't started".into(),
+                });
             }
             GameState::GameEnded => {
-                let sent = msg
-                    .reply(ctx, error_messages::GAME_ENDED[command.names[0]])
-                    .await;
-                return Err(Reason::Log(format!(
-                        "\nStandardGameCheck: Game has ended. Error when sending message (if any): {:?}",
-                        if sent.is_err() {
-                            Some(sent.err())
-                        } else {
-                            None
-                        }
-                    )));
+                return Err(Reason::UserAndLog {
+                    user: error_messages::GAME_ENDED[command.names[0]].into(),
+                    log: "Game has ended.".into(),
+                });
             }
             _ => (),
         };
     } else {
-        let sent = msg
-            .reply(ctx, error_messages::NEEDS_GAME_TO_EXIST[command.names[0]])
-            .await;
-        return Err(Reason::Log(format!(
-            "\nStandardGameCheck: No game exists. Error when sending message (if any): {:?}",
-            if sent.is_err() {
-                Some(sent.err())
-            } else {
-                None
-            }
-        )));
+        return Err(Reason::UserAndLog {
+            user: error_messages::NEEDS_GAME_TO_EXIST[command.names[0]].into(),
+            log: "No game exists.".into(),
+        });
     }
 
     Ok(())
@@ -68,7 +47,7 @@ pub async fn standard_game(
 #[name("GameCheckAllowGameEnded")]
 pub async fn game_check_allow_game_ended(
     ctx: &Context,
-    msg: &Message,
+    _: &Message,
     _: &mut Args,
     command: &CommandOptions,
 ) -> Result<(), Reason> {
@@ -78,30 +57,16 @@ pub async fn game_check_allow_game_ended(
         let game = game.read().await;
 
         if game.state() == GameState::NotStarted {
-            let sent = msg
-                .reply(ctx, error_messages::GAME_NOT_STARTED[command.names[0]])
-                .await;
-            return Err(Reason::Log(format!(
-                "\nStandardGameCheck: Game wasn't started. Error when sending message (if any): {:?}",
-                if sent.is_err() {
-                    Some(sent.err())
-                } else {
-                    None
-                }
-            )));
+            return Err(Reason::UserAndLog {
+                user: error_messages::GAME_NOT_STARTED[command.names[0]].into(),
+                log: "Game wasn't started.".into(),
+            });
         }
     } else {
-        let sent = msg
-            .reply(ctx, error_messages::NEEDS_GAME_TO_EXIST[command.names[0]])
-            .await;
-        return Err(Reason::Log(format!(
-            "\nStandardGameCheck: No game exists. Error when sending message (if any): {:?}",
-            if sent.is_err() {
-                Some(sent.err())
-            } else {
-                None
-            }
-        )));
+        return Err(Reason::UserAndLog {
+            user: error_messages::NEEDS_GAME_TO_EXIST[command.names[0]].into(),
+            log: "No game exists.".into(),
+        });
     }
     Ok(())
 }

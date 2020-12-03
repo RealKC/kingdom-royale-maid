@@ -1,4 +1,5 @@
 use serenity::{
+    framework::standard::Reason,
     framework::standard::{macros::hook, CommandResult, DispatchError},
     model::channel::Message,
     prelude::*,
@@ -49,5 +50,23 @@ pub async fn dispatch_error(ctx: &Context, msg: &Message, error: DispatchError) 
                 &format!("Try this again in {} seconds.", duration.as_secs()),
             )
             .await;
+    } else if let DispatchError::CheckFailed(_, reason) = error {
+        match reason {
+            Reason::User(error_msg) => {
+                let _ = msg.reply(ctx, error_msg).await;
+            }
+            Reason::Log(log) => {
+                info!("{}", log);
+            }
+
+            Reason::UserAndLog {
+                user: error_msg,
+                log: error_log,
+            } => {
+                let _ = msg.reply(ctx, error_msg).await;
+                info!("{}", error_log);
+            }
+            _ => (),
+        }
     }
 }

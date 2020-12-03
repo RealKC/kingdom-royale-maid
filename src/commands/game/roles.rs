@@ -168,15 +168,10 @@ pub async fn perms_are_good(
         return Ok(());
     }
 
-    // I'd rather bubble the error out, but checks return a Result<(), Reason>.....
-    let _send_msg = msg
-        .reply(
-            ctx,
-            "You need either the Manage Messages permission or to be Administrator",
-        )
-        .await;
-
-    Err(Reason::User("user lacks permissions to run this command (needs either Manage messages/Administrator, or to be the owner of the bot".into()))
+    Err(Reason::UserAndLog{
+        user: "You need either the Manage Messages permission or to be Administrator".into(),
+        log: "user lacks permissions to run this command (needs either Manage messages/Administrator, or to be the owner of the bot".into()
+    })
 }
 
 #[command]
