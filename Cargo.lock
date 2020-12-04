@@ -691,6 +691,7 @@ dependencies = [
  "humansize",
  "image",
  "itertools",
+ "libwebp-image",
  "once_cell",
  "procfs",
  "rand",
@@ -716,6 +717,38 @@ name = "libc"
 version = "0.2.80"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4d58d1b70b004888f764dfbf6a26a3b0342a1632d33968e4a179d8011c760614"
+
+[[package]]
+name = "libwebp"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c7792a82f95b5b2528d9fe1642231f972d2cdd73b91ccbcb6ab214c2cf1a74f4"
+dependencies = [
+ "libwebp-sys2",
+]
+
+[[package]]
+name = "libwebp-image"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bfc1952dafda58823f922cc76574f16abb622ba8ad258e760706ef020a6fd2cd"
+dependencies = [
+ "image",
+ "libwebp",
+]
+
+[[package]]
+name = "libwebp-sys2"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ccaf37ce08987eb7f7ec7eadb56585ba3e4c57725850a788d0560377c005ea3b"
+dependencies = [
+ "cc",
+ "cfg-if 0.1.10",
+ "libc",
+ "pkg-config",
+ "vcpkg",
+]
 
 [[package]]
 name = "log"
@@ -983,6 +1016,12 @@ name = "pin-utils"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8b870d8c151b6f2fb93e84a13146138f05d02ed11c7e7c54f8826aaaf7c9f184"
+
+[[package]]
+name = "pkg-config"
+version = "0.3.19"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3831453b3449ceb48b6d9c7ad7c96d5ea673e9b470a1dc578c2ce6521230884c"
 
 [[package]]
 name = "png"
@@ -1752,6 +1791,12 @@ name = "uwl"
 version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f4bf03e0ca70d626ecc4ba6b0763b934b6f2976e8c744088bb3c1d646fbb1ad0"
+
+[[package]]
+name = "vcpkg"
+version = "0.2.10"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6454029bf181f092ad1b853286f23e2c507d8e8194d01d92da4a55c274a5508c"
 
 [[package]]
 name = "version_check"

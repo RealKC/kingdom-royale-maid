@@ -3,6 +3,7 @@ use crate::data::{Cdn, ReqwestClient};
 use image::{
     self, imageops, load_from_memory_with_format, png::PngEncoder, ColorType, ImageFormat,
 };
+use libwebp_image::webp_load_from_memory;
 use serenity::{builder::CreateEmbed, http::AttachmentType, model::id::UserId, prelude::*};
 use tracing::{error, info, warn};
 
@@ -89,7 +90,14 @@ async fn fetch_avatars(ctx: &Context, players: &[UserId]) -> Result<Vec<Image>, 
         let response = reqwest.execute(image_request).await?;
         let raw_image = response.bytes().await?;
 
-        let image = load_from_memory_with_format(&raw_image, image_format)?;
+        let image = match image_format {
+            // `image` chokes on webp's with alpha in them, so we `libwebp-image` in order to workaround that.
+            // This also gives us colour support, which `image` doesn't have
+            // Pretty cool overall, sadly that's a few more deps though
+            ImageFormat::WebP => webp_load_from_memory(&raw_image)?,
+            ImageFormat::Png => load_from_memory_with_format(&raw_image, ImageFormat::Png)?,
+            _ => unreachable!("This image format variable should only ever be Webp or Png"),
+        };
 
         let image = image.into_rgba8();
         avatars.push(image);
