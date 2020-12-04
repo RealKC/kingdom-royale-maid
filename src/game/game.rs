@@ -18,15 +18,10 @@ use serenity::{
     },
     prelude::*,
 };
-<<<<<<< HEAD
-use std::{collections::BTreeMap, fmt::Write};
-=======
-use serenity::{model::prelude::User, prelude::*};
 use std::{
     collections::{BTreeMap, HashMap},
     fmt::Write,
 };
->>>>>>> 528f0df (wip stuff for secret meeting logs)
 use tracing::{error, info};
 
 type Host = UserId;
