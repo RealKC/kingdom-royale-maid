@@ -6,6 +6,10 @@ use typemap_rev::Entry;
 #[only_in(guilds)]
 #[description("Forcefully end a game")]
 pub async fn end_game(ctx: &Context, msg: &Message) -> CommandResult {
+    end_game_impl(ctx, msg, false).await
+}
+
+pub async fn end_game_impl(ctx: &Context, msg: &Message, in_shutdown: bool) -> CommandResult {
     let mut data = ctx.data.write().await;
 
     {
@@ -16,8 +20,10 @@ pub async fn end_game(ctx: &Context, msg: &Message) -> CommandResult {
                 game.end(ctx).await?;
             }
             None => {
-                msg.reply(ctx, "You can't end a game if there isn't one running")
-                    .await?;
+                if !in_shutdown {
+                    msg.reply(ctx, "You can't end a game if there isn't one running")
+                        .await?;
+                }
                 return Ok(());
             }
         }
@@ -29,7 +35,7 @@ pub async fn end_game(ctx: &Context, msg: &Message) -> CommandResult {
             game_container.remove();
         }
         Entry::Vacant(_) => {
-            // Don't think this should ever happen, but to be safe
+            // This can happen when in_shutdown == true
             return Ok(());
         }
     }
