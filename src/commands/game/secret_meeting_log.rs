@@ -1,7 +1,11 @@
 use futures::StreamExt;
-use serenity::{builder::CreateEmbed, model::id::UserId};
+use serenity::{
+    builder::CreateEmbed,
+    model::id::{ChannelId, UserId},
+};
+use tracing::log::warn;
 
-use crate::{data::Prefix, game::GameState};
+use crate::{data::Prefix, game::GameState, helpers::react::react_with};
 
 use super::prelude::*;
 
@@ -143,12 +147,76 @@ pub async fn show_meeting_log(ctx: &Context, msg: &Message, mut args: Args) -> C
     let mut embed = CreateEmbed::default();
 
     embed
-        .title(format!("Secret logs between you and {}", partner.mention(),))
+        .title(format!("Secret logs between you and {}", partner.mention()))
         .fields(message_fields);
 
-    msg.channel_id
+    let sent_msg = msg
+        .channel_id
         .send_message(ctx, |m| m.set_embed(embed))
         .await?;
+
+    static REACTIONS: [&str; 2] = ["⏮️", "⏭️"];
+
+    react_with(ctx, &sent_msg, &REACTIONS).await?;
+
+    let author = msg.author.id;
+    let channel = msg.channel_id;
+
+    tokio::task::spawn(pagination(
+        ctx.clone(),
+        sent_msg,
+        author,
+        channel,
+        &REACTIONS,
+    ));
+
+    Ok(())
+}
+
+async fn pagination(
+    ctx: Context,
+    mut msg: Message,
+    author: UserId,
+    channel: ChannelId,
+    unicodes: &'static [&'static str],
+) -> CommandResult {
+    if let Some(reaction) = msg
+        .await_reaction(&ctx)
+        .filter(move |r| unicodes.contains(&r.emoji.to_string().as_str()))
+        .author_id(author)
+        .channel_id(channel)
+        .await
+    {
+        let message_id = msg.id;
+
+        let fields = if reaction.as_inner_ref().emoji.unicode_eq(unicodes[0]) {
+            msg.channel_id.messages(&ctx, |b| b.after(message_id)).await
+        } else {
+            msg.channel_id
+                .messages(&ctx, |b| b.before(message_id))
+                .await
+        }
+        .map(|mut v| {
+            v.truncate(10);
+            v
+        })?
+        .iter()
+        .map(|m| (format!("{} said:", m.author), m.content.clone(), false))
+        .collect::<Vec<_>>();
+
+        let mut embed = CreateEmbed::default();
+        embed.fields(fields);
+
+        msg.edit(ctx, |em| {
+            em.embed(|e| {
+                *e = embed;
+                e
+            })
+        })
+        .await?;
+    }
+
+    warn!("Reacing this is probably bad????");
 
     Ok(())
 }
