@@ -1,9 +1,12 @@
+use std::time::Duration;
+
 use futures::StreamExt;
 use serenity::{
     builder::CreateEmbed,
+    collector::ReactionAction,
     model::id::{ChannelId, UserId},
 };
-use tracing::log::warn;
+use tracing::{info, log::warn};
 
 use crate::{data::Prefix, game::GameState, helpers::react::react_with};
 
@@ -13,6 +16,8 @@ use super::prelude::*;
 #[description(
     r#"
 Allows you to show the chat logs in a secret meeting between you and another player.
+
+You can navigate log history using ⏮️ and ⏭️, and anyone can use these reactions in order to navigate the history. The bot will listen for new reactions for a total of five(5) minutes.
 
 *Attachments are intentionally excluded.*"#
 )]
@@ -159,64 +164,76 @@ pub async fn show_meeting_log(ctx: &Context, msg: &Message, mut args: Args) -> C
 
     react_with(ctx, &sent_msg, &REACTIONS).await?;
 
-    let author = msg.author.id;
-    let channel = msg.channel_id;
+    let channel = sent_msg.channel_id;
 
-    tokio::task::spawn(pagination(
-        ctx.clone(),
-        sent_msg,
-        author,
-        channel,
-        &REACTIONS,
-    ));
+    tokio::task::spawn(pagination(ctx.clone(), sent_msg, channel, &REACTIONS));
 
     Ok(())
 }
 
+/// Creates a task that paginates the !showlogs output, and runs it
 async fn pagination(
     ctx: Context,
-    mut msg: Message,
-    author: UserId,
+    msg: Message,
     channel: ChannelId,
     unicodes: &'static [&'static str],
 ) -> CommandResult {
-    if let Some(reaction) = msg
-        .await_reaction(&ctx)
+    let collector = msg
+        .await_reactions(&ctx)
         .filter(move |r| unicodes.contains(&r.emoji.to_string().as_str()))
-        .author_id(author)
         .channel_id(channel)
-        .await
-    {
-        let message_id = msg.id;
+        .timeout(Duration::from_secs(300))
+        .await;
 
-        let fields = if reaction.as_inner_ref().emoji.unicode_eq(unicodes[0]) {
-            msg.channel_id.messages(&ctx, |b| b.after(message_id)).await
-        } else {
-            msg.channel_id
-                .messages(&ctx, |b| b.before(message_id))
-                .await
-        }
-        .map(|mut v| {
-            v.truncate(10);
-            v
-        })?
-        .iter()
-        .map(|m| (format!("{} said:", m.author), m.content.clone(), false))
-        .collect::<Vec<_>>();
+    collector
+        .for_each(|reaction| paginate(ctx.clone(), msg.clone(), unicodes, reaction))
+        .await;
 
-        let mut embed = CreateEmbed::default();
-        embed.fields(fields);
+    warn!("Reacing this is probably bad????");
 
-        msg.edit(ctx, |em| {
+    Ok(())
+}
+
+async fn paginate(
+    ctx: Context,
+    mut msg: Message,
+    unicodes: &'static [&'static str],
+    reaction: Arc<ReactionAction>,
+) {
+    let message_id = msg.id;
+
+    // [0] is "⏮️" and [1] is "⏭️". [0] Moves backwards, [1] forwards
+    let fields = if reaction.as_inner_ref().emoji.unicode_eq(unicodes[0]) {
+        msg.channel_id.messages(&ctx, |b| b.after(message_id)).await
+    } else {
+        msg.channel_id
+            .messages(&ctx, |b| b.before(message_id))
+            .await
+    }
+    .map(|mut v| {
+        v.truncate(10);
+        v
+    })
+    .or_else(|err| -> Result<Vec<Message>, ()> {
+        info!("{:?}", err);
+        Ok(vec![])
+    })
+    .unwrap()
+    .iter()
+    .map(|m| (format!("{} said:", m.author), m.content.clone(), false))
+    .collect::<Vec<_>>();
+
+    let mut embed = CreateEmbed::default();
+    embed.fields(fields);
+
+    let edited = msg
+        .edit(ctx, |em| {
             em.embed(|e| {
                 *e = embed;
                 e
             })
         })
-        .await?;
-    }
+        .await;
 
-    warn!("Reacing this is probably bad????");
-
-    Ok(())
+    info!("{:?}", edited);
 }
