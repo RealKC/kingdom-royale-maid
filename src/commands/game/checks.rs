@@ -121,6 +121,10 @@ mod error_messages {
             "ripnote",
             "You can't rip a note out of your memo book when there's no game running",
         );
+        map.insert(
+            "showlogs",
+            "You can't see secret meeting logs when there's no game running!",
+        );
 
         map
     });
@@ -169,6 +173,10 @@ mod error_messages {
         map.insert(
             "ripnote",
             "You can't rip a note out of your memo book when the game hasn't started yet",
+        );
+        map.insert(
+            "showlogs",
+            "You can't see secret meeting logs before a game started!",
         );
 
         map
