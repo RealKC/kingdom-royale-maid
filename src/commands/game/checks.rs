@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use crate::game::GameState;
 
 use super::prelude::*;
@@ -20,24 +22,27 @@ pub async fn standard_game(
 
         match game.state() {
             GameState::NotStarted => {
-                return Err(Reason::UserAndLog {
-                    user: error_messages::GAME_NOT_STARTED[command.names[0]].into(),
-                    log: "Game wasn't started".into(),
-                });
+                return Err(make_reason(
+                    command,
+                    "Game wasn't started",
+                    &*error_messages::GAME_NOT_STARTED,
+                ));
             }
             GameState::GameEnded => {
-                return Err(Reason::UserAndLog {
-                    user: error_messages::GAME_ENDED[command.names[0]].into(),
-                    log: "Game has ended.".into(),
-                });
+                return Err(make_reason(
+                    command,
+                    "Game has ended",
+                    &*error_messages::GAME_ENDED,
+                ));
             }
             _ => (),
         };
     } else {
-        return Err(Reason::UserAndLog {
-            user: error_messages::NEEDS_GAME_TO_EXIST[command.names[0]].into(),
-            log: "No game exists.".into(),
-        });
+        return Err(make_reason(
+            command,
+            "No game exists",
+            &*error_messages::NEEDS_GAME_TO_EXIST,
+        ));
     }
 
     Ok(())
@@ -57,18 +62,35 @@ pub async fn game_check_allow_game_ended(
         let game = game.read().await;
 
         if game.state() == GameState::NotStarted {
-            return Err(Reason::UserAndLog {
-                user: error_messages::GAME_NOT_STARTED[command.names[0]].into(),
-                log: "Game wasn't started.".into(),
-            });
+            return Err(make_reason(
+                command,
+                "Game wasn't started",
+                &*error_messages::GAME_NOT_STARTED,
+            ));
         }
     } else {
-        return Err(Reason::UserAndLog {
-            user: error_messages::NEEDS_GAME_TO_EXIST[command.names[0]].into(),
-            log: "No game exists.".into(),
-        });
+        return Err(make_reason(
+            command,
+            "No game exists",
+            &*error_messages::NEEDS_GAME_TO_EXIST,
+        ));
     }
     Ok(())
+}
+
+fn make_reason(command: &CommandOptions, log: &str, map: &HashMap<&str, &str>) -> Reason {
+    use Reason::{Log, UserAndLog};
+    match map.get(command.names[0]) {
+        Some(message) => UserAndLog {
+            user: message.to_string(),
+            log: log.to_string(),
+        },
+        None => Log(format!(
+            "\n{ascii}\n\tMissing entry in hashmaps for {cmd}",
+            ascii = error_messages::CHECK_BAD,
+            cmd = command.names[0]
+        )),
+    }
 }
 
 /// Module containing statics for different error messages
@@ -215,4 +237,15 @@ mod error_messages {
 
         map
     });
+
+    pub static CHECK_BAD: &str = r#"
+
+     _____ _    _ ______ _____ _  __  ____          _____  
+    / ____| |  | |  ____/ ____| |/ / |  _ \   /\   |  __ \ 
+   | |    | |__| | |__ | |    | ' /  | |_) | /  \  | |  | |
+   | |    |  __  |  __|| |    |  <   |  _ < / /\ \ | |  | |
+   | |____| |  | | |___| |____| . \  | |_) / ____ \| |__| |
+    \_____|_|  |_|______\_____|_|\_\ |____/_/    \_\_____/ 
+                                                           
+    "#;
 }
