@@ -9,7 +9,7 @@ use serenity::{
     prelude::*,
 };
 
-type SecretMeeting = Option<(UserId, ChannelId)>;
+pub type SecretMeeting = Option<(UserId, ChannelId)>;
 
 pub struct Player {
     id: UserId,
