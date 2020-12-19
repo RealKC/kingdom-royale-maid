@@ -204,7 +204,7 @@ async fn pagination(
     msg: Message,
     channel: ChannelId,
     unicodes: &'static [&'static str],
-) -> CommandResult {
+) {
     let collector = msg
         .await_reactions(&ctx)
         .filter(move |r| unicodes.contains(&r.emoji.to_string().as_str()))
@@ -215,10 +215,6 @@ async fn pagination(
     collector
         .for_each(|reaction| switch_page(ctx.clone(), msg.clone(), unicodes, reaction))
         .await;
-
-    warn!("Reacing this is probably bad????");
-
-    Ok(())
 }
 
 /// Fetches messages and builds an embed for a new page
