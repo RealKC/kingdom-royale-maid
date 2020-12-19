@@ -9,5 +9,5 @@ mod tasks;
 
 pub use data::{DeathCause, GameState, JoinError, SubstitutionStatus};
 pub use game::Game;
-pub use player::Player;
+pub use player::{Player, SecretMeeting};
 pub use roles::RoleName;
