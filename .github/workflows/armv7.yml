@@ -1,0 +1,21 @@
+on: [push, pull_request]
+
+name: Raspberry Pi build
+
+jobs:
+  linux_arm7:
+    if: "!startsWith(github.event.head_commit.message, '[SKIP CI]')"
+    name: Linux ARMv7
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          target: armv7-unknown-linux-gnueabihf
+          override: true
+      - uses: actions-rs/cargo@v1
+        with:
+          use-cross: true
+          command: build
+          args: --target armv7-unknown-linux-gnueabihf
