@@ -92,10 +92,11 @@ pub async fn show_meeting_log(ctx: &Context, msg: &Message, mut args: Args) -> C
         match choose_secret_meeting(ctx, msg, player, day, which_meeting, secret_meetings).await? {
             Some((partner, room)) => (partner, room),
             None => {
+                let partner_name = user.to_user(ctx).await?.name;
                 warn!(
                     "No secret meeting between {author} and {partner} on day={day}",
-                    author = msg.author.id.mention(),
-                    partner = user.mention(),
+                    author = msg.author.name,
+                    partner = partner_name,
                     day = day
                 );
                 msg.reply(ctx, "There wasn't actually a secret meeting! Huh...")
