@@ -1,6 +1,7 @@
 // Command modules
 mod end_game;
 mod end_gathering;
+mod flavour;
 mod forceadd;
 mod game_info;
 mod give_item;
@@ -20,6 +21,7 @@ mod substitute;
 
 pub use end_game::*;
 pub use end_gathering::*;
+pub use flavour::*;
 pub use forceadd::*;
 pub use game_info::*;
 pub use give_item::*;

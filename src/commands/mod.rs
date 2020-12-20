@@ -44,7 +44,16 @@ pub struct GameManagement;
 
 #[group("Item Interactions")]
 #[only_in(guilds)]
-#[commands(give_item, inventory, notes, write_note, show_note, rip_note)]
+#[commands(
+    give_item,
+    inventory,
+    notes,
+    write_note,
+    show_note,
+    rip_note,
+    inspect,
+    look_around
+)]
 pub struct ItemInteractions;
 
 #[group("Player Interactions")]
