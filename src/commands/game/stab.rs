@@ -42,6 +42,11 @@ pub async fn stab(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult
         return Ok(());
     }
 
+    if target == msg.author.id {
+        msg.reply(ctx, "You cannot stab yourself!").await?;
+        return Ok(());
+    }
+
     let channel = msg.channel(ctx).await;
     if channel.is_none() {
         return Err("Got an invalid channel somehow".into());
