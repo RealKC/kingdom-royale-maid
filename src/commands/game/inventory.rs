@@ -22,7 +22,7 @@ pub async fn inventory(ctx: &Context, msg: &Message) -> CommandResult {
     let mut embed = CreateEmbed::default();
     embed
         .title("Your inventory")
-        .color(0x8B572A)
+        .colour(0x8B572A)
         .image("https://github.com/RealKC/kingdom-royale-maid/raw/master/res/the_jute_bag.png")
         .field("Items", inventory, true);
 
