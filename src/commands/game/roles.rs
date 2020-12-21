@@ -33,7 +33,7 @@ role_embed!(
     "https://github.com/RealKC/kingdom-royale-maid/raw/master/res/king.png",
     r#"“He is the king who has ascended to the throne by assassinating the previous ruler and has carried out many invasions. Having a distrustful personality, he's scheming murder of the ones that threaten his throne. He does not notice that his distrust makes others lose their loyalty for him.
 
-He can request his subordinates to commit 「 murder 」, but he cannot force themm because he fears their animosity could become directed at him.
+He can request his subordinates to commit 「 murder 」, but he cannot force them because he fears their animosity could become directed at him.
 
 A land ruled by a man that cannot trust others is unlikely to have a bright future.”
 "#,
@@ -41,7 +41,7 @@ A land ruled by a man that cannot trust others is unlikely to have a bright futu
     r#"
 「 Murder 」
 He can select a player he wants to kill and request the 「 Sorcerer 」 or 「 Knight 」 to execute this action. He does not need to select.
-    
+
 「 Substitution 」
 He can once avoid being the target of 「 Assassination 」 by changing roles with 「 The Double 」 for a single day. If he was selected as the target on this day, 「 The Double 」 will die instead of the 「 King 」.
 "#,
@@ -60,7 +60,7 @@ If he comes to the throne, this land is likely to turn into a worse dictatorship
     0xfcf403, // Yellow for the crown he wishes
     r#"
 「 Throne Succession」
-He becomes able to use 「 Murder 」 once the 「 King 」 and 「 The Double 」 die. 
+He becomes able to use 「 Murder 」 once the 「 King 」 and 「 The Double 」 die.
 
 「 Anti-magic 」
 He cannot be killed by 「 Sorcery 」."#,

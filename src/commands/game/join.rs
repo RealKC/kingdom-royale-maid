@@ -40,7 +40,7 @@ pub async fn join(ctx: &Context, msg: &Message) -> CommandResult {
             }
         }
     } else {
-        info!("User tried joining nonexistent user");
+        info!("User tried joining inexistent user");
         msg.reply(ctx, "you can't join a game if there aren't any in progress")
             .await?;
     }
