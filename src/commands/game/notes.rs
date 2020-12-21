@@ -13,23 +13,13 @@ use std::time::Duration;
 #[only_in(guilds)]
 #[description("Allows you to browse your memo book")]
 #[aliases("memobook")]
-#[checks(GameCheckAllowGameEnded)]
+#[checks(GameCheckAllowGameEnded, UserIsPlaying)]
 pub async fn notes(ctx: &Context, msg: &Message) -> CommandResult {
     let data = ctx.data.read().await;
 
     let game = expect_game!(data);
 
-    let player = game.players().get(&msg.author.id);
-    if player.is_none() {
-        msg.reply(
-            ctx,
-            "You can't take a look at your note when you're not part of the game",
-        )
-        .await?;
-        return Ok(());
-    }
-    let player = player.unwrap();
-
+    let player = expect_player!(game, msg.author.id);
     let channel = player.room();
     let memo_book = player.items().memo_book();
 
@@ -126,7 +116,7 @@ pub async fn notes(ctx: &Context, msg: &Message) -> CommandResult {
 (Usage and Sample usage do not include the prefix, but it still must be used)
 "#)]
 #[usage("your note here, can't be too long")]
-#[checks(StandardGameCheck)]
+#[checks(StandardGameCheck, UserIsPlaying)]
 pub async fn write_note(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let note = args.rest();
 
@@ -168,7 +158,7 @@ Shows a note at "page" N in the current channel.
 (Usage and Sample usage do not include the prefix, but it still must be used)"#
 )]
 #[usage("N")]
-#[checks(GameCheckAllowGameEnded)]
+#[checks(GameCheckAllowGameEnded, UserIsPlaying)]
 pub async fn show_note(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let page = args.parse::<usize>();
 
@@ -218,7 +208,7 @@ Allows you to rip a note out of your memobook and give it to someone. Note that 
 "#)]
 #[usage("<page> <user mention>")]
 #[example("5 @KC#7788")]
-#[checks(StandardGameCheck)]
+#[checks(StandardGameCheck, UserIsPlaying)]
 pub async fn rip_note(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let page = args.single::<usize>();
     let target = args.single::<UserId>();

@@ -4,21 +4,12 @@ use crate::game::{RoleName, SubstitutionStatus};
 #[command]
 #[only_in(guilds)]
 #[description("This allows the『 King 』to use 「 Substitution 」 once per game.")]
-#[checks(StandardGameCheck)]
+#[checks(StandardGameCheck, UserIsPlaying)]
 pub async fn substitute(ctx: &Context, msg: &Message) -> CommandResult {
     let data = ctx.data.read().await;
     let mut game = expect_game_mut!(data);
 
-    let player = game.players().get(&msg.author.id);
-    if player.is_none() {
-        msg.reply(
-            ctx,
-            "You can't 「 substitute 」  with someone when you aren't in a game!",
-        )
-        .await?;
-        return Ok(());
-    }
-    let player = player.unwrap();
+    let player = expect_player!(game, msg.author.id);
 
     if player.role_name() != RoleName::King {
         msg.reply(

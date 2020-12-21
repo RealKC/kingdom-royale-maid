@@ -16,7 +16,7 @@ Note that you have to mention someone as the target.
 "#)]
 #[usage("<target user mention> <item>")]
 #[example("@KC#7788 food")]
-#[checks(StandardGameCheck)]
+#[checks(StandardGameCheck, UserIsPlaying)]
 pub async fn give_item(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let data = ctx.data.read().await;
 

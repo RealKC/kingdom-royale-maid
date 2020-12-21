@@ -6,23 +6,12 @@ use serenity::builder::CreateEmbed;
 #[aliases("bag")]
 #[only_in(guilds)]
 #[description("Allows you to inspect the items you have in your bag")]
-#[checks(GameCheckAllowGameEnded)]
+#[checks(GameCheckAllowGameEnded, UserIsPlaying)]
 pub async fn inventory(ctx: &Context, msg: &Message) -> CommandResult {
     let data = ctx.data.read().await;
-
     let game = expect_game!(data);
 
-    let player = game.players().get(&msg.author.id);
-    if player.is_none() {
-        msg.reply(
-            ctx,
-            "You can't look into your bag when you aren't in the game",
-        )
-        .await?;
-        return Ok(());
-    }
-    let player = player.unwrap();
-
+    let player = expect_player!(game, msg.author.id);
     let items = player.items();
 
     let mut inventory = String::new();

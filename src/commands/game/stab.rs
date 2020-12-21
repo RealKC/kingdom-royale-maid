@@ -15,16 +15,10 @@ Stab another player
 )]
 #[usage("<target user mention>")]
 #[example("@KC#7788")]
-#[checks(StandardGameCheck)]
+#[checks(StandardGameCheck, UserIsPlaying)]
 pub async fn stab(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let data = ctx.data.read().await;
     let mut game = expect_game_mut!(data);
-
-    if !game.players().contains_key(&msg.author.id) {
-        msg.reply(ctx, "You can't stab someone when you're not in the game!")
-            .await?;
-        return Ok(());
-    }
 
     let target = args.single::<UserId>();
     if target.is_err() {

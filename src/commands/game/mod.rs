@@ -53,9 +53,8 @@ impl TypeMapKey for GameContainer {
 }
 
 mod prelude {
-    pub use super::{
-        checks::{GAMECHECKALLOWGAMEENDED_CHECK, STANDARDGAMECHECK_CHECK},
-        GameContainer,
+    pub use super::{checks::*, GameContainer};
+    pub use crate::{
+        commands::prelude::*, expect_game, expect_game_mut, expect_player, game::Game,
     };
-    pub use crate::{commands::prelude::*, expect_game, expect_game_mut, game::Game};
 }

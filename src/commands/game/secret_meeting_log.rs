@@ -24,7 +24,7 @@ You can navigate log history using ⏮️ and ⏭️, and anyone can use these r
 *Attachments are intentionally excluded.*"#
 )]
 #[usage("<day> <target user mention> [optionally, which meeting(as you can meet with a user 2 times a day, use 1 or 2)]")]
-#[checks(GameCheckAllowGameEnded)]
+#[checks(GameCheckAllowGameEnded, UserIsPlaying)]
 #[only_in(guilds)]
 pub async fn show_meeting_log(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let data = ctx.data.read().await;
@@ -48,7 +48,7 @@ pub async fn show_meeting_log(ctx: &Context, msg: &Message, mut args: Args) -> C
             return Ok(());
         }
     };
-    let user = match args.single::<UserId>() {
+    let partner_id = match args.single::<UserId>() {
         Ok(user) => user,
         Err(err) => {
             msg.reply(
@@ -60,17 +60,20 @@ pub async fn show_meeting_log(ctx: &Context, msg: &Message, mut args: Args) -> C
         }
     };
 
-    let player = match game.players().get(&user) {
+    let partner = match game.players().get(&partner_id) {
         Some(player) => player,
         None => {
             msg.reply(
                 ctx,
-                "You can't show secret meeting logs when you're not in a game!",
+                "You can't show your secret meeting logs with someone who's not in the game!",
             )
             .await?;
+
             return Ok(());
         }
     };
+
+    let player = expect_player!(game, msg.author.id);
 
     if day > game.day()
         || (day == game.day()
@@ -88,23 +91,31 @@ pub async fn show_meeting_log(ctx: &Context, msg: &Message, mut args: Args) -> C
     let secret_meetings = player.get_secret_meetings_for_day(day).unwrap();
     let which_meeting = args.single::<u8>().ok();
 
-    let (partner, room) =
-        match choose_secret_meeting(ctx, msg, player, day, which_meeting, secret_meetings).await? {
-            Some((partner, room)) => (partner, room),
-            None => {
-                let partner_name = user.to_user(ctx).await?.name;
-                warn!(
-                    "No secret meeting between {author} and {partner} on day={day}",
-                    author = msg.author.name,
-                    partner = partner_name,
-                    day = day
-                );
-                msg.reply(ctx, "There wasn't actually a secret meeting! Huh...")
-                    .await?;
-                // Not actually an "Ok" state I believe, but I do my own logging and I don't want serenity to log here
-                return Ok(());
-            }
-        };
+    let (partner, room) = match choose_secret_meeting(
+        ctx,
+        msg,
+        partner,
+        day,
+        which_meeting,
+        secret_meetings,
+    )
+    .await?
+    {
+        Some((partner, room)) => (partner, room),
+        None => {
+            let partner_name = partner_id.to_user(ctx).await?.name;
+            warn!(
+                "No secret meeting between {author} and {partner} on day={day}",
+                author = msg.author.name,
+                partner = partner_name,
+                day = day
+            );
+            msg.reply(ctx, "There wasn't actually a secret meeting! Huh...")
+                .await?;
+            // Not actually an "Ok" state I believe, but I do my own logging and I don't want serenity to log here
+            return Ok(());
+        }
+    };
 
     let mut messages = room.messages_iter(&ctx).boxed();
     let mut message_fields: Vec<(String, String, bool)> = vec![];
