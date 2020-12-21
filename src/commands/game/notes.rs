@@ -16,7 +16,7 @@ use std::time::Duration;
 #[checks(GameCheckAllowGameEnded, UserIsPlaying)]
 pub async fn notes(ctx: &Context, msg: &Message) -> CommandResult {
     let game_guard = get_game_guard(ctx).await?;
-    let game = game_guard.write().await;
+    let game = game_guard.read().await;
 
     let player = game.player(msg.author.id)?;
     let channel = player.room();

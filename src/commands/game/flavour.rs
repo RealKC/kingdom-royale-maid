@@ -33,7 +33,7 @@ pub async fn inspect(ctx: &Context, msg: &Message, args: Args) -> CommandResult 
 
         "watch" => {
             let game_guard = get_game_guard(ctx).await?;
-            let game = game_guard.write().await;
+            let game = game_guard.read().await;
             let player = game.player(msg.author.id)?;
 
             let items = player.items();
@@ -50,7 +50,7 @@ pub async fn inspect(ctx: &Context, msg: &Message, args: Args) -> CommandResult 
 
         "food" | "food bar" | "food ration" | "food item" | "snack" => {
             let game_guard = get_game_guard(ctx).await?;
-            let game = game_guard.write().await;
+            let game = game_guard.read().await;
             let player = game.player(msg.author.id)?;
 
             let items = player.items();
@@ -67,7 +67,7 @@ pub async fn inspect(ctx: &Context, msg: &Message, args: Args) -> CommandResult 
 
         "tablet" | "digital tablet" => {
             let game_guard = get_game_guard(ctx).await?;
-            let game = game_guard.write().await;
+            let game = game_guard.read().await;
 
             if game.state() == GameState::ABlock && game.day() == 1 {
                 msg.reply(ctx, "You look at the tablet. It currently is off.")
@@ -102,7 +102,7 @@ pub async fn inspect(ctx: &Context, msg: &Message, args: Args) -> CommandResult 
 
         "table" => {
             let game_guard = get_game_guard(ctx).await?;
-            let game = game_guard.write().await;
+            let game = game_guard.read().await;
             let player = game.player(msg.author.id)?;
 
             if msg.channel_id == player.room() {
@@ -133,7 +133,7 @@ pub async fn inspect(ctx: &Context, msg: &Message, args: Args) -> CommandResult 
 #[checks(StandardGameCheck, UserIsPlaying)]
 pub async fn look_around(ctx: &Context, msg: &Message) -> CommandResult {
     let game_guard = get_game_guard(ctx).await?;
-    let game = game_guard.write().await;
+    let game = game_guard.read().await;
 
     let player = game.players().get(&msg.author.id);
 
