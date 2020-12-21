@@ -15,9 +15,8 @@ use std::time::Duration;
 #[aliases("memobook")]
 #[checks(GameCheckAllowGameEnded, UserIsPlaying)]
 pub async fn notes(ctx: &Context, msg: &Message) -> CommandResult {
-    let data = ctx.data.read().await;
-
-    let game = expect_game!(data);
+    let game_guard = get_game_guard(ctx).await?;
+    let game = game_guard.write().await;
 
     let player = expect_player!(game, msg.author.id);
     let channel = player.room();
@@ -120,8 +119,8 @@ pub async fn notes(ctx: &Context, msg: &Message) -> CommandResult {
 pub async fn write_note(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let note = args.rest();
 
-    let data = ctx.data.read().await;
-    let mut game = expect_game_mut!(data);
+    let game_guard = get_game_guard(ctx).await?;
+    let mut game = game_guard.write().await;
 
     let game_state = game.state();
     let player = game.players_mut().get_mut(&msg.author.id);
@@ -162,8 +161,8 @@ Shows a note at "page" N in the current channel.
 pub async fn show_note(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let page = args.parse::<usize>();
 
-    let data = ctx.data.read().await;
-    let game = expect_game!(data);
+    let game_guard = get_game_guard(ctx).await?;
+    let game = game_guard.write().await;
 
     let player = game.players().get(&msg.author.id);
 
@@ -213,17 +212,24 @@ pub async fn rip_note(ctx: &Context, msg: &Message, mut args: Args) -> CommandRe
     let page = args.single::<usize>();
     let target = args.single::<UserId>();
 
-    let data = ctx.data.read().await;
-    let mut game = expect_game_mut!(data);
+    let game_guard = get_game_guard(ctx).await?;
+    let mut game = game_guard.write().await;
 
     let page = page.unwrap();
 
+    let prefix = ctx
+        .data
+        .read()
+        .await
+        .get::<Prefix>()
+        .expect("Prefix should always be in ctx.data")
+        .clone();
     if target.is_err() {
         msg.reply(
             ctx,
             format!(
                 "I couldn't get a user from your message. Try {}help ripnote",
-                data.get::<Prefix>().unwrap()
+                prefix
             ),
         )
         .await?;

@@ -32,8 +32,8 @@ pub async fn inspect(ctx: &Context, msg: &Message, args: Args) -> CommandResult 
         }
 
         "watch" => {
-            let data = ctx.data.read().await;
-            let game = expect_game!(data);
+            let game_guard = get_game_guard(ctx).await?;
+            let game = game_guard.write().await;
             let player = expect_player!(game, msg.author.id);
 
             let items = player.items();
@@ -49,8 +49,8 @@ pub async fn inspect(ctx: &Context, msg: &Message, args: Args) -> CommandResult 
         }
 
         "food" | "food bar" | "food ration" | "food item" | "snack" => {
-            let data = ctx.data.read().await;
-            let game = expect_game!(data);
+            let game_guard = get_game_guard(ctx).await?;
+            let game = game_guard.write().await;
             let player = expect_player!(game, msg.author.id);
 
             let items = player.items();
@@ -66,8 +66,8 @@ pub async fn inspect(ctx: &Context, msg: &Message, args: Args) -> CommandResult 
         }
 
         "tablet" | "digital tablet" => {
-            let data = ctx.data.read().await;
-            let game = expect_game!(data);
+            let game_guard = get_game_guard(ctx).await?;
+            let game = game_guard.write().await;
 
             if game.state() == GameState::ABlock && game.day() == 1 {
                 msg.reply(ctx, "You look at the tablet. It currently is off.")
@@ -101,8 +101,8 @@ pub async fn inspect(ctx: &Context, msg: &Message, args: Args) -> CommandResult 
         }
 
         "table" => {
-            let data = ctx.data.read().await;
-            let game = expect_game!(data);
+            let game_guard = get_game_guard(ctx).await?;
+            let game = game_guard.write().await;
             let player = expect_player!(game, msg.author.id);
 
             if msg.channel_id == player.room() {
@@ -132,8 +132,8 @@ pub async fn inspect(ctx: &Context, msg: &Message, args: Args) -> CommandResult 
 #[description("This command allows you to look around in order to get a general description of the room you're in.")]
 #[checks(StandardGameCheck, UserIsPlaying)]
 pub async fn look_around(ctx: &Context, msg: &Message) -> CommandResult {
-    let data = ctx.data.read().await;
-    let game = expect_game!(data);
+    let game_guard = get_game_guard(ctx).await?;
+    let game = game_guard.write().await;
 
     let player = game.players().get(&msg.author.id);
 

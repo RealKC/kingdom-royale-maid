@@ -6,6 +6,8 @@ use super::prelude::*;
 
 use serenity::framework::standard::{macros::check, CommandOptions, Reason};
 
+pub static BROKEN_GAME_CHECK_CONTRACT: &str = r#"This command either misses a `#[checks(StandardGameCheck)` or `#[checks(GameCheckAllowGameEnded)] attribute, or StandardGameCheck or GameCheckAllowGameEnded broke the contract of "This command will only run if there's a game here""#;
+
 // This is the standard check ran before most game commands, it ensures that these commands have a valid game to work with.
 #[check]
 #[name = "StandardGameCheck"]

@@ -54,7 +54,15 @@ impl TypeMapKey for GameContainer {
 
 mod prelude {
     pub use super::{checks::*, GameContainer};
-    pub use crate::{
-        commands::prelude::*, expect_game, expect_game_mut, expect_player, game::Game,
-    };
+    pub use crate::{commands::prelude::*, expect_player, game::Game};
+
+    /// Gets a `Arc<RwLock<Game>>` from `ctx.data`
+    pub async fn get_game_guard(ctx: &Context) -> CommandResult<Arc<RwLock<Game>>> {
+        ctx.data
+            .read()
+            .await
+            .get::<GameContainer>()
+            .cloned()
+            .ok_or_else(|| BROKEN_GAME_CHECK_CONTRACT.into())
+    }
 }

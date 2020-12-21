@@ -27,10 +27,13 @@ You can navigate log history using ⏮️ and ⏭️, and anyone can use these r
 #[checks(GameCheckAllowGameEnded, UserIsPlaying)]
 #[only_in(guilds)]
 pub async fn show_meeting_log(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
-    let data = ctx.data.read().await;
-    let game = expect_game!(data);
+    let game_guard = get_game_guard(ctx).await?;
+    let game = game_guard.write().await;
 
-    let prefix = data
+    let prefix = ctx
+        .data
+        .read()
+        .await
         .get::<Prefix>()
         .expect("Prefix should always be in ctx.data")
         .clone();

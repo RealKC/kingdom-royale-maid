@@ -6,8 +6,9 @@ use crate::game::GameState;
 #[description("Forcefully start a meeting")]
 #[checks(StandardGameCheck)]
 pub async fn start_gathering(ctx: &Context, msg: &Message) -> CommandResult {
-    let data = ctx.data.read().await;
-    let mut game = expect_game_mut!(data);
+    let game_guard = get_game_guard(ctx).await?;
+    let mut game = game_guard.write().await;
+
     if msg.author.id != game.host() {
         msg.reply(
             ctx,

@@ -18,9 +18,8 @@ Note that you have to mention someone as the target.
 #[example("@KC#7788 food")]
 #[checks(StandardGameCheck, UserIsPlaying)]
 pub async fn give_item(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
-    let data = ctx.data.read().await;
-
-    let mut game = expect_game_mut!(data);
+    let game_guard = get_game_guard(ctx).await?;
+    let mut game = game_guard.write().await;
 
     let players = game.players_mut();
 

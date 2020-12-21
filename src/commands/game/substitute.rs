@@ -6,8 +6,8 @@ use crate::game::{RoleName, SubstitutionStatus};
 #[description("This allows the『 King 』to use 「 Substitution 」 once per game.")]
 #[checks(StandardGameCheck, UserIsPlaying)]
 pub async fn substitute(ctx: &Context, msg: &Message) -> CommandResult {
-    let data = ctx.data.read().await;
-    let mut game = expect_game_mut!(data);
+    let game_guard = get_game_guard(ctx).await?;
+    let mut game = game_guard.write().await;
 
     let player = expect_player!(game, msg.author.id);
 
