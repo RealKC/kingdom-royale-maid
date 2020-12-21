@@ -7,20 +7,18 @@ use serenity::model::misc::Mentionable;
 #[only_in(guilds)]
 #[description("Shows info(such as players and started status) about a game")]
 pub async fn game_info(ctx: &Context, msg: &Message) -> CommandResult {
-    let data = ctx.data.read().await;
-    let game = data.get::<GameContainer>();
-
-    if game.is_none() {
-        msg.reply(
-            ctx,
-            "You can't get info about a game if there's none running!",
-        )
-        .await?;
-        return Ok(());
-    }
-    let game = game.unwrap();
-
-    let game = game.write().await;
+    let game_guard = match get_game_guard(ctx).await {
+        Ok(guard) => guard,
+        Err(err) => {
+            msg.reply(
+                ctx,
+                "You can't get info about a game if there's none running!",
+            )
+            .await?;
+            return Err(err);
+        }
+    };
+    let game = game_guard.read().await;
 
     let (players_field_name, players_field_value) = {
         if game.state() == GameState::NotStarted {
