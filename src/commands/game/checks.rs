@@ -303,6 +303,7 @@ mod error_messages {
             "substitute",
             "You can't 「 substitute 」  with someone when you aren't in a game!",
         );
+        map.insert("give", "You can't give items when you're not in a game");
 
         map
     });

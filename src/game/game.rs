@@ -701,6 +701,16 @@ And a heavy-duty knife.
         &mut self.players
     }
 
+    pub fn player(&self, player: UserId) -> StdResult<&Player, &'static str> {
+        static ERR: &str = "_(read)_ This command either lacks the UserIsPlaying check or UserIsPlaying broke the contract it should enforce.";
+        self.players.get(&player).ok_or(ERR)
+    }
+
+    pub fn player_mut(&mut self, player: UserId) -> StdResult<&mut Player, &'static str> {
+        static ERR: &str = "_(write)_ This command either lacks the UserIsPlaying check or UserIsPlaying broke the contract it should enforce.";
+        self.players.get_mut(&player).ok_or(ERR)
+    }
+
     pub fn host(&self) -> Host {
         self.host
     }

@@ -34,7 +34,7 @@ pub async fn inspect(ctx: &Context, msg: &Message, args: Args) -> CommandResult 
         "watch" => {
             let game_guard = get_game_guard(ctx).await?;
             let game = game_guard.write().await;
-            let player = expect_player!(game, msg.author.id);
+            let player = game.player(msg.author.id)?;
 
             let items = player.items();
 
@@ -51,7 +51,7 @@ pub async fn inspect(ctx: &Context, msg: &Message, args: Args) -> CommandResult 
         "food" | "food bar" | "food ration" | "food item" | "snack" => {
             let game_guard = get_game_guard(ctx).await?;
             let game = game_guard.write().await;
-            let player = expect_player!(game, msg.author.id);
+            let player = game.player(msg.author.id)?;
 
             let items = player.items();
 
@@ -103,7 +103,7 @@ pub async fn inspect(ctx: &Context, msg: &Message, args: Args) -> CommandResult 
         "table" => {
             let game_guard = get_game_guard(ctx).await?;
             let game = game_guard.write().await;
-            let player = expect_player!(game, msg.author.id);
+            let player = game.player(msg.author.id)?;
 
             if msg.channel_id == player.room() {
                 msg.reply(

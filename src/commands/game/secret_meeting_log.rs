@@ -63,20 +63,20 @@ pub async fn show_meeting_log(ctx: &Context, msg: &Message, mut args: Args) -> C
         }
     };
 
-    let partner = match game.players().get(&partner_id) {
-        Some(player) => player,
-        None => {
+    let partner = match game.player(partner_id) {
+        Ok(player) => player,
+        Err(err) => {
             msg.reply(
                 ctx,
                 "You can't show your secret meeting logs with someone who's not in the game!",
             )
             .await?;
 
-            return Ok(());
+            return Err(err.into());
         }
     };
 
-    let player = expect_player!(game, msg.author.id);
+    let player = game.player(msg.author.id)?;
 
     if day > game.day()
         || (day == game.day()

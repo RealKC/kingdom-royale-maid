@@ -20,13 +20,18 @@ pub async fn stab(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult
     let game_guard = get_game_guard(ctx).await?;
     let mut game = game_guard.write().await;
 
-    let target = args.single::<UserId>();
-    if target.is_err() {
-        msg.reply(ctx, "I couldn't get a user ID from your message!")
-            .await?;
-        return Err(target.unwrap_err().into());
+    let target = match args.single::<UserId>() {
+        Ok(target) => target,
+        Err(err) => {
+            msg.reply(ctx, "I couldn't get a user ID from your message!")
+                .await?;
+            return Err(err.into());
+        }
+    };
+    if target == ctx.cache.current_user_id().await {
+        msg.reply(ctx, "Ara ara~, you can't stab me~").await?;
+        return Ok(());
     }
-    let target = target.unwrap();
 
     if target == game.host() {
         msg.reply(
@@ -34,17 +39,6 @@ pub async fn stab(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult
             "You can't stab the host! That's rather rude towards them, isn't it?",
         )
         .await?;
-        return Ok(());
-    }
-
-    if target == ctx.cache.current_user_id().await {
-        msg.reply(ctx, "Ara ara~, you can't stab me~").await?;
-        return Ok(());
-    }
-
-    if game.players().contains_key(&target) {
-        msg.reply(ctx, "You can't stab someone not in the game!")
-            .await?;
         return Ok(());
     }
 
@@ -75,7 +69,15 @@ pub async fn stab(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult
     };
 
     if attacker_roll > target_roll {
-        let target = game.players_mut().get_mut(&target).unwrap();
+        let target = match game.player_mut(target) {
+            Ok(target) => target,
+            Err(err) => {
+                msg.reply(ctx, "You can't stab someone not in the game!")
+                    .await?;
+                return Err(err.into());
+            }
+        };
+
         target
             .set_dead(DeathCause::Stab(msg.author.id), &ctx, channel.id)
             .await?;

@@ -40,8 +40,6 @@ pub use start_gathering::*;
 pub use substitute::*;
 
 mod checks;
-#[macro_use]
-mod macros;
 
 use super::prelude::*;
 pub use crate::game::Game;
@@ -54,7 +52,7 @@ impl TypeMapKey for GameContainer {
 
 mod prelude {
     pub use super::{checks::*, GameContainer};
-    pub use crate::{commands::prelude::*, expect_player, game::Game};
+    pub use crate::{commands::prelude::*, game::Game};
 
     /// Gets a `Arc<RwLock<Game>>` from `ctx.data`
     pub async fn get_game_guard(ctx: &Context) -> CommandResult<Arc<RwLock<Game>>> {

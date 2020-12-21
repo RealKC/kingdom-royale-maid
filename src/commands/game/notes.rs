@@ -18,7 +18,7 @@ pub async fn notes(ctx: &Context, msg: &Message) -> CommandResult {
     let game_guard = get_game_guard(ctx).await?;
     let game = game_guard.write().await;
 
-    let player = expect_player!(game, msg.author.id);
+    let player = game.player(msg.author.id)?;
     let channel = player.room();
     let memo_book = player.items().memo_book();
 

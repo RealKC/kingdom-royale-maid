@@ -9,7 +9,7 @@ pub async fn substitute(ctx: &Context, msg: &Message) -> CommandResult {
     let game_guard = get_game_guard(ctx).await?;
     let mut game = game_guard.write().await;
 
-    let player = expect_player!(game, msg.author.id);
+    let player = game.player(msg.author.id)?;
 
     if player.role_name() != RoleName::King {
         msg.reply(
