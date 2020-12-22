@@ -19,6 +19,8 @@ use hooks::*;
 mod data;
 mod game;
 mod helpers;
+#[cfg(not(feature = "deterministic"))]
+mod version_data;
 
 use crate::data::{stats, Cdn, Reqwest, ReqwestClient};
 

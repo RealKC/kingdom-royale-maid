@@ -8,6 +8,28 @@ use serenity::{
 };
 use std::{fmt::Write, time::Instant};
 
+#[cfg(not(feature = "deterministic"))]
+use tracing::trace;
+
+#[cfg(not(feature = "deterministic"))]
+mod res {
+    use super::CommandResult;
+    use crate::version_data::VersionData;
+    use rust_embed::RustEmbed;
+
+    #[derive(RustEmbed)]
+    #[folder = "$VERSION_FILE_PATH/"]
+    struct Asset;
+
+    pub fn version() -> CommandResult<VersionData> {
+        let ver = &Asset::get("version.json").ok_or("version.json not embedded for some reason")?;
+
+        let version = serde_json::from_slice::<VersionData>(&ver)?;
+
+        Ok(version)
+    }
+}
+
 #[command]
 #[description("Shows a number of different statistics about the bot")]
 #[aliases("statistics")]
@@ -96,6 +118,56 @@ Uptime: {uptime}
             ),
             true,
         );
+
+    #[cfg(not(feature = "deterministic"))]
+    if let Ok(version) = res::version() {
+        use crate::data::ReqwestClient;
+        use reqwest::Method;
+
+        let github_url = format!(
+            "https://github.com/RealKC/kingdom-royale-maid/commit/{}",
+            version.commit
+        );
+        trace!("Commit: {}", github_url);
+
+        let commit_is_online = {
+            let reqwest = ctx.data.read().await.get::<ReqwestClient>().cloned();
+            if let Some(client) = reqwest {
+                let response = client.request(Method::GET, &github_url).send().await;
+                if let Ok(response) = response {
+                    response.status().is_success()
+                } else {
+                    false
+                }
+            } else {
+                false
+            }
+        };
+
+        let commit = format!(
+            "Commit: {}",
+            if commit_is_online {
+                format!("[{sha}]({url})", sha = version.commit, url = github_url)
+            } else {
+                version.commit
+            }
+        );
+
+        embed.field(
+            "Build info",
+            format!(
+                r#"
+Built on: {date}
+{commit}
+Has untracked changes: {not_clean}
+        "#,
+                date = version.timestamp,
+                commit = commit,
+                not_clean = !version.clean_worktree
+            ),
+            true,
+        );
+    }
 
     msg.channel_id
         .send_message(ctx, |m| m.set_embed(embed))
