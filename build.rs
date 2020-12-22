@@ -56,10 +56,11 @@ fn main() -> std::io::Result<()> {
     };
 
     let version_path = env::var("OUT_DIR").unwrap();
+    println!("{}", version_path);
     let version_path = Path::new(&version_path);
     let path = version_path
         .strip_prefix(env::var("CARGO_MANIFEST_DIR").unwrap())
-        .unwrap();
+        .unwrap_or(version_path);
 
     println!("cargo:rustc-env=VERSION_FILE_PATH={}", path.display());
 
