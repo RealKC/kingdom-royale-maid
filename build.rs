@@ -5,6 +5,9 @@
 // Author: https://github.com/Prof-Bloodstone/
 // Commit: "Some more work on tests, parsing json etc" https://github.com/Prof-Bloodstone/botstone/commit/7c8b6672919c67256a3735869159ef052b8faeb2
 
+// I license all of my modifications and additions to this file also under the Mozilla Public License, v. 2.0,
+// Obtain a copy at https://mozilla.org/MPL/2.0/
+
 #[path = "src/version_data.rs"]
 mod version_data;
 use version_data::VersionData;
