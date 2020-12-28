@@ -32,13 +32,11 @@ dotenv = "0.15"
 image = "0.23"
 libwebp-image = "0.1"
 
-humansize = "1.1"
 chrono = "0.4"
-[dependencies.procfs]
-# path = "../procfs"
-# git = "https://github.com/RealKC/procfs"
-# branch = "feature/smaps"
-version = "0.9"
+
+[target.'cfg(target_os = "linux")'.dependencies]
+humansize = "1.1"
+procfs = "0.9"
 
 [dependencies.serenity]
 git = "https://github.com/serenity-rs/serenity"

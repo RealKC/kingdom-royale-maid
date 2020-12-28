@@ -123,20 +123,36 @@ async fn main() -> CommandResult {
 
     // Listen to interrupts
     // Thanks Prof Bloodstone from the serenity discord
+    #[cfg(not(windows))]
+    {
+        use tokio::{signal::unix::signal, signal::unix::SignalKind};
 
-    use tokio::{signal::unix::signal, signal::unix::SignalKind};
+        let signals_to_handle = vec![
+            SignalKind::hangup(),
+            SignalKind::interrupt(),
+            SignalKind::terminate(),
+        ];
+        for kind in signals_to_handle {
+            let mut stream = signal(kind).unwrap();
+            let shard_manager = client.shard_manager.clone();
+            tokio::spawn(async move {
+                stream.recv().await;
+                info!("Signal received - shutting down!");
+                shard_manager.lock().await.shutdown_all().await;
+            });
+        }
+    }
 
-    let signals_to_handle = vec![
-        SignalKind::hangup(),
-        SignalKind::interrupt(),
-        SignalKind::terminate(),
-    ];
-    for kind in signals_to_handle {
-        let mut stream = signal(kind).unwrap();
+    #[cfg(windows)]
+    {
+        use tokio::signal::windows::ctrl_break;
+
+        let stream = ctrl_break();
         let shard_manager = client.shard_manager.clone();
+
         tokio::spawn(async move {
-            stream.recv().await;
-            info!("Signal received - shutting down!");
+            stream.unwrap().recv().await;
+            info!("Ctrl Break received - shutting down!");
             shard_manager.lock().await.shutdown_all().await;
         });
     }

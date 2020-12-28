@@ -34,8 +34,6 @@ mod res {
 #[description("Shows a number of different statistics about the bot")]
 #[aliases("statistics")]
 pub async fn stats(ctx: &Context, msg: &Message) -> CommandResult {
-    use humansize::{file_size_opts as size_options, FileSize};
-
     let stats_lock = ctx
         .data
         .read()
@@ -56,6 +54,7 @@ pub async fn stats(ctx: &Context, msg: &Message) -> CommandResult {
     };
 
     // This SO answers describes what PSS is, and why I use it <https://stackoverflow.com/a/13754307>
+    #[cfg(target_os = "linux")]
     let (uss, pss, rss) = {
         use procfs::process::Process;
 
@@ -107,8 +106,13 @@ Uptime: {uptime}
             uptime = get_formatted_uptime(startup_time)?,
             ver = system_version
         ))
-        .field("Command invocations", command_invocations, true)
-        .field(
+        .field("Command invocations", command_invocations, true);
+
+    #[cfg(target_os = "linux")]
+    {
+        use humansize::{file_size_opts as size_options, FileSize};
+
+        embed.field(
             "Memory usage",
             format!(
                 "PSS: {}\nRSS: {}\n USS(no shared): {}",
@@ -118,6 +122,7 @@ Uptime: {uptime}
             ),
             true,
         );
+    }
 
     #[cfg(not(feature = "deterministic"))]
     if let Ok(version) = res::version() {
