@@ -61,7 +61,7 @@ impl Item {
 
 type Count = u8;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Items {
     items: Vec<(Count, Item)>,
     memo_book: MemoBook,
@@ -123,14 +123,14 @@ impl Items {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct MemoBook {
     notes: Vec<Note>,
     notes_ripped_from_self: u32,
     ripped_notes_gotten_from_others: u32,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Note {
     pub text: String,
     pub when: String,
