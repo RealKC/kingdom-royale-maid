@@ -1,3 +1,5 @@
+use std::fmt::Debug;
+
 use super::{
     item::{Item, Items},
     roles::{Role, RoleName},
@@ -113,5 +115,19 @@ impl Player {
 
     pub fn role_name(&self) -> RoleName {
         self.role.name()
+    }
+}
+
+impl Debug for Player {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Player")
+            .field("id", &self.id)
+            .field("role", &self.role.name())
+            .field("alive", &self.alive)
+            .field("room", &self.room)
+            .field("secret_meeting_partner", &self.secret_meeting_partner)
+            .field("secret_meeting_channels", &self.secret_meeting_channels)
+            .field("items", &self.items)
+            .finish()
     }
 }
