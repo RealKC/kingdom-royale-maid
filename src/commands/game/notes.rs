@@ -18,7 +18,7 @@ pub async fn notes(ctx: &Context, msg: &Message) -> CommandResult {
     let game_guard = get_game_guard(ctx).await?;
     let game = game_guard.read().await;
 
-    let player = game.player(msg.author.id).expect("");
+    let player = game.player(msg.author.id).expect("notes: UserIsPlaying broke its contract");
     let channel = player.room();
     let memo_book = player.items().memo_book();
 
@@ -122,7 +122,7 @@ pub async fn write_note(ctx: &Context, msg: &Message, args: Args) -> CommandResu
     let game_guard = get_game_guard(ctx).await?;
     let mut game = game_guard.write().await;
 
-    let time_range = game.time_range().expect("").to_string();
+    let time_range = game.time_range().expect("write_note: StandardGameCheck broke its contract").to_string();
     let player = game.player_mut(msg.author.id);
 
     if player.is_none() {
@@ -262,7 +262,7 @@ pub async fn rip_note(ctx: &Context, msg: &Message, mut args: Args) -> CommandRe
         myself.unwrap().items_mut().memo_book_mut().rip_note(page)
     };
 
-    let time_range = game.time_range().expect("").to_string();
+    let time_range = game.time_range().expect("rip_note: StandardGameCheck broke its contract").to_string();
     {
         let them = game.player_mut(target).unwrap();
         let note = note.unwrap_or(Note {

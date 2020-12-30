@@ -74,15 +74,16 @@ pub async fn show_meeting_log(ctx: &Context, msg: &Message, mut args: Args) -> C
         }
     };
 
-    let player = game.player(msg.author.id).expect("");
+    let player = game.player(msg.author.id).expect("show_meeting_log: UserIsPlaying broke its contract");
 
-    if day > game.day().expect("")
-        || (day == game.day().expect("") && !game.secret_meetings_took_place())
+    static EXPECT_ERR_MSG: &str = "show_meeting_log: StandardGameCheck broke its contract";
+    if day > game.day().expect(EXPECT_ERR_MSG)
+        || (day == game.day().expect(EXPECT_ERR_MSG) && !game.secret_meetings_took_place())
     {
         msg.reply(ctx, "You can't show secret meeting logs from the future!")
             .await?;
         return Ok(());
-    } else if day == game.day().expect("") && game.secret_meetings_are_happening() {
+    } else if day == game.day().expect(EXPECT_ERR_MSG) && game.secret_meetings_are_happening() {
         msg.reply(ctx, "Time is a fickle thing, and your tablet seems to show that you didn't participate in that meeting from earlier. Did you? Either way, it's not allowing you to show logs you swore existed").await?;
         return Ok(());
     }
