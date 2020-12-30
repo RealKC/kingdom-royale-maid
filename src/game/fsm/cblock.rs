@@ -133,7 +133,7 @@ impl GameMachine<CBlock> {
             ));
         }
 
-        Err("Probably an error to arrive here".into())
+        Ok(())
     }
 
     async fn announce_secret_meeting_partners(&self, ctx: &Context) -> CommandResult {
@@ -322,7 +322,7 @@ impl GameMachine<CBlock> {
             room_id,
         ));
 
-        Err("Probably an error to arrive here".into())
+        Ok(())
     }
 
     async fn make_assistant_choose(&mut self, ctx: &Context) -> CommandResult {
@@ -373,6 +373,6 @@ impl GameMachine<CBlock> {
             room_id,
         ));
 
-        Err("Reaching here is probably a bug".into())
+        Ok(())
     }
 }
