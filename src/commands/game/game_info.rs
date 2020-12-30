@@ -1,5 +1,4 @@
 use super::prelude::*;
-use crate::game::GameState;
 
 use serenity::model::misc::Mentionable;
 
@@ -21,36 +20,40 @@ pub async fn game_info(ctx: &Context, msg: &Message) -> CommandResult {
     let game = game_guard.read().await;
 
     let (players_field_name, players_field_value) = {
-        if game.state() == GameState::NotStarted {
+        if !game.is_started() {
             let mut players = String::new();
-            for user in game.joined_users().iter() {
+            let joined_users = game
+                .joined_users()
+                .expect("joined users should be Some before a game start");
+            for user in joined_users.iter() {
                 players.push_str(&user.mention());
                 players.push('\n');
             }
             if !players.is_empty() {
-                (format!("Players ({})", game.joined_users().len()), players)
+                (format!("Players ({})", joined_users.len()), players)
             } else {
-                ("Players".into(), "None have joined yet :(".into())
+                ("Players".to_string(), "None have joined yet :(".to_string())
             }
         } else {
-            let mut players = String::new();
+            let mut players_string = String::new();
 
             let all_alive_have_won = game.all_alive_have_won();
+            let players = game.players().expect("players should be Some");
 
-            for player in game.players().iter() {
+            for player in players.iter() {
                 if player.1.is_alive() {
                     let mention = player.0.mention();
-                    players.push_str(&mention);
+                    players_string.push_str(&mention);
                     if all_alive_have_won {
-                        players.push_str("(Victory!)");
+                        players_string.push_str("(Victory!)");
                     }
-                    players.push('\n');
+                    players_string.push('\n');
                 } else {
                     let mention = format! {"~~{}~~\n", player.0.mention()};
-                    players.push_str(&mention);
+                    players_string.push_str(&mention);
                 }
             }
-            (format!("Players ({})", game.players().len()), players)
+            (format!("Players ({})", players.len()), players_string)
         }
     };
     let fields = vec![
@@ -69,7 +72,7 @@ pub async fn game_info(ctx: &Context, msg: &Message) -> CommandResult {
         .send_message(ctx, |m| {
             m.embed(|e| {
                 e.author(|a| {
-                    if game.state() == GameState::NotStarted {
+                    if !game.is_started() {
                         if game.can_start() {
                             a.icon_url("https://cdn.discordapp.com/emojis/764529845756493885.png")
                                 .name("Not started")
@@ -79,13 +82,13 @@ pub async fn game_info(ctx: &Context, msg: &Message) -> CommandResult {
                         }
                     } else {
                         a.icon_url("https://cdn.discordapp.com/emojis/764529758998102037.png")
-                            .name(&game.state().to_string())
+                            .name(&game.state_name())
                     }
                 })
                 .title("Kingdom Royale")
                 .fields(fields)
                 .colour({
-                    if game.state() == GameState::NotStarted {
+                    if !game.is_started() {
                         if game.can_start() {
                             0xdea712 // Yellow
                         } else {
@@ -99,13 +102,13 @@ pub async fn game_info(ctx: &Context, msg: &Message) -> CommandResult {
                     if let Some(ava) = msg.author.avatar_url() {
                         f.icon_url(ava);
                     }
-                    f.text(if game.state() == GameState::NotStarted {
+                    f.text(if !game.is_started() {
                         msg.author.name.clone()
                     } else {
                         format!(
                             "{} | {} day",
                             msg.author.name,
-                            cardinal_to_ordinal(game.day())
+                            cardinal_to_ordinal(game.day().expect("a day"))
                         )
                     })
                 });

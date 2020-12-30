@@ -18,7 +18,7 @@ pub async fn notes(ctx: &Context, msg: &Message) -> CommandResult {
     let game_guard = get_game_guard(ctx).await?;
     let game = game_guard.read().await;
 
-    let player = game.player(msg.author.id)?;
+    let player = game.player(msg.author.id).expect("");
     let channel = player.room();
     let memo_book = player.items().memo_book();
 
@@ -122,8 +122,8 @@ pub async fn write_note(ctx: &Context, msg: &Message, args: Args) -> CommandResu
     let game_guard = get_game_guard(ctx).await?;
     let mut game = game_guard.write().await;
 
-    let game_state = game.state();
-    let player = game.players_mut().get_mut(&msg.author.id);
+    let time_range = game.time_range().expect("").to_string();
+    let player = game.player_mut(msg.author.id);
 
     if player.is_none() {
         msg.reply(
@@ -138,7 +138,7 @@ pub async fn write_note(ctx: &Context, msg: &Message, args: Args) -> CommandResu
     let res = player
         .items_mut()
         .memo_book_mut()
-        .add_note(note.into(), game_state.to_time_range().unwrap());
+        .add_note(note.into(), time_range);
 
     match res {
         Ok(_) => (),
@@ -164,7 +164,7 @@ pub async fn show_note(ctx: &Context, msg: &Message, args: Args) -> CommandResul
     let game_guard = get_game_guard(ctx).await?;
     let game = game_guard.write().await;
 
-    let player = game.players().get(&msg.author.id);
+    let player = game.player(msg.author.id);
 
     if player.is_none() {
         msg.reply(
@@ -238,14 +238,12 @@ pub async fn rip_note(ctx: &Context, msg: &Message, mut args: Args) -> CommandRe
     let target = target.unwrap();
 
     let target_is_in_game = {
-        let them = game.players().get(&target);
+        let them = game.player(target);
         them.is_some()
     };
 
-    let game_state = game.state();
-
     let note = {
-        let myself = game.players_mut().get_mut(&msg.author.id);
+        let myself = game.player_mut(msg.author.id);
         if myself.is_none() {
             msg.reply(ctx, "You can't give a note when you're not in the game")
                 .await?;
@@ -264,11 +262,12 @@ pub async fn rip_note(ctx: &Context, msg: &Message, mut args: Args) -> CommandRe
         myself.unwrap().items_mut().memo_book_mut().rip_note(page)
     };
 
+    let time_range = game.time_range().expect("").to_string();
     {
-        let them = game.players_mut().get_mut(&target).unwrap();
+        let them = game.player_mut(target).unwrap();
         let note = note.unwrap_or(Note {
             text: format!("*<An empty page from {}>*", msg.author.mention()),
-            when: game_state.to_time_range().unwrap(),
+            when: time_range,
             ripped: true,
         });
 

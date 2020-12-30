@@ -9,7 +9,7 @@ pub async fn substitute(ctx: &Context, msg: &Message) -> CommandResult {
     let game_guard = get_game_guard(ctx).await?;
     let mut game = game_guard.write().await;
 
-    let player = game.player(msg.author.id)?;
+    let player = game.player(msg.author.id).expect("");
 
     if player.role_name() != RoleName::King {
         msg.reply(
@@ -21,7 +21,7 @@ pub async fn substitute(ctx: &Context, msg: &Message) -> CommandResult {
     }
 
     let mut aliveness_statuses = vec![];
-    for player in game.players() {
+    for player in game.players().expect("") {
         if [RoleName::King, RoleName::TheDouble].contains(&player.1.role_name()) {
             aliveness_statuses.push((player.1.is_alive(), player.1.role_name()));
         }
@@ -36,7 +36,7 @@ pub async fn substitute(ctx: &Context, msg: &Message) -> CommandResult {
         return Ok(());
     }
 
-    if game.king_has_substituted() {
+    if game.king_has_substituted().expect("") {
         msg.reply(ctx, "You can't 「 substitute 」 more than once per game")
             .await?;
         return Ok(());

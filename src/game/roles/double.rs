@@ -1,5 +1,7 @@
 use super::prelude::*;
+use crate::game::fsm::TimeBlock;
 
+#[derive(Clone)]
 pub struct TheDouble;
 
 impl Role for TheDouble {
@@ -7,7 +9,11 @@ impl Role for TheDouble {
         RoleName::TheDouble
     }
 
-    fn win_condition_achieved(&self, game: &Game) -> bool {
-        !game.is_prince_alive() && !game.is_revolutionary_alive()
+    fn win_condition_achieved(&self, block: &dyn TimeBlock) -> bool {
+        !block.is_prince_alive() && !block.is_revolutionary_alive()
+    }
+
+    fn wrap(self) -> RoleHolder {
+        RoleHolder::Double(self)
     }
 }

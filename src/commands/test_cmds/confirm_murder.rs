@@ -18,7 +18,7 @@ pub async fn confirm_murder(ctx: &Context, msg: &Message) -> CommandResult {
         match game {
             Some(game) => {
                 let game = game.read().await;
-                (game.guild(), game.king_murder_target().id())
+                (game.guild(), game.king_murder_target().unwrap())
             }
             None => (msg.guild_id.unwrap(), msg.author.id),
         }

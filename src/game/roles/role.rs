@@ -1,4 +1,5 @@
 use super::prelude::*;
+use crate::game::fsm::TimeBlock;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum RoleName {
@@ -34,7 +35,8 @@ impl ToString for RoleName {
 
 pub trait Role {
     fn name(&self) -> RoleName;
-    fn win_condition_achieved(&self, game: &Game) -> bool;
+    fn win_condition_achieved(&self, block: &dyn TimeBlock) -> bool;
+    fn wrap(self) -> RoleHolder;
 }
 
 impl Into<DeathCause> for RoleName {

@@ -1,7 +1,5 @@
 use std::collections::HashMap;
 
-use crate::game::GameState;
-
 use super::prelude::*;
 
 use serenity::framework::standard::{macros::check, CommandOptions, Reason};
@@ -22,23 +20,20 @@ pub async fn standard_game(
     if let Some(game) = game {
         let game = game.read().await;
 
-        match game.state() {
-            GameState::NotStarted => {
-                return Err(make_reason(
-                    command,
-                    "Game wasn't started",
-                    &*error_messages::GAME_NOT_STARTED,
-                ));
-            }
-            GameState::GameEnded => {
-                return Err(make_reason(
-                    command,
-                    "Game has ended",
-                    &*error_messages::GAME_ENDED,
-                ));
-            }
-            _ => (),
-        };
+        if !game.is_started() {
+            return Err(make_reason(
+                command,
+                "Game wasn't started",
+                &*error_messages::GAME_NOT_STARTED,
+            ));
+        }
+        if game.is_ended() {
+            return Err(make_reason(
+                command,
+                "Game has ended",
+                &*error_messages::GAME_ENDED,
+            ));
+        }
     } else {
         return Err(make_reason(
             command,
@@ -63,7 +58,7 @@ pub async fn game_check_allow_game_ended(
     if let Some(game) = game {
         let game = game.read().await;
 
-        if game.state() == GameState::NotStarted {
+        if !game.is_started() {
             return Err(make_reason(
                 command,
                 "Game wasn't started",
@@ -98,7 +93,7 @@ pub async fn user_is_playing(
     };
 
     let user = msg.author.id;
-    let player = game.players().get(&user);
+    let player = game.player(user);
 
     if player.is_none() {
         return Err(make_reason(

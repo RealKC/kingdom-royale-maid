@@ -21,7 +21,7 @@ pub async fn give_item(ctx: &Context, msg: &Message, mut args: Args) -> CommandR
     let game_guard = get_game_guard(ctx).await?;
     let mut game = game_guard.write().await;
 
-    let giver = game.player_mut(msg.author.id)?;
+    let giver = game.player_mut(msg.author.id).expect("needed");
 
     let target = args.single::<UserId>();
     if target.is_err() {
@@ -66,7 +66,7 @@ Note that the syntax of this command is `!give <TARGET> <WHAT>`, you'd use it li
     // drop(giver); // stop borrowing `game` as mut here
 
     match game.player_mut(target) {
-        Ok(target) => {
+        Some(target) => {
             let what = parse_item(what_as_str, watch_name.as_ref());
             if what.is_err() {
                 msg.reply(ctx, what.unwrap_err()).await?;
@@ -85,13 +85,13 @@ Note that the syntax of this command is `!give <TARGET> <WHAT>`, you'd use it li
                 });
             }
         }
-        Err(err) => {
+        None => {
             msg.reply(
                 ctx,
                 "You can't give an item to someone who's not in the game",
             )
             .await?;
-            return Err(err.into());
+            return Err("idk".into());
         }
     }
     Ok(())

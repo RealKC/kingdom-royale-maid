@@ -1,5 +1,4 @@
 use super::prelude::*;
-use crate::game::GameState;
 
 use tracing::info;
 
@@ -13,7 +12,7 @@ pub async fn leave(ctx: &Context, msg: &Message) -> CommandResult {
 
     if game.is_some() {
         let mut game = game.unwrap().write().await;
-        if game.state() != GameState::NotStarted || game.state() != GameState::GameEnded {
+        if game.is_started() {
             msg.reply(ctx, "You can't leave a game that has started!")
                 .await?;
             info!("User tried leaving running game");

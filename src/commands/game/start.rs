@@ -1,3 +1,5 @@
+use tracing::info;
+
 use super::prelude::*;
 
 #[command]
@@ -14,13 +16,24 @@ pub async fn start(ctx: &Context, msg: &Message) -> CommandResult {
                 msg.reply(ctx, "You can't start a game that you aren't the host of.")
                     .await
                     .map(|_| ())?;
+            } else if game.is_started() {
+                msg.reply(ctx, "You can't start a game that already started")
+                    .await
+                    .map(|_| ())?;
             } else if game.can_start() {
                 msg.channel_id
                     .say(ctx, "Starting the game...")
                     .await
                     .map(|_| ())?;
 
-                game.start(ctx).await?;
+                let res = game.clone().start(ctx).await;
+                match res {
+                    Ok(started_game) => *game = started_game,
+                    Err(err) => {
+                        msg.reply(ctx, format!("Couldn't start the game! Encountered the following error: \n\n```{}```", err)).await?;
+                        info!("{}", err);
+                    }
+                }
             } else {
                 msg.reply_ping(ctx, "You can't start a game if there's less than 6 players")
                     .await?;

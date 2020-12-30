@@ -1,9 +1,10 @@
 use std::fmt::Debug;
 
 use super::{
+    fsm::TimeBlock,
     item::{Item, Items},
-    roles::{Role, RoleName},
-    DeathCause, Game,
+    roles::{ RoleHolder, RoleName},
+    DeathCause,
 };
 use serenity::{
     framework::standard::CommandResult,
@@ -13,9 +14,10 @@ use serenity::{
 
 pub type SecretMeeting = Option<(UserId, ChannelId)>;
 
+#[derive(Clone)]
 pub struct Player {
     id: UserId,
-    role: Box<(dyn Role + Send + Sync)>,
+    role: RoleHolder,
     alive: bool,
     room: ChannelId,
     secret_meeting_partner: Option<UserId>,
@@ -24,12 +26,7 @@ pub struct Player {
 }
 
 impl Player {
-    pub fn new(
-        id: UserId,
-        role: Box<(dyn Role + Send + Sync)>,
-        room: ChannelId,
-        watch_colour: String,
-    ) -> Self {
+    pub fn new(id: UserId, role: RoleHolder, room: ChannelId, watch_colour: String) -> Self {
         // PONDER: We may want to allow disabling certain items
         //         If we do, how should that be handled? Should we just pass a reference to the Game and ask it for enabled items?
         Self {
@@ -109,8 +106,8 @@ impl Player {
         &mut self.items
     }
 
-    pub fn win_condition_achieved(&self, game: &Game) -> bool {
-        self.role.win_condition_achieved(game)
+    pub fn win_condition_achieved(&self, block: &dyn TimeBlock) -> bool {
+        self.role.win_condition_achieved(block)
     }
 
     pub fn role_name(&self) -> RoleName {

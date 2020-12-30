@@ -1,4 +1,3 @@
-use crate::game::GameState;
 
 use super::prelude::*;
 
@@ -34,7 +33,7 @@ pub async fn inspect(ctx: &Context, msg: &Message, args: Args) -> CommandResult 
         "watch" => {
             let game_guard = get_game_guard(ctx).await?;
             let game = game_guard.read().await;
-            let player = game.player(msg.author.id)?;
+            let player = game.player(msg.author.id).expect("Have a player here");
 
             let items = player.items();
 
@@ -51,7 +50,9 @@ pub async fn inspect(ctx: &Context, msg: &Message, args: Args) -> CommandResult 
         "food" | "food bar" | "food ration" | "food item" | "snack" => {
             let game_guard = get_game_guard(ctx).await?;
             let game = game_guard.read().await;
-            let player = game.player(msg.author.id)?;
+            let player = game
+                .player(msg.author.id)
+                .expect("inspect: need a player here");
 
             let items = player.items();
 
@@ -68,16 +69,27 @@ pub async fn inspect(ctx: &Context, msg: &Message, args: Args) -> CommandResult 
         "tablet" | "digital tablet" => {
             let game_guard = get_game_guard(ctx).await?;
             let game = game_guard.read().await;
+            let day = game.day().expect("inspect: should have a game running");
 
-            if game.state() == GameState::ABlock && game.day() == 1 {
-                msg.reply(ctx, "You look at the tablet. It currently is off.")
+            if day == 1 {
+                if game
+                    .time_range()
+                    .expect("inspect: should have a game running")
+                    == "~12"
+                {
+                    msg.reply(ctx, "You look at the tablet. It currently is off.")
+                        .await?;
+                } else if game
+                    .time_range()
+                    .expect("inspect: should have a game running")
+                    == "12~14"
+                {
+                    msg.reply(
+                        ctx,
+                        r#"You look at the tablet. It says "Logs" on it, but it seems to be empty"#,
+                    )
                     .await?;
-            } else if game.state() == GameState::BBlock && game.day() == 1 {
-                msg.reply(
-                    ctx,
-                    r#"You look at the tablet. It says "Logs" on it, but it seems to be empty"#,
-                )
-                .await?;
+                }
             } else {
                 msg.reply(ctx, "You look at the tablet. It stores logs when you talk with someone else at a secret meeting. You can show them to other people...").await?;
             }
@@ -103,7 +115,7 @@ pub async fn inspect(ctx: &Context, msg: &Message, args: Args) -> CommandResult 
         "table" => {
             let game_guard = get_game_guard(ctx).await?;
             let game = game_guard.read().await;
-            let player = game.player(msg.author.id)?;
+            let player = game.player(msg.author.id).expect("yes");
 
             if msg.channel_id == player.room() {
                 msg.reply(
@@ -135,7 +147,7 @@ pub async fn look_around(ctx: &Context, msg: &Message) -> CommandResult {
     let game_guard = get_game_guard(ctx).await?;
     let game = game_guard.read().await;
 
-    let player = game.players().get(&msg.author.id);
+    let player = game.player(msg.author.id);
 
     if let Some(player) = player {
         if msg.channel_id == player.room() {

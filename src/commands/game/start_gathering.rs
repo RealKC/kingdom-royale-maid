@@ -1,5 +1,4 @@
 use super::prelude::*;
-use crate::game::GameState;
 
 #[command("startgathering")]
 #[only_in(guilds)]
@@ -18,7 +17,7 @@ pub async fn start_gathering(ctx: &Context, msg: &Message) -> CommandResult {
         return Ok(());
     }
 
-    if ![GameState::ABlock, GameState::CBlock].contains(&game.state()) {
+    if !game.can_start_gathering() {
         msg.reply(
                     ctx,
                     "You can't start a gathering in the big room if the current block isn't either the A block or the C block"
@@ -26,7 +25,7 @@ pub async fn start_gathering(ctx: &Context, msg: &Message) -> CommandResult {
         return Ok(());
     }
 
-    game.transition_to_next_state(ctx).await?;
+    *game = game.clone().transition_to_next_state(ctx).await;
 
     Ok(())
 }

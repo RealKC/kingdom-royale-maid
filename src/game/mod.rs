@@ -1,13 +1,11 @@
 mod data;
-// I really don't wanna come up with a better name for this module ngl
-#[allow(clippy::module_inception)]
-mod game;
+mod fsm;
 pub mod item;
 mod player;
 mod roles;
 mod tasks;
 
-pub use data::{DeathCause, GameState, JoinError, SubstitutionStatus};
-pub use game::Game;
+pub use data::{DeathCause, SubstitutionStatus};
+pub use fsm::Game;
 pub use player::{Player, SecretMeeting};
 pub use roles::RoleName;

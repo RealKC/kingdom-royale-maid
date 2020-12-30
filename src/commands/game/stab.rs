@@ -75,11 +75,11 @@ pub async fn stab(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult
 
     if attacker_roll > target_roll {
         let target = match game.player_mut(target) {
-            Ok(target) => target,
-            Err(err) => {
+            Some(target) => target,
+            None => {
                 msg.reply(ctx, "You can't stab someone not in the game!")
                     .await?;
-                return Err(err.into());
+                return Err("idk".into());
             }
         };
 

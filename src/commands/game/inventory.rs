@@ -11,7 +11,7 @@ pub async fn inventory(ctx: &Context, msg: &Message) -> CommandResult {
     let game_guard = get_game_guard(ctx).await?;
     let game = game_guard.read().await;
 
-    let player = game.player(msg.author.id)?;
+    let player = game.player(msg.author.id).expect("player");
     let items = player.items();
 
     let mut inventory = String::new();

@@ -1,7 +1,7 @@
 use super::prelude::*;
 use crate::{
     data::Prefix,
-    game::{GameState, Player, SecretMeeting},
+    game::{Player, SecretMeeting},
     helpers::react::react_with,
 };
 
@@ -38,8 +38,6 @@ pub async fn show_meeting_log(ctx: &Context, msg: &Message, mut args: Args) -> C
         .expect("Prefix should always be in ctx.data")
         .clone();
 
-    let game_state = game.state();
-
     let day = match args.single::<u8>() {
         Ok(day) => day,
         Err(err) => {
@@ -64,28 +62,27 @@ pub async fn show_meeting_log(ctx: &Context, msg: &Message, mut args: Args) -> C
     };
 
     let partner = match game.player(partner_id) {
-        Ok(player) => player,
-        Err(err) => {
+        Some(player) => player,
+        None => {
             msg.reply(
                 ctx,
                 "You can't show your secret meeting logs with someone who's not in the game!",
             )
             .await?;
 
-            return Err(err.into());
+            return Err("err".into());
         }
     };
 
-    let player = game.player(msg.author.id)?;
+    let player = game.player(msg.author.id).expect("");
 
-    if day > game.day()
-        || (day == game.day()
-            && [GameState::ABlock, GameState::BBlock, GameState::CBlock].contains(&game_state))
+    if day > game.day().expect("")
+        || (day == game.day().expect("") && !game.secret_meetings_took_place())
     {
         msg.reply(ctx, "You can't show secret meeting logs from the future!")
             .await?;
         return Ok(());
-    } else if day == game.day() && game.state() == GameState::DBlock {
+    } else if day == game.day().expect("") && game.secret_meetings_are_happening() {
         msg.reply(ctx, "Time is a fickle thing, and your tablet seems to show that you didn't participate in that meeting from earlier. Did you? Either way, it's not allowing you to show logs you swore existed").await?;
         return Ok(());
     }
