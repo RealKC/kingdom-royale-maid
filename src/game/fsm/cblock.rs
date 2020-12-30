@@ -97,10 +97,6 @@ impl GameMachine<CBlock> {
         self.state.king_murder_target
     }
 
-    pub(super) fn king_has_substituted(&self) -> bool {
-        todo!()
-    }
-
     async fn select_secret_meeting_partners(&mut self, ctx: &Context) -> CommandResult {
         info!("Collecting rooms...");
         let rooms = self
