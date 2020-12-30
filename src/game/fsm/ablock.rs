@@ -51,4 +51,8 @@ impl GameMachine<ABlock> {
     pub(super) fn set_king_substitution_status(&mut self, kss: SubstitutionStatus) {
         self.state.king_substitution_status = kss;
     }
+
+    pub(super) fn king_has_substituted(&self) -> bool {
+        self.state.king_substitution_status == SubstitutionStatus::Has
+    }
 }

@@ -212,6 +212,11 @@ impl Game {
 
     pub fn king_has_substituted(&self) -> Option<bool> {
         match &self.0 {
+            Wrapper::ABlock(s) => Some(s.king_has_substituted()),
+            Wrapper::BBlock(s) => Some(s.king_has_substituted()),
+            Wrapper::CBlock(s) => Some(s.king_has_substituted()),
+            Wrapper::DBlock(s) => Some(s.king_has_substituted()),
+            Wrapper::EBlock(s) => Some(s.king_has_substituted()),
             Wrapper::FBlock(s) => Some(s.king_has_substituted()),
             _ => None,
         }
