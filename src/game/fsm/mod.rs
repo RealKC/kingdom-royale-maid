@@ -476,7 +476,7 @@ macro_rules! impl_common_state_boilerplate {
         }
 
         pub(super) fn king_has_substituted(&self) -> bool {
-            matches!(self.state.king_substitution_status, SubstitutionStatus::Has | SubSubstitutionStatus::CurrentlyIs);
+            matches!(self.state.king_substitution_status, SubstitutionStatus::Has | SubstitutionStatus::CurrentlyIs)
         }
 
     }
