@@ -1,10 +1,13 @@
-use tracing::{info, instrument};
+//! First state after NotStarted, follows FBlock.
+//!
+//! During this block the meeting room gets opened.
 
 use super::*;
 
-use serenity::model::id::UserId;
-use serenity::prelude::*;
+use serenity::{model::id::UserId, prelude::*};
 use std::collections::BTreeMap;
+use tracing::{info, instrument};
+
 #[derive(Debug, Clone)]
 pub(super) struct ABlock {
     players: BTreeMap<UserId, Player>,

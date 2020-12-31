@@ -1,19 +1,28 @@
+//! Follows ABlock
+//!
+//! During this block the meeting room gets closed. If only winning alive players are found during
+//! this block, the game ends.
 
 use super::*;
-use serenity::model::id::UserId;
-use tracing::{info, instrument};
-use serenity::prelude::*;
+
+use serenity::{model::id::UserId, prelude::*};
 use std::collections::BTreeMap;
+use tracing::{info, instrument};
+
 #[derive(Debug, Clone)]
 pub(super) struct BBlock {
     players: BTreeMap<UserId, Player>,
     day: u8,
-    king_substitution_status: SubstitutionStatus
+    king_substitution_status: SubstitutionStatus,
 }
 
 impl BBlock {
     pub fn new(players: BTreeMap<UserId, Player>, day: u8, kss: SubstitutionStatus) -> Self {
-        Self { players, day ,king_substitution_status: kss}
+        Self {
+            players,
+            day,
+            king_substitution_status: kss,
+        }
     }
 }
 
@@ -37,7 +46,11 @@ impl GameMachine<BBlock> {
 
             Next::Block(GameMachine {
                 metadata: self.metadata,
-                state: CBlock::new(self.state.players, self.state.day, self.state.king_substitution_status),
+                state: CBlock::new(
+                    self.state.players,
+                    self.state.day,
+                    self.state.king_substitution_status,
+                ),
             })
         }
     }

@@ -1,3 +1,8 @@
+//! Follows {A, B, C, D, E, F}Block
+//!
+//! State that exists for after game discussion in which players may share some things while the
+//! data structures of a game are still alive.
+
 use super::*;
 
 #[derive(Debug, Clone)]

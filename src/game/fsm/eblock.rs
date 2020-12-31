@@ -1,3 +1,10 @@
+//! Follows DBlock
+//!
+//! During this state:
+//!  * the meeting room gets closed
+//!  * players are made to either eat a piece of food or starve
+//!  * the Revolutionary assassinates
+
 use super::*;
 use crate::{
     game::tasks,
@@ -5,9 +12,7 @@ use crate::{
     helpers::{choose_target::build_embed_for_target_choice, react::react_with},
 };
 
-use serenity::framework::standard::CommandResult;
-use serenity::model::id::UserId;
-use serenity::prelude::*;
+use serenity::{framework::standard::CommandResult, model::id::UserId, prelude::*};
 use std::collections::BTreeMap;
 use tracing::{info, instrument};
 

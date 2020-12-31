@@ -1,9 +1,12 @@
-use super::GameState;
+//! Follows BBlock
+//!
+//! During this block:
+//! * the secret meeting partners get chosen & the secret meetings happen
+//! * the King selects a target & either the Sorcerer or Knight will decide whether to kill the target or not
+
 use super::*;
-use crate::game::data::*;
-use crate::game::tasks;
 use crate::{
-    game::{player::Player, roles::RoleName},
+    game::{data::*, player::Player, roles::RoleName, tasks},
     helpers::{
         choose_target::build_embed_for_target_choice,
         confirm_murder::build_embed_for_murder_confirmation, perms, react::react_with,
@@ -24,12 +27,13 @@ use std::{
     fmt::Write,
 };
 use tracing::{info, instrument};
+
 #[derive(Debug, Clone)]
 pub(super) struct CBlock {
     players: BTreeMap<UserId, Player>,
     day: u8,
     king_murder_target: UserId,
-    king_substitution_status: SubstitutionStatus
+    king_substitution_status: SubstitutionStatus,
 }
 
 impl CBlock {
@@ -38,7 +42,7 @@ impl CBlock {
             players,
             day,
             king_murder_target: UserId::default(),
-            king_substitution_status: kss
+            king_substitution_status: kss,
         }
     }
 }
@@ -53,7 +57,7 @@ impl GameMachine<CBlock> {
         if self.state.all_alive_have_won() {
             return Next::GameEnded(GameMachine {
                 metadata: self.metadata,
-                state: GameEnded ::new(self.state.players, self.state.day)
+                state: GameEnded::new(self.state.players, self.state.day),
             });
         }
 
@@ -81,7 +85,11 @@ impl GameMachine<CBlock> {
 
         Next::Block(GameMachine {
             metadata: self.metadata,
-            state: DBlock::new(self.state.players, self.state.day, self.state.king_substitution_status),
+            state: DBlock::new(
+                self.state.players,
+                self.state.day,
+                self.state.king_substitution_status,
+            ),
         })
     }
 

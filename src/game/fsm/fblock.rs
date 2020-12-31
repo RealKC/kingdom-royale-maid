@@ -1,7 +1,13 @@
+//! Follows EBlock
+//!
+//! During this state, if all alive players are found to be winning the game ends, otherwise,
+//! the day number gets increased
+
 use super::*;
 
 use serenity::model::id::UserId;
 use std::collections::BTreeMap;
+
 #[derive(Debug, Clone)]
 pub(super) struct FBlock {
     players: BTreeMap<UserId, Player>,

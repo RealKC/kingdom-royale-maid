@@ -1,3 +1,7 @@
+//! Initial state
+//!
+//! The purpose of this state is for players to join a game, and for it to be explained to them.
+
 use super::*;
 use crate::{
     game::roles::{Role, RoleHolder},

@@ -1,7 +1,10 @@
+//! Follows CBlock
+//!
+//! The meeting room gets opened in this block. If all alive players are found to be winning, the game ends.
+
 use super::*;
 
-use serenity::model::id::UserId;
-use serenity::prelude::*;
+use serenity::{model::id::UserId, prelude::*};
 use std::collections::BTreeMap;
 use tracing::{info, instrument};
 
