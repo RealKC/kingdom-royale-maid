@@ -93,14 +93,6 @@ impl GameMachine<CBlock> {
         })
     }
 
-    pub(super) fn set_king_substitution_status(&mut self, kss: SubstitutionStatus) {
-        self.state.king_substitution_status = kss;
-    }
-
-    pub(super) fn king_has_substituted(&self) -> bool {
-        self.state.king_substitution_status == SubstitutionStatus::Has
-    }
-
     pub(super) fn set_king_murder_target(&mut self, target: UserId) {
         self.state.king_murder_target = target;
     }
@@ -387,4 +379,6 @@ impl GameMachine<CBlock> {
 
         Ok(())
     }
+
+    impl_common_state_boilerplate!();
 }

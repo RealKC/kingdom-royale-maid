@@ -468,6 +468,21 @@ macro_rules! impl_wrap {
 }
 pub use crate::impl_wrap;
 
+#[macro_export]
+macro_rules! impl_common_state_boilerplate {
+    () => {
+        pub(super) fn set_king_substitution_status(&mut self, kss: SubstitutionStatus) {
+            self.state.king_substitution_status = kss;
+        }
+
+        pub(super) fn king_has_substituted(&self) -> bool {
+            self.state.king_substitution_status == SubstitutionStatus::Has
+        }
+
+    }
+}
+pub use crate::impl_common_state_boilerplate;
+
 /// Variant representing the next state after a TimeBlock
 enum Next<S>
 where
