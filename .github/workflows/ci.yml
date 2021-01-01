@@ -6,7 +6,7 @@ on:
     branches:
       - master
 
-name: Clippy check
+name: Lint, build
 jobs:
   clippy_check:
     if: "!startsWith(github.event.head_commit.message, '[SKIP CI]')"
