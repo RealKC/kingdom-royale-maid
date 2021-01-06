@@ -26,7 +26,7 @@ pub async fn game_info(ctx: &Context, msg: &Message) -> CommandResult {
                 .joined_users()
                 .expect("joined users should be Some before a game start");
             for user in joined_users.iter() {
-                players.push_str(&user.mention());
+                players.push_str(&user.mention().to_string());
                 players.push('\n');
             }
             if !players.is_empty() {
@@ -42,7 +42,7 @@ pub async fn game_info(ctx: &Context, msg: &Message) -> CommandResult {
 
             for player in players.iter() {
                 if player.1.is_alive() {
-                    let mention = player.0.mention();
+                    let mention = player.0.mention().to_string();
                     players_string.push_str(&mention);
                     if all_alive_have_won {
                         players_string.push_str("(Victory!)");
@@ -57,15 +57,15 @@ pub async fn game_info(ctx: &Context, msg: &Message) -> CommandResult {
         }
     };
     let fields = vec![
-        ("Host", game.host().mention(), false),
+        ("Host", game.host().mention().to_string(), false),
         (&players_field_name, players_field_value, true),
-        ("Meeting room", game.meeting_room().mention(), true),
+        ("Meeting room", game.meeting_room().mention().to_string(), true),
         (
             "Announcement channel",
-            game.announcement_channel().mention(),
+            game.announcement_channel().mention().to_string(),
             true,
         ),
-        ("Player role", game.player_role().mention(), true),
+        ("Player role", game.player_role().mention().to_string(), true),
     ];
 
     msg.channel_id

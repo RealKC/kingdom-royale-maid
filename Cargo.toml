@@ -12,7 +12,7 @@ build   = "build.rs"
 deterministic = []
 
 [dependencies]
-tokio = { version = "0.2", features = ["macros", "signal", "blocking"] }
+tokio = { version = "1.0.1", features = ["macros", "signal", "rt-multi-thread"] }
 futures = "0.3"
 
 tracing = "0.1"
