@@ -33,7 +33,7 @@ fn main() -> std::io::Result<()> {
     .expect("Failed to copy background file");
     println!("?");
 
-    std::fs::remove_file(&version_file_dest_path).expect("Failed to remove old version.json file");
+    let _ = std::fs::remove_file(&version_file_dest_path);
 
     #[cfg(not(feature = "deterministic"))]
     {
@@ -87,12 +87,14 @@ fn main() -> std::io::Result<()> {
     Ok(())
 }
 
+#[cfg(not(feature = "deterministic"))]
 fn git_cmd() -> Command {
     let mut cmd = Command::new("git".to_string());
     cmd.current_dir(env!("CARGO_MANIFEST_DIR"));
     cmd
 }
 
+#[cfg(not(feature = "deterministic"))]
 fn get_commit_hash() -> Option<String> {
     let output = git_cmd()
         .arg("log")
@@ -108,6 +110,7 @@ fn get_commit_hash() -> Option<String> {
     }
 }
 
+#[cfg(not(feature = "deterministic"))]
 fn get_branch_name() -> Option<String> {
     let output = git_cmd()
         .arg("rev-parse")
@@ -127,6 +130,7 @@ fn get_branch_name() -> Option<String> {
     }
 }
 
+#[cfg(not(feature = "deterministic"))]
 fn is_working_tree_clean() -> bool {
     let status = git_cmd()
         .arg("diff")
