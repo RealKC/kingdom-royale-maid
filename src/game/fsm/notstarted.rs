@@ -8,7 +8,6 @@ use crate::{
     helpers::perms,
 };
 
-use itertools::izip;
 use rand::{seq::SliceRandom, thread_rng};
 use serenity::{
     framework::standard::CommandResult,
@@ -67,7 +66,7 @@ impl GameMachine<NotStarted> {
 
         let mut next = ABlock::new(BTreeMap::new(), 0, SubstitutionStatus::HasNot);
 
-        for new_player in izip!(&mut self.state.joined_users, &watch_colours) {
+        for new_player in self.state.joined_users.iter_mut().zip(watch_colours.iter()) {
             let channel = self
                 .metadata
                 .guild
