@@ -35,6 +35,20 @@ use serenity::prelude::*;
 use std::collections::BTreeMap;
 use tracing::error;
 
+macro_rules! for_all_blocks {
+    ($matcher:expr, $n:ident, $e:expr) => {
+        match $matcher {
+            Wrapper::ABlock($n) => Some($e),
+            Wrapper::BBlock($n) => Some($e),
+            Wrapper::CBlock($n) => Some($e),
+            Wrapper::DBlock($n) => Some($e),
+            Wrapper::EBlock($n) => Some($e),
+            Wrapper::FBlock($n) => Some($e),
+            _ => None,
+        }
+    };
+}
+
 /// Struct for the public API of the state machine
 #[derive(Clone)]
 pub struct Game(Wrapper);
@@ -134,9 +148,9 @@ impl Game {
             Wrapper::FBlock(s) => s.set_king_substitution_status(st),
             other => {
                 warn!(
-                "Game::set_king_substitution_status called in set_king_substition_status on {:?}",
-                other
-            );
+                 "Game::set_king_substitution_status called in set_king_substition_status on {:?}",
+                 other
+             );
             }
         }
     }
@@ -211,15 +225,7 @@ impl Game {
     }
 
     pub fn king_has_substituted(&self) -> Option<bool> {
-        match &self.0 {
-            Wrapper::ABlock(s) => Some(s.king_has_substituted()),
-            Wrapper::BBlock(s) => Some(s.king_has_substituted()),
-            Wrapper::CBlock(s) => Some(s.king_has_substituted()),
-            Wrapper::DBlock(s) => Some(s.king_has_substituted()),
-            Wrapper::EBlock(s) => Some(s.king_has_substituted()),
-            Wrapper::FBlock(s) => Some(s.king_has_substituted()),
-            _ => None,
-        }
+        for_all_blocks!(&self.0, s, s.king_has_substituted())
     }
 
     pub fn state_name(&self) -> &'static str {
@@ -248,16 +254,7 @@ impl Game {
     }
 
     pub fn day(&self) -> Option<u8> {
-        match &self.0 {
-            Wrapper::BBlock(s) => Some(s.day()),
-            Wrapper::CBlock(s) => Some(s.day()),
-            Wrapper::DBlock(s) => Some(s.day()),
-            Wrapper::ABlock(s) => Some(s.day()),
-            Wrapper::EBlock(s) => Some(s.day()),
-            Wrapper::FBlock(s) => Some(s.day()),
-            Wrapper::GameEnded(s) => Some(s.day()),
-            _ => None,
-        }
+        for_all_blocks!(&self.0, s, s.day())
     }
 
     pub fn joined_users(&self) -> Option<&Vec<UserId>> {
@@ -268,29 +265,11 @@ impl Game {
     }
 
     pub fn players(&self) -> Option<&BTreeMap<UserId, Player>> {
-        match &self.0 {
-            Wrapper::BBlock(s) => Some(s.players()),
-            Wrapper::CBlock(s) => Some(s.players()),
-            Wrapper::DBlock(s) => Some(s.players()),
-            Wrapper::ABlock(s) => Some(s.players()),
-            Wrapper::EBlock(s) => Some(s.players()),
-            Wrapper::FBlock(s) => Some(s.players()),
-            Wrapper::GameEnded(s) => Some(s.players()),
-            _ => None,
-        }
+        for_all_blocks!(&self.0, s, s.players())
     }
 
     pub fn players_mut(&mut self) -> Option<&mut BTreeMap<UserId, Player>> {
-        match &mut self.0 {
-            Wrapper::BBlock(s) => Some(s.players_mut()),
-            Wrapper::CBlock(s) => Some(s.players_mut()),
-            Wrapper::DBlock(s) => Some(s.players_mut()),
-            Wrapper::ABlock(s) => Some(s.players_mut()),
-            Wrapper::EBlock(s) => Some(s.players_mut()),
-            Wrapper::FBlock(s) => Some(s.players_mut()),
-            Wrapper::GameEnded(s) => Some(s.players_mut()),
-            _ => None,
-        }
+        for_all_blocks!(&mut self.0, s, s.players_mut())
     }
 
     pub fn set_king_murder_target(&mut self, target: UserId) {
@@ -476,10 +455,12 @@ macro_rules! impl_common_state_boilerplate {
         }
 
         pub(super) fn king_has_substituted(&self) -> bool {
-            matches!(self.state.king_substitution_status, SubstitutionStatus::Has | SubstitutionStatus::CurrentlyIs)
+            matches!(
+                self.state.king_substitution_status,
+                SubstitutionStatus::Has | SubstitutionStatus::CurrentlyIs
+            )
         }
-
-    }
+    };
 }
 pub use crate::impl_common_state_boilerplate;
 
