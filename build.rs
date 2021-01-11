@@ -8,18 +8,12 @@
 // I license all of my modifications and additions to this file also under the Mozilla Public License, v. 2.0,
 // Obtain a copy at https://mozilla.org/MPL/2.0/
 
+#[cfg(not(feature = "deterministic"))]
 #[path = "src/version_data.rs"]
 mod version_data;
-use version_data::VersionData;
 
-use chrono::Utc;
 use std::{
-    env::{
-        self,
-        consts::{ARCH, OS},
-    },
-    fs::File,
-    io::Write,
+    env::{self},
     path::Path,
     process::Command,
 };
@@ -39,11 +33,18 @@ fn main() -> std::io::Result<()> {
     .expect("Failed to copy background file");
     println!("?");
 
-    #[cfg(feature = "deterministic")]
-    std::fs::delete(version_file_dest_path);
+    std::fs::remove_file(&version_file_dest_path).expect("Failed to remove old version.json file");
 
     #[cfg(not(feature = "deterministic"))]
     {
+        use chrono::Utc;
+        use std::{
+            env::consts::{ARCH, OS},
+            fs::File,
+            io::Write,
+        };
+        use version_data::VersionData;
+
         let mut file = File::create(version_file_dest_path)?;
         let is_git_info_available = git_cmd()
             .arg("status")
