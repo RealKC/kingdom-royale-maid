@@ -11,25 +11,6 @@ use std::{fmt::Write, time::Instant};
 #[cfg(not(feature = "deterministic"))]
 use tracing::trace;
 
-#[cfg(not(feature = "deterministic"))]
-mod res {
-    use super::CommandResult;
-    use crate::version_data::VersionData;
-    use rust_embed::RustEmbed;
-
-    #[derive(RustEmbed)]
-    #[folder = "$VERSION_FILE_PATH/"]
-    struct Asset;
-
-    pub fn version() -> CommandResult<VersionData> {
-        let ver = &Asset::get("version.json").ok_or("version.json not embedded for some reason")?;
-
-        let version = serde_json::from_slice::<VersionData>(&ver)?;
-
-        Ok(version)
-    }
-}
-
 #[command]
 #[description("Shows a number of different statistics about the bot")]
 #[aliases("statistics")]
@@ -125,7 +106,7 @@ Uptime: {uptime}
     }
 
     #[cfg(not(feature = "deterministic"))]
-    if let Ok(version) = res::version() {
+    if let Ok(version) = crate::resources::version() {
         use crate::data::ReqwestClient;
         use reqwest::Method;
 

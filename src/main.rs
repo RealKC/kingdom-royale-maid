@@ -19,6 +19,7 @@ use hooks::*;
 mod data;
 mod game;
 mod helpers;
+mod resources;
 #[cfg(not(feature = "deterministic"))]
 mod version_data;
 

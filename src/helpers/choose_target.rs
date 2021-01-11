@@ -9,26 +9,7 @@ use tracing::{error, info, warn};
 
 type Image = image::RgbaImage;
 
-/// Module for embedded resources
-mod res {
-    use super::{Error, Image};
-    use image::{load_from_memory_with_format, ImageFormat};
-    use rust_embed::RustEmbed;
-
-    /// The embedded folder
-    #[derive(RustEmbed)]
-    #[folder = "res/"]
-    struct ResFolder;
-
-    /// The "background" containing the six emojis used in build_embed_for_target_choice
-    pub fn get_background() -> Result<Image, Error> {
-        let res = ResFolder::get("avatars.png").unwrap();
-        let dynimg = load_from_memory_with_format(&*res, ImageFormat::Png)?;
-        Ok(dynimg.to_rgba8())
-    }
-}
-
-/// This function takes UserIds and generates an Embed containing  
+/// This function takes UserIds and generates an Embed containing
 /// * the avatars of the users indicated by those UserIds, placed one after each other
 /// * emojis indicating with what reaction you need to reply to select a specific player
 /// * flavour text in the embed title
@@ -124,7 +105,7 @@ fn merge_avatars(mut avatars: Vec<Image>) -> Result<Image, Error> {
         ));
     }
 
-    let mut image = res::get_background()?;
+    let mut image = crate::resources::six_choice_background()?;
 
     warn!(" w:{} h:{}", image.width(), image.height());
 
