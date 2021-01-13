@@ -7,10 +7,11 @@
 
 use super::{
     macros::{state::*, tasks::expect_game},
+    reactions::*,
     *,
 };
 use crate::{
-    game::{data::NUMBER_EMOJIS_ONE_TO_SIX, item, DeathCause},
+    game::{item, DeathCause},
     helpers::{choose_target::build_embed_for_target_choice, react::react_with},
 };
 

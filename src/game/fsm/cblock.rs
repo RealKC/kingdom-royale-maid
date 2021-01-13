@@ -4,9 +4,9 @@
 //! * the secret meeting partners get chosen & the secret meetings happen
 //! * the King selects a target & either the Sorcerer or Knight will decide whether to kill the target or not
 
-use super::{macros::state::*, *};
+use super::{macros::state::*, reactions::*, *};
 use crate::{
-    game::{data::*, player::Player, roles::RoleName},
+    game::{player::Player, roles::RoleName},
     helpers::{
         choose_target::build_embed_for_target_choice,
         confirm_murder::build_embed_for_murder_confirmation, perms, react::react_with,

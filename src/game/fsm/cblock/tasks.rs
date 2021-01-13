@@ -7,10 +7,7 @@ use serenity::{
 };
 use tracing::{error, warn};
 
-use crate::game::{
-    data::{NUMBER_EMOJIS_ONE_TO_SIX, YES_NO_EMOJIS},
-    fsm::macros::tasks::expect_game,
-};
+use crate::game::fsm::{macros::tasks::expect_game, reactions::*};
 
 pub async fn handle_secret_meeting_selection(
     ctx: Context,

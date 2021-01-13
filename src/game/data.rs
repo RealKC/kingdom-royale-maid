@@ -10,9 +10,6 @@ pub enum DeathCause {
     Stab(UserId),
 }
 
-pub static NUMBER_EMOJIS_ONE_TO_SIX: [&str; 6] = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣"];
-pub static YES_NO_EMOJIS: [&str; 2] = ["🇾", "🇳"];
-
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub enum SubstitutionStatus {
     HasNot,
