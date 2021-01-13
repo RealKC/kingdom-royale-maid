@@ -1,6 +1,5 @@
 use serenity::{
     client::Context,
-    framework::standard::CommandResult,
     model::{
         channel::Message,
         id::{ChannelId, UserId},
@@ -24,8 +23,6 @@ macro_rules! expect_game {
                 "{} woke up but no game is running. (Game likely ended)",
                 $func
             );
-
-            return Ok(());
         }
 
         game.unwrap()
@@ -36,7 +33,7 @@ pub async fn handle_secret_meeting_selection(
     ctx: Context,
     msg: Message,
     user_and_room: (UserId, ChannelId),
-) -> CommandResult {
+) {
     if let Some(reaction) = msg
         .await_reaction(&ctx)
         .author_id(user_and_room.0)
@@ -73,7 +70,6 @@ pub async fn handle_secret_meeting_selection(
             }
         }
     }
-    Ok(())
 }
 
 pub async fn handle_king_choosing_target(
@@ -81,7 +77,7 @@ pub async fn handle_king_choosing_target(
     msg: Message,
     king_id: UserId,
     room_id: ChannelId,
-) -> CommandResult {
+) {
     if let Some(reaction) = msg
         .await_reaction(&ctx)
         .author_id(king_id)
@@ -110,10 +106,7 @@ pub async fn handle_king_choosing_target(
                 }
             }
         }
-
-        return Ok(());
     }
-    Ok(())
 }
 
 pub async fn handle_assistant_choice(
@@ -121,7 +114,7 @@ pub async fn handle_assistant_choice(
     msg: Message,
     assistant_id: UserId,
     room_id: ChannelId,
-) -> CommandResult {
+) {
     if let Some(reaction) = msg
         .await_reaction(&ctx)
         .filter(|r| YES_NO_EMOJIS.contains(&r.emoji.to_string().as_str()))
@@ -137,7 +130,7 @@ pub async fn handle_assistant_choice(
                 id
             } else {
                 warn!("handle_assistance_choice woke up in the wrong block");
-                return Ok(());
+                return;
             };
 
             let meeting_room = game.meeting_room();
@@ -145,16 +138,16 @@ pub async fn handle_assistant_choice(
                 players.get_mut(&target_id).unwrap()
             } else {
                 warn!("handle_assistance_choice woke up in the wrong block");
-                return Ok(());
+                return;
             };
-            target
+            let _ = target
                 .set_dead(target.role_name().into(), &ctx, meeting_room)
-                .await?;
+                .await
+                .map_err(|e| {
+                    warn!("{}", e);
+                });
         }
-        return Ok(());
     }
-
-    Ok(())
 }
 
 pub async fn handle_assassination(
@@ -162,7 +155,7 @@ pub async fn handle_assassination(
     msg: Message,
     revolutionary_id: UserId,
     room_id: ChannelId,
-) -> CommandResult {
+) {
     if let Some(reaction) = msg
         .await_reaction(&ctx)
         .author_id(revolutionary_id)
@@ -203,17 +196,18 @@ pub async fn handle_assassination(
                                 res
                             };
 
-                            double
+                            let _ =double
                                 .expect("Should have a player here, i.e. the king shouldn't be allowed to substitute when the double is dead")
                                 .1
                                 .set_dead(DeathCause::Assassination, &ctx, meeting_room)
-                                .await?;
+                                .await.map_err(|e| warn!("{}", e));
                         } else {
                             let player = game.player_mut(id);
-                            player
+                            let _ = player
                                 .expect("Should have a player here")
                                 .set_dead(DeathCause::Assassination, &ctx, meeting_room)
-                                .await?;
+                                .await
+                                .map_err(|e| warn!("{}", e));
                         }
                     }
                 }
@@ -222,8 +216,5 @@ pub async fn handle_assassination(
                 }
             }
         }
-
-        return Ok(());
     }
-    Ok(())
 }
