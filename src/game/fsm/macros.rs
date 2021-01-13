@@ -62,3 +62,29 @@ macro_rules! impl_timeblock {
 pub mod state {
     pub use crate::{for_all_blocks, impl_common_state_boilerplate, impl_timeblock, impl_wrap};
 }
+
+#[macro_export]
+macro_rules! expect_game {
+    ($ctx:ident, $func: literal) => {{
+        let game = $ctx
+            .data
+            .read()
+            .await
+            .get::<crate::commands::game::GameContainer>()
+            .cloned();
+
+        if let Some(game) = game {
+            game
+        } else {
+            warn!(
+                "{} woke up but no game is running. (Game likely ended)",
+                $func
+            );
+            return;
+        }
+    }};
+}
+
+pub mod tasks {
+    pub use crate::expect_game;
+}

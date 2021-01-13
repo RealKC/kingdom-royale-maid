@@ -5,9 +5,11 @@
 //!  * players are made to either eat a piece of food or starve
 //!  * the Revolutionary assassinates
 
-use super::{macros::state::*, *};
+use super::{
+    macros::{state::*, tasks::expect_game},
+    *,
+};
 use crate::{
-    game::tasks,
     game::{data::NUMBER_EMOJIS_ONE_TO_SIX, item, DeathCause},
     helpers::{choose_target::build_embed_for_target_choice, react::react_with},
 };
@@ -128,7 +130,7 @@ impl GameMachine<EBlock> {
 
         react_with(ctx, &msg, &NUMBER_EMOJIS_ONE_TO_SIX).await?;
 
-        tokio::task::spawn(tasks::handle_assassination(
+        tokio::task::spawn(handle_assassination(
             ctx.clone(),
             msg,
             *revolutionary.0,
@@ -139,4 +141,73 @@ impl GameMachine<EBlock> {
     }
 
     impl_common_state_boilerplate!();
+}
+
+pub async fn handle_assassination(
+    ctx: Context,
+    msg: Message,
+    revolutionary_id: UserId,
+    room_id: ChannelId,
+) {
+    if let Some(reaction) = msg
+        .await_reaction(&ctx)
+        .author_id(revolutionary_id)
+        .channel_id(room_id)
+        .filter(|r| NUMBER_EMOJIS_ONE_TO_SIX.contains(&r.emoji.to_string().as_str()))
+        .await
+    {
+        static EXPECT_ERR_MESSAGE: &str = "handle_assassination called outside of the E Block";
+        let game = expect_game!(ctx, "handle_assassination");
+        let mut game = game.write().await;
+
+        let meeting_room = game.meeting_room();
+
+        let emoji = reaction.as_inner_ref().emoji.to_string();
+        if let Ok(idx) = NUMBER_EMOJIS_ONE_TO_SIX.binary_search(&emoji.as_str()) {
+            let id = game
+                .players()
+                .expect(EXPECT_ERR_MESSAGE)
+                .keys()
+                .nth(idx)
+                .copied();
+            match id {
+                Some(id) => {
+                    let hit_king = game.player(id).expect("handle_assassination: binary_search returned an index the array I think").role_name() == RoleName::King;
+                    if hit_king {
+                        let king_has_substituted =
+                            game.king_has_substituted().expect(EXPECT_ERR_MESSAGE);
+
+                        if king_has_substituted {
+                            let double = {
+                                let mut res = None;
+                                for player in game.players_mut().expect(EXPECT_ERR_MESSAGE) {
+                                    if player.1.role_name() == RoleName::TheDouble {
+                                        res = Some(player);
+                                        break;
+                                    }
+                                }
+                                res
+                            };
+
+                            let _ =double
+                                .expect("Should have a player here, i.e. the king shouldn't be allowed to substitute when the double is dead")
+                                .1
+                                .set_dead(DeathCause::Assassination, &ctx, meeting_room)
+                                .await.map_err(|e| warn!("{}", e));
+                        } else {
+                            let player = game.player_mut(id);
+                            let _ = player
+                                .expect("Should have a player here")
+                                .set_dead(DeathCause::Assassination, &ctx, meeting_room)
+                                .await
+                                .map_err(|e| warn!("{}", e));
+                        }
+                    }
+                }
+                None => {
+                    error!("Got a wrong reaction somehow");
+                }
+            }
+        }
+    }
 }
