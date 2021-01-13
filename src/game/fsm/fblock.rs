@@ -3,7 +3,7 @@
 //! During this state, if all alive players are found to be winning the game ends, otherwise,
 //! the day number gets increased
 
-use super::*;
+use super::{macros::state::*, *};
 
 use serenity::model::id::UserId;
 use std::collections::BTreeMap;
@@ -34,7 +34,7 @@ impl GameMachine<FBlock> {
         if self.state.all_alive_have_won() {
             Next::GameEnded(GameMachine {
                 metadata: self.metadata,
-                state: GameEnded ::new(self.state.players, self.state.day),
+                state: GameEnded::new(self.state.players, self.state.day),
             })
         } else {
             Next::Block(GameMachine {

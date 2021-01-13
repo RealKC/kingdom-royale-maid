@@ -2,7 +2,7 @@
 //!
 //! The meeting room gets opened in this block. If all alive players are found to be winning, the game ends.
 
-use super::*;
+use super::{macros::state::*, *};
 
 use serenity::{model::id::UserId, prelude::*};
 use std::collections::BTreeMap;
@@ -36,7 +36,7 @@ impl GameMachine<DBlock> {
         if self.state.all_alive_have_won() {
             Next::GameEnded(GameMachine {
                 metadata: self.metadata,
-                state: GameEnded ::new(self.state.players, self.state.day),
+                state: GameEnded::new(self.state.players, self.state.day),
             })
         } else {
             if let Err(err) = self.open_meeting_room(ctx).await {

@@ -2,7 +2,7 @@
 //!
 //! The purpose of this state is for players to join a game, and for it to be explained to them.
 
-use super::*;
+use super::{macros::state::*, *};
 use crate::{
     game::roles::{Role, RoleHolder},
     helpers::perms,

@@ -5,7 +5,7 @@
 //!  * players are made to either eat a piece of food or starve
 //!  * the Revolutionary assassinates
 
-use super::*;
+use super::{macros::state::*, *};
 use crate::{
     game::tasks,
     game::{data::NUMBER_EMOJIS_ONE_TO_SIX, item, DeathCause},
@@ -21,12 +21,16 @@ pub(super) struct EBlock {
     players: BTreeMap<UserId, Player>,
     day: u8,
 
-    king_substitution_status: SubstitutionStatus
+    king_substitution_status: SubstitutionStatus,
 }
 
 impl EBlock {
     pub fn new(players: BTreeMap<UserId, Player>, day: u8, kss: SubstitutionStatus) -> Self {
-        Self { players, day, king_substitution_status: kss }
+        Self {
+            players,
+            day,
+            king_substitution_status: kss,
+        }
     }
 }
 
@@ -41,7 +45,7 @@ impl GameMachine<EBlock> {
         if self.state.all_alive_have_won() {
             Next::GameEnded(GameMachine {
                 metadata: self.metadata,
-                state: GameEnded ::new(self.state.players, self.state.day),
+                state: GameEnded::new(self.state.players, self.state.day),
             })
         } else {
             if let Err(err) = self.close_meeting_room(ctx).await {
@@ -62,7 +66,11 @@ impl GameMachine<EBlock> {
 
             Next::Block(GameMachine {
                 metadata: self.metadata,
-                state: FBlock::new(self.state.players, self.state.day, self.state.king_substitution_status),
+                state: FBlock::new(
+                    self.state.players,
+                    self.state.day,
+                    self.state.king_substitution_status,
+                ),
             })
         }
     }

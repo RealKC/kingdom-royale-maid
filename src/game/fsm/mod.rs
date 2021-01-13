@@ -23,6 +23,9 @@ use fblock::*;
 use gameended::*;
 use tracing::{info, warn};
 
+#[macro_use]
+mod macros;
+
 use super::roles::RoleName;
 use crate::game::data::*;
 pub use crate::game::player::Player;
@@ -34,20 +37,6 @@ use serenity::model::prelude::*;
 use serenity::prelude::*;
 use std::collections::BTreeMap;
 use tracing::error;
-
-macro_rules! for_all_blocks {
-    ($matcher:expr, $n:ident, $e:expr) => {
-        match $matcher {
-            Wrapper::ABlock($n) => Some($e),
-            Wrapper::BBlock($n) => Some($e),
-            Wrapper::CBlock($n) => Some($e),
-            Wrapper::DBlock($n) => Some($e),
-            Wrapper::EBlock($n) => Some($e),
-            Wrapper::FBlock($n) => Some($e),
-            _ => None,
-        }
-    };
-}
 
 /// Struct for the public API of the state machine
 #[derive(Clone)]
@@ -435,35 +424,6 @@ trait Wrap {
     fn wrap(self) -> Wrapper;
 }
 
-#[macro_export]
-macro_rules! impl_wrap {
-    ($name:ident) => {
-        impl Wrap for GameMachine<$name> {
-            fn wrap(self) -> Wrapper {
-                Wrapper::$name(self)
-            }
-        }
-    };
-}
-pub use crate::impl_wrap;
-
-#[macro_export]
-macro_rules! impl_common_state_boilerplate {
-    () => {
-        pub(super) fn set_king_substitution_status(&mut self, kss: SubstitutionStatus) {
-            self.state.king_substitution_status = kss;
-        }
-
-        pub(super) fn king_has_substituted(&self) -> bool {
-            matches!(
-                self.state.king_substitution_status,
-                SubstitutionStatus::Has | SubstitutionStatus::CurrentlyIs
-            )
-        }
-    };
-}
-pub use crate::impl_common_state_boilerplate;
-
 /// Variant representing the next state after a TimeBlock
 enum Next<S>
 where
@@ -540,26 +500,6 @@ pub trait TimeBlock: GameState {
         unreachable!("There should always be a {:?} in the game", role)
     }
 }
-
-#[macro_export]
-macro_rules! impl_timeblock {
-    ($name:ident) => {
-        impl TimeBlock for $name {
-            fn day(&self) -> u8 {
-                self.day
-            }
-
-            fn players(&self) -> &BTreeMap<UserId, Player> {
-                &self.players
-            }
-
-            fn players_mut(&mut self) -> &mut BTreeMap<UserId, Player> {
-                &mut self.players
-            }
-        }
-    };
-}
-pub use crate::impl_timeblock;
 
 /// Marker trait for TimeBlocks in which the meeting room can be opened
 trait CanOpenMeetingRoom: TimeBlock {}

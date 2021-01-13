@@ -3,7 +3,7 @@
 //! State that exists for after game discussion in which players may share some things while the
 //! data structures of a game are still alive.
 
-use super::*;
+use super::{macros::state::*, *};
 
 #[derive(Debug, Clone)]
 pub(super) struct GameEnded {

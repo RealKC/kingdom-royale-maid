@@ -3,7 +3,7 @@
 //! During this block the meeting room gets closed. If only winning alive players are found during
 //! this block, the game ends.
 
-use super::*;
+use super::{macros::state::*, *};
 
 use serenity::{model::id::UserId, prelude::*};
 use std::collections::BTreeMap;

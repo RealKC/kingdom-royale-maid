@@ -4,7 +4,7 @@
 //! * the secret meeting partners get chosen & the secret meetings happen
 //! * the King selects a target & either the Sorcerer or Knight will decide whether to kill the target or not
 
-use super::*;
+use super::{macros::state::*, *};
 use crate::{
     game::{data::*, player::Player, roles::RoleName, tasks},
     helpers::{
