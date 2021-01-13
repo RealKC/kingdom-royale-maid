@@ -49,6 +49,7 @@ pub async fn handle_secret_meeting_selection(
             let game = expect_game!(ctx, "handle_secret_meeting_selection");
             let mut game = game.write().await;
 
+            // Panic safety: The only GameState that's not a TimeBlock is NotStarted, and this can never wake up then
             let id = game
                 .players()
                 .expect("handle_secret_meeting_selection should only be called by a TimeBlock")
@@ -57,6 +58,7 @@ pub async fn handle_secret_meeting_selection(
                 .copied();
             match id {
                 Some(id) => {
+                    // Panic safety: The only GameState that's not a TimeBlock is NotStarted, and this can never wake up then
                     game.players_mut()
                         .expect(
                             "handle_secret_meeting_selection should only be called by a TimeBlock",
@@ -92,6 +94,7 @@ pub async fn handle_king_choosing_target(
             let game = expect_game!(ctx, "handle_king_choosing_target");
             let mut game = game.write().await;
 
+            // Panic safety: The only GameState that's not a TimeBlock is NotStarted, and this can never wake up then
             let id = game
                 .players_mut()
                 .expect("handle_king_choosing_target should only be called in a TimeBlock")
@@ -126,18 +129,24 @@ pub async fn handle_assistant_choice(
         .channel_id(room_id)
         .await
     {
-        static EXPECT_ERR_MESSAGE: &str = "handle_assisstant_choice called outside the C block";
         if reaction.as_inner_ref().emoji.unicode_eq(YES_NO_EMOJIS[0]) {
             let game = expect_game!(ctx, "handle_assistant_choice");
             let mut game = game.write().await;
 
-            let target_id = game.king_murder_target().expect(EXPECT_ERR_MESSAGE);
+            let target_id = if let Some(id) = game.king_murder_target() {
+                id
+            } else {
+                warn!("handle_assistance_choice woke up in the wrong block");
+                return Ok(());
+            };
+
             let meeting_room = game.meeting_room();
-            let target = game
-                .players_mut()
-                .expect(EXPECT_ERR_MESSAGE)
-                .get_mut(&target_id)
-                .unwrap();
+            let target = if let Some(players) = game.players_mut() {
+                players.get_mut(&target_id).unwrap()
+            } else {
+                warn!("handle_assistance_choice woke up in the wrong block");
+                return Ok(());
+            };
             target
                 .set_dead(target.role_name().into(), &ctx, meeting_room)
                 .await?;
@@ -195,7 +204,7 @@ pub async fn handle_assassination(
                             };
 
                             double
-                            .expect("Should have a player here, i.e. the king shouldn't be allowed to substitute when the double is dead")
+                                .expect("Should have a player here, i.e. the king shouldn't be allowed to substitute when the double is dead")
                                 .1
                                 .set_dead(DeathCause::Assassination, &ctx, meeting_room)
                                 .await?;
