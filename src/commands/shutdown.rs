@@ -1,4 +1,4 @@
-use crate::ShardManagerContainer;
+use crate::bot::ShardManagerContainer;
 
 use super::game::end_game_impl;
 use super::prelude::*;
