@@ -317,8 +317,14 @@ impl GameMachine<CBlock> {
             .send_message(ctx, |m| m.set_embed(embed))
             .await?;
 
-        react_with(ctx, &msg, &NUMBER_EMOJIS_ONE_TO_SIX).await?;
+        let mut emojis = vec![];
+        for (idx, player) in self.state.players().values().enumerate() {
+            if player.is_alive() {
+                emojis.push(NUMBER_EMOJIS_ONE_TO_SIX[idx]);
+            }
+        }
 
+        react_with(ctx, &msg, &emojis).await?;
         let room_id = msg.channel_id;
 
         tokio::task::spawn(tasks::handle_king_choosing_target(

@@ -129,7 +129,13 @@ impl GameMachine<EBlock> {
             .send_message(ctx, |m| m.set_embed(embed))
             .await?;
 
-        react_with(ctx, &msg, &NUMBER_EMOJIS_ONE_TO_SIX).await?;
+        let mut emojis = vec![];
+        for (idx, player) in self.state.players().values().enumerate() {
+            if player.is_alive() {
+                emojis.push(NUMBER_EMOJIS_ONE_TO_SIX[idx]);
+            }
+        }
+        react_with(ctx, &msg, &emojis).await?;
 
         tokio::task::spawn(handle_assassination(
             ctx.clone(),
