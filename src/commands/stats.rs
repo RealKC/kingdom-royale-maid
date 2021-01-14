@@ -117,14 +117,16 @@ Uptime: {uptime}
         trace!("Commit: {}", github_url);
 
         let commit_is_online = {
-            let reqwest = ctx.data.read().await.get::<ReqwestClient>().cloned();
-            if let Some(client) = reqwest {
-                let response = client.request(Method::GET, &github_url).send().await;
-                if let Ok(response) = response {
-                    response.status().is_success()
-                } else {
-                    false
-                }
+            let client = ctx
+                .data
+                .read()
+                .await
+                .get::<ReqwestClient>()
+                .cloned()
+                .expect("There must always be a Reqwest client in the typemap");
+            let response = client.request(Method::GET, &github_url).send().await;
+            if let Ok(response) = response {
+                response.status().is_success()
             } else {
                 false
             }

@@ -140,7 +140,9 @@ impl Bot {
         let reqwest_client = Reqwest::builder()
             .user_agent("Mozilla/5.0 (X11; Linux x86_64; rv:81.0) Gecko/20100101 Firefox/81.0")
             .build()
-            .unwrap();
+            .expect(
+                "Could not create a Reqwest client, which is necessary for the bot to function.",
+            );
 
         let mut data = self.client.data.write().await;
         data.insert::<stats::CommandStatisticsContainer>(Default::default());
