@@ -1,4 +1,4 @@
-use crate::data::stats::{CommandStatisticsContainer, StartupTime, SystemVersion};
+use crate::data::stats::{self, CommandStatisticsContainer, StartupTime};
 
 use serenity::{
     builder::CreateEmbed,
@@ -62,32 +62,38 @@ pub async fn stats(ctx: &Context, msg: &Message) -> CommandResult {
         .await
         .get::<StartupTime>()
         .expect("ctx.data should always have a StartupTime in it");
-    let system_version = ctx
-        .data
-        .read()
-        .await
-        .get::<SystemVersion>()
-        .expect("ctx.data should always have a SystemVersion in it")
-        .clone();
+
+    #[cfg(target_os = "linux")]
+    let system_version = ctx.data.read().await.get::<stats::SystemVersion>().cloned();
 
     let mut embed = CreateEmbed::default();
 
-    embed
-        .title("Statistics")
-        .description(format!(
-            r#"
-Total amount of command invocations: {invocations}.
+    let mut description = format!(
+        r#"
+    Total amount of command invocations: {invocations}.
 
-Uptime: {uptime}
+    Uptime: {uptime}
 
-**System:**
-```{ver}```
-"#,
-            invocations = stats.total_command_invocations,
-            uptime = get_formatted_uptime(startup_time)?,
-            ver = system_version
-        ))
-        .field("Command invocations", command_invocations, true);
+    "#,
+        invocations = stats.total_command_invocations,
+        uptime = get_formatted_uptime(startup_time)?
+    );
+
+    #[cfg(target_os = "linux")]
+    if let Some(system_version) = system_version {
+        let version = format!(
+            r#"**System**
+```{}```"#,
+            system_version
+        );
+        description = format!("{}{}", description, version);
+    }
+
+    embed.title("Statistics").description(description).field(
+        "Command invocations",
+        command_invocations,
+        true,
+    );
 
     #[cfg(target_os = "linux")]
     {

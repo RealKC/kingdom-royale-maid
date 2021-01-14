@@ -145,9 +145,14 @@ impl Bot {
             );
 
         let mut data = self.client.data.write().await;
+
+        #[cfg(target_os = "linux")]
+        if let Ok(version) = read_system_version() {
+            data.insert::<stats::SystemVersion>(version);
+        }
+
         data.insert::<stats::CommandStatisticsContainer>(Default::default());
         data.insert::<stats::StartupTime>(startup_time);
-        data.insert::<stats::SystemVersion>(read_system_version().unwrap());
         data.insert::<ShardManagerContainer>(Arc::clone(&self.client.shard_manager));
         data.insert::<ReqwestClient>(reqwest_client);
         data.insert::<Cdn>(cdn_channel_id);
@@ -155,6 +160,7 @@ impl Bot {
     }
 }
 
+#[cfg(target_os = "linux")]
 fn read_system_version() -> Result<String, std::io::Error> {
     let mut f = File::open("/proc/version")?;
     let mut version = String::new();

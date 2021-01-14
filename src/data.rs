@@ -54,8 +54,10 @@ pub mod stats {
         }
     }
 
+    #[cfg(target_os = "linux")]
     pub struct SystemVersion;
 
+    #[cfg(target_os = "linux")]
     impl TypeMapKey for SystemVersion {
         type Value = String;
     }
