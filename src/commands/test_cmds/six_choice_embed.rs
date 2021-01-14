@@ -31,8 +31,8 @@ impl MockPlayers {
     async fn new(ctx: &Context, ids: Vec<UserId>) -> Self {
         let mut players = vec![];
 
-        for id in &ids {
-            players.push(Player::new(
+        for (idx, id) in ids.iter().enumerate() {
+            let mut player = Player::new(
                 *id,
                 RoleHolder::King(King),
                 ctx.data
@@ -42,7 +42,13 @@ impl MockPlayers {
                     .copied()
                     .expect("There must always be a CDN in ctx.data"),
                 "lol".to_string(),
-            ));
+            );
+
+            if idx % 2 == 0 {
+                player.set_dead_mock();
+            }
+
+            players.push(player);
         }
 
         Self { ids, players }

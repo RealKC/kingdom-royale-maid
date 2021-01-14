@@ -6,7 +6,8 @@ use crate::{
     game::Player,
 };
 use image::{
-    self, imageops, load_from_memory_with_format, png::PngEncoder, ColorType, ImageFormat,
+    self, imageops, imageops::colorops, load_from_memory_with_format, png::PngEncoder, ColorType,
+    DynamicImage, ImageFormat,
 };
 use libwebp_image::webp_load_from_memory;
 use serenity::{builder::CreateEmbed, http::AttachmentType, model::id::UserId, prelude::*};
@@ -51,7 +52,17 @@ pub async fn build_embed_for_target_choice(
     info!("Fetching avatars...");
     let avatars = fetch_avatars(ctx, &players.player_ids()).await?;
 
+    let alivenesses = {
+        let mut a = vec![];
+        for player in &players.players() {
+            a.push(player.is_alive());
+        }
+        a
+    };
+
     let merged_avatars = tokio::task::spawn_blocking(move || -> Result<AttachmentType, Error> {
+        info!("Grayscaling avatars...");
+        let avatars = grayscale_dead_players(avatars, alivenesses);
         info!("Merging avatars...");
         let merged_avatars = merge_avatars(avatars)?;
         let merged_avatars_png = encode_to_png(merged_avatars)?;
@@ -115,6 +126,16 @@ async fn fetch_avatars(ctx: &Context, players: &[UserId]) -> Result<Vec<Image>, 
     }
 
     Ok(avatars)
+}
+
+fn grayscale_dead_players(mut avatars: Vec<Image>, alivenesses: Vec<bool>) -> Vec<Image> {
+    for (avatar, alive) in avatars.iter_mut().zip(alivenesses.iter()) {
+        if !alive {
+            *avatar = DynamicImage::ImageLuma8(colorops::grayscale(avatar)).to_rgba8();
+        }
+    }
+
+    avatars
 }
 
 /// This function creates an image big enough to contain the first 6 images in the vector,

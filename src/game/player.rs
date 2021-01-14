@@ -3,7 +3,7 @@ use std::fmt::Debug;
 use super::{
     fsm::TimeBlock,
     item::{Item, Items},
-    roles::{ RoleHolder, RoleName},
+    roles::{RoleHolder, RoleName},
     DeathCause,
 };
 use serenity::{
@@ -92,6 +92,11 @@ impl Player {
             .say(ctx, format!("{} {}", self.id.mention(), cause))
             .await?;
         Ok(())
+    }
+
+    /// Function meant to be only used inside test functions
+    pub fn set_dead_mock(&mut self) {
+        self.alive = false;
     }
 
     pub fn items(&self) -> &Items {
