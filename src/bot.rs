@@ -118,6 +118,9 @@ impl Bot {
                 let mut owners = HashSet::new();
                 if let Some(team) = info.team {
                     owners.insert(team.owner_user_id);
+                    for member in team.members {
+                        owners.insert(member.user.id);
+                    }
                 } else {
                     owners.insert(info.owner.id);
                 }
