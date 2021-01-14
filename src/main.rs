@@ -77,13 +77,19 @@ async fn setup_signals(shard_manager: Arc<Mutex<ShardManager>>) {
 
     #[cfg(windows)]
     {
-        use tokio::signal::windows::ctrl_break;
+        use tokio::signal::windows::{ctrl_break, ctrl_c};
 
-        let stream = ctrl_break();
+        let shard_manager_clone = Arc::clone(shard_manager);
 
         tokio::spawn(async move {
-            stream.unwrap().recv().await;
+            ctrl_break().unwrap().recv().await;
             info!("Ctrl Break received - shutting down!");
+            shard_manager_clone.lock().await.shutdown_all().await;
+        });
+
+        tokio::spawn(async move {
+            ctrl_c().unwrap().recv().await;
+            info!("Ctrl C received - shutting down!");
             shard_manager.lock().await.shutdown_all().await;
         });
     }
