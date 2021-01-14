@@ -1,7 +1,11 @@
 use crate::{
     commands::prelude::*,
-    game::RoleName,
-    helpers::{choose_target::build_embed_for_target_choice, react::react_with},
+    data::Cdn,
+    game::{King, Player, RoleHolder, RoleName},
+    helpers::{
+        choose_target::{build_embed_for_target_choice, Players},
+        react::react_with,
+    },
 };
 
 use serenity::model::id::UserId;
@@ -18,6 +22,43 @@ pub async fn rev_test(ctx: &Context, msg: &Message, args: Args) -> CommandResult
     generic_test(ctx, msg, args, RoleName::Revolutionary).await
 }
 
+struct MockPlayers {
+    ids: Vec<UserId>,
+    players: Vec<Player>,
+}
+
+impl MockPlayers {
+    async fn new(ctx: &Context, ids: Vec<UserId>) -> Self {
+        let mut players = vec![];
+
+        for id in &ids {
+            players.push(Player::new(
+                *id,
+                RoleHolder::King(King),
+                ctx.data
+                    .read()
+                    .await
+                    .get::<Cdn>()
+                    .copied()
+                    .expect("There must always be a CDN in ctx.data"),
+                "lol".to_string(),
+            ));
+        }
+
+        Self { ids, players }
+    }
+}
+
+impl Players for MockPlayers {
+    fn players(&self) -> Vec<Player> {
+        self.players.clone()
+    }
+
+    fn player_ids(&self) -> Vec<UserId> {
+        self.ids.clone()
+    }
+}
+
 async fn generic_test(
     ctx: &Context,
     msg: &Message,
@@ -25,11 +66,13 @@ async fn generic_test(
     role_kind: RoleName,
 ) -> CommandResult {
     let _typing = msg.channel_id.start_typing(&ctx.http)?;
-    let mut players = vec![];
+    let mut player_ids = vec![];
 
     while let Ok(user_id) = args.single::<UserId>() {
-        players.push(user_id);
+        player_ids.push(user_id);
     }
+
+    let players = MockPlayers::new(ctx, player_ids).await;
 
     let embed = build_embed_for_target_choice(
         ctx,

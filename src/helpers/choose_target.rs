@@ -1,5 +1,10 @@
+use std::collections::BTreeMap;
+
 use super::Error;
-use crate::data::{Cdn, ReqwestClient};
+use crate::{
+    data::{Cdn, ReqwestClient},
+    game::Player,
+};
 use image::{
     self, imageops, load_from_memory_with_format, png::PngEncoder, ColorType, ImageFormat,
 };
@@ -9,17 +14,42 @@ use tracing::{error, info, warn};
 
 type Image = image::RgbaImage;
 
+/// Trait that exists to make !testk's existence easier on me
+pub trait Players: Sync {
+    fn players(&self) -> Vec<Player>;
+    fn player_ids(&self) -> Vec<UserId>;
+}
+
+/// Impl for the type used to store players by TimeBlocks
+impl Players for BTreeMap<UserId, Player> {
+    fn players(&self) -> Vec<Player> {
+        let mut players = vec![];
+        for player in self.values() {
+            players.push(player.clone());
+        }
+        players
+    }
+
+    fn player_ids(&self) -> Vec<UserId> {
+        let mut ids = vec![];
+        for id in self.keys() {
+            ids.push(*id);
+        }
+        ids
+    }
+}
+
 /// This function takes UserIds and generates an Embed containing
 /// * the avatars of the users indicated by those UserIds, placed one after each other
 /// * emojis indicating with what reaction you need to reply to select a specific player
 /// * flavour text in the embed title
 pub async fn build_embed_for_target_choice(
     ctx: &Context,
-    players: &[UserId],
+    players: &dyn Players,
     embed_title: &str,
 ) -> Result<CreateEmbed, Error> {
     info!("Fetching avatars...");
-    let avatars = fetch_avatars(ctx, players).await?;
+    let avatars = fetch_avatars(ctx, &players.player_ids()).await?;
 
     let merged_avatars = tokio::task::spawn_blocking(move || -> Result<AttachmentType, Error> {
         info!("Merging avatars...");

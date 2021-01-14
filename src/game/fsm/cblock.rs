@@ -116,7 +116,7 @@ impl GameMachine<CBlock> {
         info!("Trying to build an embed");
         let embed = build_embed_for_target_choice(
             ctx,
-            &self.state.players().keys().copied().collect::<Vec<_>>(),
+            self.state.players(),
             "Please select a partner for your secret meeting",
         )
         .await?;
@@ -303,7 +303,7 @@ impl GameMachine<CBlock> {
 
         let embed = build_embed_for_target_choice(
             ctx,
-            &self.state.players().keys().copied().collect::<Vec<_>>(),
+            self.state.players(),
             "Please select a target for 「 Murder 」",
         )
         .await?;
