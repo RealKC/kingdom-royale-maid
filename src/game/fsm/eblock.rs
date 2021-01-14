@@ -97,7 +97,7 @@ impl GameMachine<EBlock> {
         Ok(())
     }
 
-    pub async fn make_revolutionary_assassinate(&mut self, ctx: &Context) -> CommandResult {
+    async fn make_revolutionary_assassinate(&mut self, ctx: &Context) -> CommandResult {
         let revolutionary = {
             let mut res = None;
             for player in self.state.players().iter() {
@@ -144,7 +144,7 @@ impl GameMachine<EBlock> {
     impl_common_state_boilerplate!();
 }
 
-pub async fn handle_assassination(
+async fn handle_assassination(
     ctx: Context,
     msg: Message,
     revolutionary_id: UserId,
