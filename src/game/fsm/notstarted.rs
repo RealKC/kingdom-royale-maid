@@ -160,7 +160,7 @@ And a heavy-duty knife.
     }
 }
 
-pub type StdResult<T, E> = std::result::Result<T, E>;
+type StdResult<T, E> = std::result::Result<T, E>;
 pub type JoinResult = StdResult<(), JoinError>;
 pub type LeaveResult = StdResult<(), LeaveError>;
 
