@@ -14,7 +14,7 @@ mod version_data;
 
 use std::{
     env::{self},
-    path::Path,
+    path::{Path, PathBuf},
     process::Command,
 };
 
@@ -25,12 +25,7 @@ fn main() -> std::io::Result<()> {
     let _ = std::fs::create_dir(&out_dir);
     let version_file_dest_path = out_dir.join("version.json");
 
-    let cargo = env::var("CARGO_MANIFEST_DIR").expect("fuc");
-    std::fs::copy(
-        Path::new(&cargo).join("res/avatars.png"),
-        out_dir.join("avatars.png"),
-    )
-    .expect("Failed to copy background file");
+    copy_resource_reactions(&out_dir);
     println!("?");
 
     let _ = std::fs::remove_file(&version_file_dest_path);
@@ -85,6 +80,16 @@ fn main() -> std::io::Result<()> {
     println!("cargo:rustc-env=RESOURCE_PATH={}", out_dir.display());
 
     Ok(())
+}
+
+fn copy_resource_reactions(out_dir: &PathBuf) {
+    let cargo = env::var("CARGO_MANIFEST_DIR").expect("fuc");
+    for i in 1..7 {
+        let _ = std::fs::copy(
+            Path::new(&cargo).join(format!("res/reactions/{}.png", i)),
+            out_dir.join(format!("{}.png", i)),
+        );
+    }
 }
 
 #[cfg(not(feature = "deterministic"))]

@@ -156,7 +156,20 @@ fn merge_avatars(mut avatars: Vec<Image>) -> Result<Image, Error> {
         ));
     }
 
-    let mut image = crate::resources::six_choice_background()?;
+    let mut image = {
+        let mut res = DynamicImage::new_rgba8(6 * IMAGE_LEN, 764).to_rgba8();
+        let mut offset = 0;
+
+        for i in 1..7 {
+            let img = crate::resources::number_reactions(i)?;
+            for (x, y, pixel) in img.enumerate_pixels() {
+                res.put_pixel(offset + x, y, *pixel);
+            }
+            offset += IMAGE_LEN;
+        }
+
+        res
+    };
 
     warn!(" w:{} h:{}", image.width(), image.height());
 

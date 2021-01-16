@@ -10,4 +10,4 @@
 
 The icons were edited using the built-in game-icons.net editors in order to have the colours they have.
 
-[avatars.png](avatars.png) by Millie on Discord. THANK YOU SO MUCH :heart:
+All images under [reactions/](reactions/) by Millie on Discord. Thank you so much :heart:

@@ -18,8 +18,9 @@ pub fn version() -> CommandResult<VersionData> {
     Ok(version)
 }
 
-pub fn six_choice_background() -> CommandResult<RgbaImage> {
-    let res = Assets::get("avatars.png").unwrap();
+pub fn number_reactions(i: u8) -> CommandResult<RgbaImage> {
+    debug_assert!((1..7).contains(&i));
+    let res = Assets::get(&format!("{}.png", i)).unwrap();
     let dynimg = load_from_memory_with_format(&*res, ImageFormat::Png)?;
     Ok(dynimg.to_rgba8())
 }
