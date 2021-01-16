@@ -64,7 +64,8 @@ pub async fn build_embed_for_target_choice(
         info!("Grayscaling avatars...");
         let avatars = grayscale_dead_players(avatars, alivenesses);
         info!("Merging avatars...");
-        let merged_avatars = merge_avatars(avatars)?;
+        let background_image = make_background_image()?;
+        let merged_avatars = merge_avatars(avatars, background_image)?;
         let merged_avatars_png = encode_to_png(merged_avatars)?;
         Ok(AttachmentType::Bytes {
             data: merged_avatars_png.into(),
@@ -138,38 +139,38 @@ fn grayscale_dead_players(mut avatars: Vec<Image>, alivenesses: Vec<bool>) -> Ve
     avatars
 }
 
+const IMAGE_WIDTH: u32 = 512;
+
+fn make_background_image() -> Result<Image, Error> {
+    let mut res = DynamicImage::new_rgba8(6 * IMAGE_WIDTH, 764).to_rgba8();
+    let mut offset = 0;
+
+    for i in 1..7 {
+        let img = crate::resources::number_reactions(i)?;
+        for (x, y, pixel) in img.enumerate_pixels() {
+            res.put_pixel(offset + x, y, *pixel);
+        }
+        offset += IMAGE_WIDTH;
+    }
+
+    Ok(res)
+}
+
 /// This function creates an image big enough to contain the first 6 images in the vector,
 /// putting them one after each other after they got resized to be 512x512
-fn merge_avatars(mut avatars: Vec<Image>) -> Result<Image, Error> {
+fn merge_avatars(mut avatars: Vec<Image>, mut image: Image) -> Result<Image, Error> {
     avatars.truncate(6);
-
-    const IMAGE_LEN: u32 = 512;
 
     let mut resized_avatars = Vec::with_capacity(6);
 
     for ava in &avatars {
         resized_avatars.push(imageops::resize(
             ava,
-            IMAGE_LEN,
-            IMAGE_LEN,
+            IMAGE_WIDTH,
+            IMAGE_WIDTH,
             imageops::Nearest,
         ));
     }
-
-    let mut image = {
-        let mut res = DynamicImage::new_rgba8(6 * IMAGE_LEN, 764).to_rgba8();
-        let mut offset = 0;
-
-        for i in 1..7 {
-            let img = crate::resources::number_reactions(i)?;
-            for (x, y, pixel) in img.enumerate_pixels() {
-                res.put_pixel(offset + x, y, *pixel);
-            }
-            offset += IMAGE_LEN;
-        }
-
-        res
-    };
 
     warn!(" w:{} h:{}", image.width(), image.height());
 
@@ -179,7 +180,7 @@ fn merge_avatars(mut avatars: Vec<Image>) -> Result<Image, Error> {
         for (x, y, pixel) in ava.enumerate_pixels() {
             image.put_pixel(x + offset, y, *pixel);
         }
-        offset += IMAGE_LEN;
+        offset += IMAGE_WIDTH;
     }
 
     Ok(image)
