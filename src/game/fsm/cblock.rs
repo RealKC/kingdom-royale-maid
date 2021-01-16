@@ -123,6 +123,16 @@ impl GameMachine<CBlock> {
         info!("Embed built successfuly");
 
         for user_and_room in rooms {
+            if !self
+                .state
+                .players()
+                .get(&user_and_room.0)
+                .unwrap()
+                .is_alive()
+            {
+                continue;
+            }
+
             info!("Trying to send messages...");
             let msg = user_and_room
                 .1
