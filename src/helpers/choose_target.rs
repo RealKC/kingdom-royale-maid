@@ -62,9 +62,9 @@ pub async fn build_embed_for_target_choice(
 
     let merged_avatars = tokio::task::spawn_blocking(move || -> Result<AttachmentType, Error> {
         info!("Grayscaling avatars...");
-        let avatars = grayscale_dead_players(avatars, alivenesses);
+        let avatars = grayscale_dead_players(avatars, &alivenesses);
         info!("Merging avatars...");
-        let background_image = make_background_image()?;
+        let background_image = make_background_image(&alivenesses)?;
         let merged_avatars = merge_avatars(avatars, background_image)?;
         let merged_avatars_png = encode_to_png(merged_avatars)?;
         Ok(AttachmentType::Bytes {
@@ -129,7 +129,7 @@ async fn fetch_avatars(ctx: &Context, players: &[UserId]) -> Result<Vec<Image>, 
     Ok(avatars)
 }
 
-fn grayscale_dead_players(mut avatars: Vec<Image>, alivenesses: Vec<bool>) -> Vec<Image> {
+fn grayscale_dead_players(mut avatars: Vec<Image>, alivenesses: &[bool]) -> Vec<Image> {
     for (avatar, alive) in avatars.iter_mut().zip(alivenesses.iter()) {
         if !alive {
             *avatar = DynamicImage::ImageLuma8(colorops::grayscale(avatar)).to_rgba8();
@@ -141,15 +141,21 @@ fn grayscale_dead_players(mut avatars: Vec<Image>, alivenesses: Vec<bool>) -> Ve
 
 const IMAGE_WIDTH: u32 = 512;
 
-fn make_background_image() -> Result<Image, Error> {
+fn make_background_image(alivenesses: &[bool]) -> Result<Image, Error> {
     let mut res = DynamicImage::new_rgba8(6 * IMAGE_WIDTH, 764).to_rgba8();
     let mut offset = 0;
 
     for i in 1..7 {
-        let img = crate::resources::number_reactions(i)?;
+        let img = if alivenesses[(i - 1) as usize] {
+            crate::resources::number_reactions(i)?
+        } else {
+            crate::resources::get_skull()?
+        };
+
         for (x, y, pixel) in img.enumerate_pixels() {
             res.put_pixel(offset + x, y, *pixel);
         }
+
         offset += IMAGE_WIDTH;
     }
 

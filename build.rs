@@ -84,6 +84,10 @@ fn main() -> std::io::Result<()> {
 
 fn copy_resource_reactions(out_dir: &PathBuf) {
     let cargo = env::var("CARGO_MANIFEST_DIR").expect("fuc");
+    let _ = std::fs::copy(
+        Path::new(&cargo).join("res/reactions/skull.png"),
+        out_dir.join("skull.png"),
+    );
     for i in 1..7 {
         let _ = std::fs::copy(
             Path::new(&cargo).join(format!("res/reactions/{}.png", i)),

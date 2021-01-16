@@ -24,3 +24,9 @@ pub fn number_reactions(i: u8) -> CommandResult<RgbaImage> {
     let dynimg = load_from_memory_with_format(&*res, ImageFormat::Png)?;
     Ok(dynimg.to_rgba8())
 }
+
+pub fn get_skull() -> CommandResult<RgbaImage> {
+    let res = Assets::get("skull.png").unwrap();
+    let dynimg = load_from_memory_with_format(&*res, ImageFormat::Png)?;
+    Ok(dynimg.to_rgba8())
+}
