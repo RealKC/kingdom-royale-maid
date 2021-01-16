@@ -234,8 +234,8 @@ impl GameMachine<CBlock> {
             let at_everyone_perms = perms::make_denied_override_for_role(RoleId {
                 0: self.metadata.guild.0,
             });
-            let guest_perms = perms::make_allowed_override_for_user(guest_id);
-            let host_perms = perms::make_allowed_override_for_user(host_id);
+            let guest_perms = perms::make_allowed_override_for_user(guest_id, false);
+            let host_perms = perms::make_allowed_override_for_user(host_id, false);
 
             let channel = self
                 .metadata

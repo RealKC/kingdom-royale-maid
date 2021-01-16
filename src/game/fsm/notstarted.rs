@@ -96,7 +96,10 @@ impl GameMachine<NotStarted> {
             channel.create_permission(ctx, &at_everyone_perms).await?;
 
             channel
-                .create_permission(ctx, &perms::make_allowed_override_for_user(*new_player.0))
+                .create_permission(
+                    ctx,
+                    &perms::make_allowed_override_for_user(*new_player.0, true),
+                )
                 .await?;
 
             channel.say(ctx, format!(r#"

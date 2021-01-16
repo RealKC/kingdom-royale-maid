@@ -3,12 +3,19 @@ use serenity::model::{
     prelude::*,
 };
 
-pub fn make_allowed_override_for_user(user: UserId) -> PermissionOverwrite {
+pub fn make_allowed_override_for_user(
+    user: UserId,
+    deny_arbitrary_reactions: bool,
+) -> PermissionOverwrite {
     PermissionOverwrite {
         allow: Permissions::READ_MESSAGES
             | Permissions::SEND_MESSAGES
             | Permissions::READ_MESSAGE_HISTORY,
-        deny: Permissions::empty(),
+        deny: if deny_arbitrary_reactions {
+            Permissions::ADD_REACTIONS
+        } else {
+            Permissions::empty()
+        },
         kind: PermissionOverwriteType::Member(user),
     }
 }
