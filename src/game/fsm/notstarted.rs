@@ -35,7 +35,7 @@ impl_wrap!(NotStarted);
 
 impl GameMachine<NotStarted> {
     pub(super) async fn next(mut self, ctx: &Context) -> CommandResult<GameMachine<ABlock>> {
-        assert!(self.state.can_start());
+        debug_assert!(self.state.can_start());
 
         use crate::game::roles::{King, Knight, Prince, Revolutionary, Sorcerer, TheDouble};
         let mut roles: Vec<RoleHolder> = vec![
@@ -153,7 +153,7 @@ And a heavy-duty knife.
                     user_idx = user.0;
                 }
             }
-            assert!(user_idx < 7);
+            debug_assert!(user_idx < 7);
             self.state.joined_users.remove(user_idx);
             Ok(())
         }

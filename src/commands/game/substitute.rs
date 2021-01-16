@@ -31,7 +31,7 @@ pub async fn substitute(ctx: &Context, msg: &Message) -> CommandResult {
             aliveness_statuses.push((player.1.is_alive(), player.1.role_name()));
         }
     }
-    assert!(aliveness_statuses.len() == 2);
+    debug_assert!(aliveness_statuses.len() == 2);
     if aliveness_statuses[0].1 == RoleName::TheDouble {
         aliveness_statuses.swap(0, 1);
     }

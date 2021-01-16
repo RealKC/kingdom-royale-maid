@@ -67,7 +67,7 @@ impl Player {
         if secret_meetings_for_day.0.is_none() {
             secret_meetings_for_day.0 = Some((self.secret_meeting_partner.expect("We should have a secret_meeting_partner when we're adding secret rooms to players"), channel));
         } else {
-            assert!(secret_meetings_for_day.1.is_none());
+            debug_assert!(secret_meetings_for_day.1.is_none());
             secret_meetings_for_day.1 = Some((self.secret_meeting_partner.expect("We should have a secret_meeting_partner when we're adding secret rooms to players"), channel));
         }
     }
