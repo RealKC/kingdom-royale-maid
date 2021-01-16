@@ -15,8 +15,10 @@ mod version_data;
 use std::{
     env::{self},
     path::{Path, PathBuf},
-    process::Command,
 };
+
+#[cfg(not(feature = "deterministic"))]
+use std::process::Command;
 
 fn main() -> std::io::Result<()> {
     println!("Version");

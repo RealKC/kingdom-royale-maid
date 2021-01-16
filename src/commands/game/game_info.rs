@@ -59,13 +59,21 @@ pub async fn game_info(ctx: &Context, msg: &Message) -> CommandResult {
     let fields = vec![
         ("Host", game.host().mention().to_string(), false),
         (&players_field_name, players_field_value, true),
-        ("Meeting room", game.meeting_room().mention().to_string(), true),
+        (
+            "Meeting room",
+            game.meeting_room().mention().to_string(),
+            true,
+        ),
         (
             "Announcement channel",
             game.announcement_channel().mention().to_string(),
             true,
         ),
-        ("Player role", game.player_role().mention().to_string(), true),
+        (
+            "Player role",
+            game.player_role().mention().to_string(),
+            true,
+        ),
     ];
 
     msg.channel_id
@@ -123,7 +131,7 @@ pub async fn game_info(ctx: &Context, msg: &Message) -> CommandResult {
 /// Takes a cardinal number and returns its ordinal version as a string
 fn cardinal_to_ordinal(number: u8) -> String {
     let last_digit = number % 10;
-    let number_is_teen = number >= 10 && number < 20;
+    let number_is_teen = (10..20).contains(&number);
 
     if number_is_teen {
         format!("{}th", number)
