@@ -140,7 +140,13 @@ impl GameMachine<CBlock> {
                 .await?;
             info!("We succeeded. Room={}", user_and_room.1.mention());
 
-            react_with(ctx, &msg, &NUMBER_EMOJIS_ONE_TO_SIX).await?;
+            let mut emojis = vec![];
+            for (idx, player) in self.state.players().values().enumerate() {
+                if player.is_alive() {
+                    emojis.push(NUMBER_EMOJIS_ONE_TO_SIX[idx]);
+                }
+            }
+            react_with(ctx, &msg, &emojis).await?;
 
             tokio::task::spawn(tasks::handle_secret_meeting_selection(
                 ctx.clone(),
