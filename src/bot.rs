@@ -5,7 +5,10 @@ use crate::{
 };
 use serenity::{
     async_trait,
-    client::bridge::gateway::{GatewayIntents, ShardManager},
+    client::{
+        bridge::gateway::{GatewayIntents, ShardManager},
+        ClientBuilder,
+    },
     framework::standard::StandardFramework,
     http::Http,
     model::{
@@ -44,9 +47,10 @@ impl Bot {
         cdn_channel_id: ChannelId,
         startup_time: time::Instant,
     ) -> Self {
-        let (owners, bot_id) = Self::application_info(&token).await;
+        let http = Http::new_with_token(&token);
+        let (owners, bot_id) = Self::application_info(&http).await;
         let framework = Self::new_framework(&prefix, bot_id, owners).await;
-        let client = Self::new_client(&token, framework).await;
+        let client = Self::new_client(&token, http, framework).await;
 
         let mut bot = Self { client };
         bot.initialise_data(cdn_channel_id, prefix, startup_time)
@@ -96,8 +100,9 @@ impl Bot {
             .group(&GAMEINFORMATION_GROUP)
     }
 
-    async fn new_client(token: &str, framework: StandardFramework) -> Client {
-        Client::builder(&token)
+    async fn new_client(token: &str, http: Http, framework: StandardFramework) -> Client {
+        ClientBuilder::new_with_http(http)
+            .token(token)
             .event_handler(Handler)
             .intents(
                 GatewayIntents::GUILD_MEMBERS
@@ -110,9 +115,7 @@ impl Bot {
             .expect("Err creating client")
     }
 
-    async fn application_info(token: &str) -> (HashSet<UserId>, UserId) {
-        let http = Http::new_with_token(token);
-
+    async fn application_info(http: &Http) -> (HashSet<UserId>, UserId) {
         match http.get_current_application_info().await {
             Ok(info) => {
                 let mut owners = HashSet::new();
