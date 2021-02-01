@@ -699,9 +699,9 @@ dependencies = [
 
 [[package]]
 name = "libwebp-image"
-version = "0.1.0"
+version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bfc1952dafda58823f922cc76574f16abb622ba8ad258e760706ef020a6fd2cd"
+checksum = "365cb9ba131903b43b724bef928f5521e9298a6a7f396b63af395253c48b40b2"
 dependencies = [
  "image",
  "libwebp",
