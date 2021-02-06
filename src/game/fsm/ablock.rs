@@ -5,7 +5,7 @@
 use super::{macros::state::*, *};
 
 use serenity::{model::id::UserId, prelude::*};
-use std::collections::BTreeMap;
+use std::{collections::BTreeMap, ops::Sub};
 use tracing::{info, instrument};
 
 #[derive(Debug, Clone)]
@@ -21,6 +21,20 @@ impl ABlock {
             players,
             day,
             king_substitution_status: kss,
+        }
+    }
+}
+
+use crate::game::db::types as db;
+
+impl From<db::RunningGame> for ABlock {
+    fn from(rg: db::RunningGame) -> Self {
+        debug_assert!(rg.gstate == db::GameState::ABlock);
+
+        Self {
+            players: BTreeMap::new(),
+            day: rg.day as u8,
+            king_substitution_status: SubstitutionStatus::HasNot,
         }
     }
 }

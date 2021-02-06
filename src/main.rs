@@ -23,12 +23,13 @@ async fn main() -> CommandResult {
 
     let startup_time = std::time::Instant::now();
 
-    let (token, prefix, cdn_channel_id) = get_env_config();
+    let [token, prefix, cdn_channel_id, database_url] = get_env_config();
 
     let mut bot = Bot::new(
         token,
         prefix,
         ChannelId(cdn_channel_id.parse::<u64>()?),
+        &database_url,
         startup_time,
     )
     .await;
@@ -42,14 +43,15 @@ async fn main() -> CommandResult {
     Ok(())
 }
 
-fn get_env_config() -> (String, String, String) {
+fn get_env_config() -> [String; 4] {
     dotenv::dotenv().expect("Encountered an error that didn't allow parsing the .env file");
 
     let token = dotenv::var("DISCORD_TOKEN").expect("Expected a token in the environment");
     let prefix = dotenv::var("MAID_PREFIX").unwrap_or_else(|_| "!".into());
     let cdn_channel_id = dotenv::var("MAID_CDN_CHANNEL_ID").expect("Give me my discord cdn pl0x");
+    let database_url = dotenv::var("DATABASE_URL").expect("Need a database URL in the environment");
 
-    (token, prefix, cdn_channel_id)
+    [token, prefix, cdn_channel_id, database_url]
 }
 
 async fn setup_signals(shard_manager: Arc<Mutex<ShardManager>>) {

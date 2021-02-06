@@ -1,6 +1,6 @@
 pub use reqwest::Client as Reqwest;
 use serenity::{model::id::ChannelId, prelude::*};
-
+use sqlx::PgPool;
 pub struct ReqwestClient;
 
 impl TypeMapKey for ReqwestClient {
@@ -11,6 +11,12 @@ pub struct Cdn;
 
 impl TypeMapKey for Cdn {
     type Value = ChannelId;
+}
+
+pub struct Db;
+
+impl TypeMapKey for Db {
+    type Value = PgPool;
 }
 
 pub struct Prefix;

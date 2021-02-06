@@ -43,6 +43,11 @@ branch = "current"
 # version = "0.9"
 features = ["collector"]
 
+[dependencies.sqlx]
+git = "https://github.com/launchbadge/sqlx"
+branch = "master"
+features = ["runtime-tokio-rustls", "postgres", "macros"]
+
 [dependencies.reqwest]
 version = "0.11.0"
 default_features = false

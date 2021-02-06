@@ -1,4 +1,5 @@
 mod data;
+mod db;
 mod fsm;
 pub mod item;
 mod player;
