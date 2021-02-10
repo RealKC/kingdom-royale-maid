@@ -26,18 +26,6 @@ impl ABlock {
     }
 }
 
-impl From<db::RunningGame> for ABlock {
-    fn from(rg: db::RunningGame) -> Self {
-        debug_assert!(rg.gstate == db::GameState::ABlock);
-
-        Self {
-            players: BTreeMap::new(),
-            day: rg.day as u8,
-            king_substitution_status: SubstitutionStatus::HasNot,
-        }
-    }
-}
-
 impl GameState for ABlock {}
 impl CanOpenMeetingRoom for ABlock {}
 impl_timeblock!(ABlock);

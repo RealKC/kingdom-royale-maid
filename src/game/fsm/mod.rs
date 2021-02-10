@@ -25,7 +25,6 @@ use gameended::*;
 #[macro_use]
 mod macros;
 
-use super::db::RunningGame;
 use super::roles::RoleName;
 use crate::game::data::*;
 pub use crate::game::player::Player;
@@ -383,21 +382,6 @@ enum Wrapper {
     EBlock(GameMachine<EBlock>),
     FBlock(GameMachine<FBlock>),
     GameEnded(GameMachine<GameEnded>),
-}
-
-impl From<RunningGame> for Wrapper {
-    fn from(rg: RunningGame) -> Self {
-        match rg.gstate {
-            super::db::GameState::ABlock => {}
-            super::db::GameState::BBlock => {}
-            super::db::GameState::CBlock => {}
-            super::db::GameState::DBlock => {}
-            super::db::GameState::EBlock => {}
-            super::db::GameState::FBlock => {}
-            super::db::GameState::GameEnded => {}
-        };
-        todo!()
-    }
 }
 
 impl Wrapper {
