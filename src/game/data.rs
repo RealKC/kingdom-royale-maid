@@ -10,7 +10,9 @@ pub enum DeathCause {
     Stab(UserId),
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[derive(Copy, Clone, PartialEq, Eq, Debug, sqlx::Type)]
+#[sqlx(type_name = "game_state")]
+#[sqlx(rename_all = "lowercase")]
 pub enum SubstitutionStatus {
     HasNot,
     CurrentlyIs,

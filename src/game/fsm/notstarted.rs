@@ -80,6 +80,7 @@ impl GameMachine<NotStarted> {
                 *new_player.0,
                 Player::new(
                     *new_player.0,
+                    self.metadata.guild,
                     roles.remove(0),
                     channel.id,
                     new_player.1.to_string(),

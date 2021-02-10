@@ -25,11 +25,16 @@ use gameended::*;
 #[macro_use]
 mod macros;
 
+// rustc is unable to see it being used in the sqlx::query! invocations, so it warns
+#[allow(unused_imports)]
+use super::db;
+
 use super::roles::RoleName;
 use crate::game::data::*;
 pub use crate::game::player::Player;
 use crate::helpers::perms;
 
+use futures::TryStreamExt;
 use serenity::framework::standard::CommandResult;
 use serenity::model::id::UserId;
 use serenity::model::prelude::*;
@@ -66,9 +71,144 @@ impl Game {
         }))
     }
 
-    pub async fn for_guild(guild: GuildId, pool: &PgPool) -> Option<Game> {
+    pub async fn for_guild(guild: GuildId, pool: &PgPool) -> CommandResult<Game> {
         let guild_id = guild.0 as i64; // need to cast as postgres doesn't have unsigned types
-        todo!();
+        let game = sqlx::query!(
+            r#"
+SELECT 
+    gstate as "gstate: db::GameState",
+    day,
+    meeting_room,
+    announcement_channel,
+    host,
+    player_role,
+    delete_rooms_category_on_game_end,
+    kss as "kss: SubstitutionStatus"
+FROM public.running_games
+WHERE guild_id = $1
+        "#,
+            guild_id
+        )
+        .fetch_optional(pool)
+        .await?;
+
+        if let Some(game) = game {
+            let mut players = sqlx::query!(
+                r#"
+SELECT user_id, channel_id, alive, prole as "prole: db::Role"
+FROM public.players
+WHERE game_id = $1
+        "#,
+                guild_id
+            )
+            .fetch(pool);
+
+            let mut btreemap = BTreeMap::new();
+
+            while let Ok(Some(player)) = players.try_next().await {
+                btreemap.insert(
+                    UserId(player.user_id as u64),
+                    Player::from_db(
+                        UserId(player.user_id as u64),
+                        guild,
+                        player.prole,
+                        ChannelId(player.channel_id as u64),
+                        player.alive,
+                    ),
+                );
+            }
+
+            debug_assert!(btreemap.len() == 6);
+
+            let metadata = Metadata {
+                guild,
+                meeting_room: ChannelId(game.meeting_room as u64),
+                announcement_channel: ChannelId(game.announcement_channel as u64),
+                host: UserId(game.host as u64),
+                player_role: RoleId(game.player_role as u64),
+                delete_rooms_category_on_game_end: game.delete_rooms_category_on_game_end,
+            };
+
+            let wrapper = match game.gstate {
+                db::GameState::ABlock => GameMachine {
+                    metadata,
+                    state: ABlock::new(btreemap, game.day as u8, game.kss),
+                }
+                .wrap(),
+                db::GameState::BBlock => GameMachine {
+                    metadata,
+                    state: BBlock::new(btreemap, game.day as u8, game.kss),
+                }
+                .wrap(),
+                db::GameState::CBlock => GameMachine {
+                    metadata,
+                    state: CBlock::new(btreemap, game.day as u8, game.kss),
+                }
+                .wrap(),
+                db::GameState::DBlock => GameMachine {
+                    metadata,
+                    state: DBlock::new(btreemap, game.day as u8, game.kss),
+                }
+                .wrap(),
+                db::GameState::EBlock => GameMachine {
+                    metadata,
+                    state: EBlock::new(btreemap, game.day as u8, game.kss),
+                }
+                .wrap(),
+                db::GameState::FBlock => GameMachine {
+                    metadata,
+                    state: FBlock::new(btreemap, game.day as u8, game.kss),
+                }
+                .wrap(),
+                db::GameState::GameEnded => GameMachine {
+                    metadata,
+                    state: GameEnded::new(btreemap, game.day as u8),
+                }
+                .wrap(),
+            };
+
+            return Ok(Game(wrapper));
+        }
+
+        let lobby = sqlx::query!(
+            r#"
+SELECT * FROM public.lobbies
+WHERE guild_id = $1
+        "#,
+            guild_id
+        )
+        .fetch_optional(pool)
+        .await?;
+
+        if let Some(lobby) = lobby {
+            let metadata = Metadata {
+                guild,
+                meeting_room: ChannelId(lobby.meeting_room as u64),
+                announcement_channel: ChannelId(lobby.announcement_channel as u64),
+                host: UserId(lobby.host as u64),
+                player_role: RoleId(lobby.player_role as u64),
+                delete_rooms_category_on_game_end: lobby.delete_rooms_category_on_game_end,
+            };
+
+            let players = lobby
+                .players
+                .unwrap_or_else(Vec::new)
+                .iter()
+                .map(|player| UserId(*player as u64))
+                .collect::<Vec<_>>();
+
+            let wrapper = GameMachine {
+                metadata,
+                state: NotStarted {
+                    joined_users: players,
+                },
+            }
+            .wrap();
+
+            return Ok(Game(wrapper));
+        }
+
+        Err(format!("No game for guild={}", guild).into())
     }
 
     pub async fn transition_to_next_state(self, ctx: &Context) -> Self {

@@ -1,6 +1,7 @@
-use std::fmt::Debug;
+use std::{fmt::Debug, unimplemented};
 
 use super::{
+    db,
     fsm::TimeBlock,
     item::{Item, Items},
     roles::{RoleHolder, RoleName},
@@ -8,7 +9,7 @@ use super::{
 };
 use serenity::{
     framework::standard::CommandResult,
-    model::id::{ChannelId, UserId},
+    model::id::{ChannelId, GuildId, UserId},
     prelude::*,
 };
 
@@ -17,26 +18,44 @@ pub type SecretMeeting = Option<(UserId, ChannelId)>;
 #[derive(Clone)]
 pub struct Player {
     id: UserId,
+    guild_id: GuildId,
     role: RoleHolder,
     alive: bool,
     room: ChannelId,
-    secret_meeting_partner: Option<UserId>,
-    secret_meeting_channels: Vec<(SecretMeeting, SecretMeeting)>,
-    items: Items,
 }
 
 impl Player {
-    pub fn new(id: UserId, role: RoleHolder, room: ChannelId, watch_colour: String) -> Self {
+    pub fn new(
+        id: UserId,
+        guild_id: GuildId,
+        role: RoleHolder,
+        room: ChannelId,
+        _watch_colour: String,
+    ) -> Self {
         // PONDER: We may want to allow disabling certain items
         //         If we do, how should that be handled? Should we just pass a reference to the Game and ask it for enabled items?
         Self {
             id,
+            guild_id,
             role,
             room,
             alive: true,
-            secret_meeting_partner: None,
-            secret_meeting_channels: vec![],
-            items: Items::new(watch_colour),
+        }
+    }
+
+    pub fn from_db(
+        id: UserId,
+        guild_id: GuildId,
+        role: db::Role,
+        room: ChannelId,
+        alive: bool,
+    ) -> Self {
+        Self {
+            id,
+            guild_id,
+            role: role.into(),
+            alive,
+            room,
         }
     }
 
@@ -49,31 +68,19 @@ impl Player {
     }
 
     pub fn secret_meeting_partner(&self) -> Option<UserId> {
-        self.secret_meeting_partner
+        unimplemented!()
     }
 
     pub fn set_secret_meeting_partner(&mut self, partner: UserId) {
-        self.secret_meeting_partner = Some(partner);
+        unimplemented!()
     }
 
     pub fn add_secret_meeting(&mut self, day: u8, channel: ChannelId) {
-        let day = day as usize;
-        self.secret_meeting_channels.resize(day, (None, None));
-        let secret_meetings_for_day = self
-            .secret_meeting_channels
-            .get_mut(day)
-            .expect("yeah we done goofed it seems");
-
-        if secret_meetings_for_day.0.is_none() {
-            secret_meetings_for_day.0 = Some((self.secret_meeting_partner.expect("We should have a secret_meeting_partner when we're adding secret rooms to players"), channel));
-        } else {
-            debug_assert!(secret_meetings_for_day.1.is_none());
-            secret_meetings_for_day.1 = Some((self.secret_meeting_partner.expect("We should have a secret_meeting_partner when we're adding secret rooms to players"), channel));
-        }
+        unimplemented!()
     }
 
     pub fn get_secret_meetings_for_day(&self, day: u8) -> Option<&(SecretMeeting, SecretMeeting)> {
-        self.secret_meeting_channels.get(day as usize)
+        unimplemented!()
     }
 
     pub fn is_alive(&self) -> bool {
@@ -100,15 +107,15 @@ impl Player {
     }
 
     pub fn items(&self) -> &Items {
-        &self.items
+        unimplemented!()
     }
 
     pub fn add_item(&mut self, item: Item) {
-        self.items.add_item(item)
+        unimplemented!()
     }
 
     pub fn items_mut(&mut self) -> &mut Items {
-        &mut self.items
+        unimplemented!()
     }
 
     pub fn win_condition_achieved(&self, block: &dyn TimeBlock) -> bool {
@@ -127,9 +134,6 @@ impl Debug for Player {
             .field("role", &self.role.name())
             .field("alive", &self.alive)
             .field("room", &self.room)
-            .field("secret_meeting_partner", &self.secret_meeting_partner)
-            .field("secret_meeting_channels", &self.secret_meeting_channels)
-            .field("items", &self.items)
             .finish()
     }
 }

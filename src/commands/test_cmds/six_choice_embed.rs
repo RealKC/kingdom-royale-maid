@@ -8,7 +8,7 @@ use crate::{
     },
 };
 
-use serenity::model::id::UserId;
+use serenity::model::id::{GuildId, UserId};
 
 #[command("testk")]
 #[description("Used to test the algorithm that creates the embed for the time when the king-like player needs to choose one for murder")]
@@ -34,6 +34,7 @@ impl MockPlayers {
         for (idx, id) in ids.iter().enumerate() {
             let mut player = Player::new(
                 *id,
+                GuildId(0),
                 RoleHolder::King(King),
                 ctx.data
                     .read()
