@@ -3,9 +3,10 @@
 //! During this block the meeting room gets opened.
 
 use super::{macros::state::*, *};
+use crate::game::db;
 
 use serenity::{model::id::UserId, prelude::*};
-use std::{collections::BTreeMap, ops::Sub};
+use std::collections::BTreeMap;
 use tracing::{info, instrument};
 
 #[derive(Debug, Clone)]
@@ -24,8 +25,6 @@ impl ABlock {
         }
     }
 }
-
-use crate::game::db::types as db;
 
 impl From<db::RunningGame> for ABlock {
     fn from(rg: db::RunningGame) -> Self {

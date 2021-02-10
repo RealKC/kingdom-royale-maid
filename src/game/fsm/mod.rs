@@ -25,7 +25,7 @@ use gameended::*;
 #[macro_use]
 mod macros;
 
-use super::db::types::RunningGame;
+use super::db::RunningGame;
 use super::roles::RoleName;
 use crate::game::data::*;
 pub use crate::game::player::Player;
@@ -69,16 +69,7 @@ impl Game {
 
     pub async fn for_guild(guild: GuildId, pool: &PgPool) -> Option<Game> {
         let guild_id = guild.0 as i64; // need to cast as postgres doesn't have unsigned types
-        let game = sqlx::query_as!(
-            RunningGame,
-            r#"SELECT guild_id, players, gstate as "gstate: _", day FROM public.running_games WHERE guild_id = $1;"#,
-            guild_id
-        )
-        .fetch_all(pool)
-        .await;
-
-        if let Ok(game) = game {}
-        todo!()
+        todo!();
     }
 
     pub async fn transition_to_next_state(self, ctx: &Context) -> Self {
@@ -397,13 +388,13 @@ enum Wrapper {
 impl From<RunningGame> for Wrapper {
     fn from(rg: RunningGame) -> Self {
         match rg.gstate {
-            super::db::types::GameState::ABlock => {}
-            super::db::types::GameState::BBlock => {}
-            super::db::types::GameState::CBlock => {}
-            super::db::types::GameState::DBlock => {}
-            super::db::types::GameState::EBlock => {}
-            super::db::types::GameState::FBlock => {}
-            super::db::types::GameState::GameEnded => {}
+            super::db::GameState::ABlock => {}
+            super::db::GameState::BBlock => {}
+            super::db::GameState::CBlock => {}
+            super::db::GameState::DBlock => {}
+            super::db::GameState::EBlock => {}
+            super::db::GameState::FBlock => {}
+            super::db::GameState::GameEnded => {}
         };
         todo!()
     }
