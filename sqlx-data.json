@@ -1,0 +1,200 @@
+{
+  "db": "PostgreSQL",
+  "2a65bae0cdea908912827d6eb7809319627030625ebee6566208600ecf3e1b53": {
+    "query": "\nSELECT \n    gstate as \"gstate: db::GameState\",\n    day,\n    meeting_room,\n    announcement_channel,\n    host,\n    player_role,\n    delete_rooms_category_on_game_end,\n    kss as \"kss: SubstitutionStatus\"\nFROM public.running_games\nWHERE guild_id = $1\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "gstate: db::GameState",
+          "type_info": {
+            "Custom": {
+              "name": "game_state",
+              "kind": {
+                "Enum": [
+                  "notstarted",
+                  "ablock",
+                  "bblock",
+                  "cblock",
+                  "dblock",
+                  "eblock",
+                  "fblock",
+                  "gameended"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "ordinal": 1,
+          "name": "day",
+          "type_info": "Int4"
+        },
+        {
+          "ordinal": 2,
+          "name": "meeting_room",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 3,
+          "name": "announcement_channel",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 4,
+          "name": "host",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 5,
+          "name": "player_role",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 6,
+          "name": "delete_rooms_category_on_game_end",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 7,
+          "name": "kss: SubstitutionStatus",
+          "type_info": {
+            "Custom": {
+              "name": "king_substitution_status",
+              "kind": {
+                "Enum": [
+                  "hasnot",
+                  "currentlyis",
+                  "has"
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  },
+  "a740dbd07a4700ef9643f71b94ed1b23750524da0fba14af1c51ca405f9a2694": {
+    "query": "\nSELECT * FROM public.lobbies\nWHERE guild_id = $1\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "guild_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "players",
+          "type_info": "Int8Array"
+        },
+        {
+          "ordinal": 2,
+          "name": "meeting_room",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 3,
+          "name": "announcement_channel",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 4,
+          "name": "host",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 5,
+          "name": "player_role",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 6,
+          "name": "delete_rooms_category_on_game_end",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  },
+  "b30368979bf0bf3a15182bc1182e159fc38b96ece9279bed32d2f6c6d60d8cec": {
+    "query": "\nSELECT user_id, channel_id, alive, prole as \"prole: db::Role\"\nFROM public.players\nWHERE game_id = $1\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "user_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "channel_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "alive",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 3,
+          "name": "prole: db::Role",
+          "type_info": {
+            "Custom": {
+              "name": "player_role",
+              "kind": {
+                "Enum": [
+                  "king",
+                  "prince",
+                  "the_double",
+                  "knight",
+                  "sorcerer",
+                  "revolutionary"
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  }
+}
