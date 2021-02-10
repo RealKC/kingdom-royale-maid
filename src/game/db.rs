@@ -11,6 +11,18 @@ pub enum GameState {
     GameEnded,
 }
 
+#[derive(sqlx::Type, PartialEq)]
+#[sqlx(type_name = "role")]
+#[sqlx(rename_all = "snake_case")]
+pub enum Role {
+    King,
+    Price,
+    TheDouble,
+    Knight,
+    Sorcerer,
+    Revolutionary,
+}
+
 pub struct Meeting {
     pub id: i64,
     pub guild_id: i64,
