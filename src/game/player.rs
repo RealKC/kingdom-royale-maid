@@ -3,15 +3,18 @@ use std::{fmt::Debug, unimplemented};
 use super::{
     db,
     fsm::TimeBlock,
-    item::{Item, Items},
+    item::{Count, Item, Items, Note},
     roles::{RoleHolder, RoleName},
     DeathCause,
 };
+use futures::TryStreamExt;
 use serenity::{
+    builder::CreateEmbed,
     framework::standard::CommandResult,
     model::id::{ChannelId, GuildId, UserId},
     prelude::*,
 };
+use sqlx::PgPool;
 
 pub type SecretMeeting = Option<(UserId, ChannelId)>;
 
@@ -106,16 +109,72 @@ impl Player {
         self.alive = false;
     }
 
-    pub fn items(&self) -> &Items {
+    fn items(&self) -> &Items {
         unimplemented!()
     }
 
-    pub fn add_item(&mut self, item: Item) {
+    pub async fn add_item(&mut self, item: Item, pool: &PgPool) -> CommandResult {
+        self._items(pool).await?.add_item(item, pool).await
+    }
+
+    /// This method adds more one of `item_name` to this player's inventory
+    pub async fn add_one_more_item(&self, _item_name: &str, _pool: &PgPool) -> CommandResult {
+        todo!()
+    }
+
+    pub async fn get_item(
+        &self,
+        _item_name: &str,
+        _pool: &PgPool,
+    ) -> CommandResult<Option<(Count, Item)>> {
+        todo!()
+    }
+
+    /// Same as `get_item` but it devreases the count of the item by one
+    pub async fn take_item(
+        &self,
+        _item_name: &str,
+        _pool: &PgPool,
+    ) -> CommandResult<Option<(Count, Item)>> {
+        todo!()
+    }
+
+    pub async fn get_inventory_string(&self, _pool: &PgPool) -> CommandResult<String> {
+        todo!()
+    }
+
+    fn items_mut(&mut self) -> &mut Items {
         unimplemented!()
     }
 
-    pub fn items_mut(&mut self) -> &mut Items {
-        unimplemented!()
+    pub async fn add_note(&self, _text: &str, _when: &str, _pool: &PgPool) -> CommandResult {
+        todo!()
+    }
+
+    pub async fn add_ripped_note(&self, _note: Note, _pool: &PgPool) -> CommandResult {
+        todo!()
+    }
+
+    pub async fn rip_note(&self, _idx: usize, _pool: &PgPool) -> CommandResult<Option<Note>> {
+        todo!()
+    }
+
+    pub async fn get_note(&self, _idx: usize, _pool: &PgPool) -> CommandResult<Option<Note>> {
+        // TODO: The database needs to hold the number of notes a player has somewhere
+        todo!()
+    }
+
+    pub async fn get_notes_between_as_embed(
+        &self,
+        _start: usize,
+        _end: usize,
+        _pool: &PgPool,
+    ) -> CommandResult<Option<CreateEmbed>> {
+        todo!()
+    }
+
+    pub async fn eat_or_starve(&self, _ctx: &Context, _pool: &PgPool) -> CommandResult {
+        todo!()
     }
 
     pub fn win_condition_achieved(&self, block: &dyn TimeBlock) -> bool {
@@ -124,6 +183,27 @@ impl Player {
 
     pub fn role_name(&self) -> RoleName {
         self.role.name()
+    }
+
+    async fn _items(&self, pool: &PgPool) -> CommandResult<Items> {
+        let mut res = sqlx::query!(
+            r#"
+SELECT count, name
+FROM public.items
+WHERE user_id = $1 AND game_id = $2
+        "#,
+            self.id.0 as i64,
+            self.guild_id.0 as i64
+        )
+        .fetch(pool);
+
+        let mut raw_items: Vec<(u8, String)> = Vec::with_capacity(6);
+
+        while let Ok(Some(raw_item)) = res.try_next().await {
+            raw_items.push((raw_item.count as u8, raw_item.name));
+        }
+
+        todo!()
     }
 }
 

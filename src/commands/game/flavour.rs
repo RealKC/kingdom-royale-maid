@@ -1,3 +1,4 @@
+use crate::{data::Db, game::item::Item};
 
 use super::prelude::*;
 
@@ -35,16 +36,31 @@ pub async fn inspect(ctx: &Context, msg: &Message, args: Args) -> CommandResult 
             let game = game_guard.read().await;
             let player = game.player(msg.author.id).expect("Have a player here");
 
-            let items = player.items();
+            let pool = ctx
+                .data
+                .read()
+                .await
+                .get::<Db>()
+                .cloned()
+                .expect("Have a pool in ctx.data");
 
-            msg.reply(
-                ctx,
-                format!(
-                    "You look at your watch. It's just a normal {watch}.",
-                    watch = items.get_item("watch").1.name
-                ),
-            )
-            .await?;
+            let watch = player.get_item("watch", &pool).await?;
+
+            match watch {
+                Some(watch) => {
+                    msg.reply(
+                        ctx,
+                        format!(
+                            "You look at your watch. It's just a normal {watch}.",
+                            watch = watch.1.name
+                        ),
+                    )
+                    .await?;
+                }
+                None => {
+                    msg.reply(ctx, "Your watch is gone :c").await?;
+                }
+            }
         }
 
         "food" | "food bar" | "food ration" | "food item" | "snack" => {
@@ -54,16 +70,29 @@ pub async fn inspect(ctx: &Context, msg: &Message, args: Args) -> CommandResult 
                 .player(msg.author.id)
                 .expect("inspect: need a player here");
 
-            let items = player.items();
+            let pool = ctx
+                .data
+                .read()
+                .await
+                .get::<Db>()
+                .cloned()
+                .expect("Have a pool in ctx.data");
 
-            msg.reply(
-                ctx,
-                format!(
-                    "You see {count} food bars in your bag.",
-                    count = items.get_item("food").0
-                ),
-            )
-            .await?;
+            let item = player.get_item(Item::FOOD_NAME, &pool).await?;
+
+            match item {
+                Some(food) => {
+                    msg.reply(
+                        ctx,
+                        format!("You see {count} food bars in your bag.", count = food.0),
+                    )
+                    .await?;
+                }
+                None => {
+                    msg.reply(ctx, "You see no food in your bag. Will you starve tonight?")
+                        .await?;
+                }
+            }
         }
 
         "tablet" | "digital tablet" => {
