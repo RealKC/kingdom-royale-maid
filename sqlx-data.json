@@ -89,6 +89,33 @@
       ]
     }
   },
+  "899fcbff1977dc10e5de976ca1f732fcb5dfd25dea48c6f2ac1ed7ec16ed74f9": {
+    "query": "\nSELECT count, name\nFROM public.items\nWHERE user_id = $1 AND game_id = $2\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "count",
+          "type_info": "Int4"
+        },
+        {
+          "ordinal": 1,
+          "name": "name",
+          "type_info": "Varchar"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        false
+      ]
+    }
+  },
   "a740dbd07a4700ef9643f71b94ed1b23750524da0fba14af1c51ca405f9a2694": {
     "query": "\nSELECT * FROM public.lobbies\nWHERE guild_id = $1\n        ",
     "describe": {
