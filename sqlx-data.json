@@ -89,6 +89,49 @@
       ]
     }
   },
+  "3bdb7548959dc1f9ff7572ffd17b18a2725772490992ebb8080e91d7e2926c56": {
+    "query": "\nSELECT visitor, channel_id\nFROM public.secret_meetings\nWHERE day = $1 AND host = $2\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "visitor",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "channel_id",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        false
+      ]
+    }
+  },
+  "81df8fa6cff492cec42bc77f5d3d01942e607db5c73ae20a83b319f9137275d0": {
+    "query": "\nINSERT INTO public.secret_meetings (game_id, host, visitor, channel_id, day)\nVALUES ($1, $2, $3, $4, $5)\n        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8",
+          "Int8",
+          "Int8",
+          "Int4"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "899fcbff1977dc10e5de976ca1f732fcb5dfd25dea48c6f2ac1ed7ec16ed74f9": {
     "query": "\nSELECT count, name\nFROM public.items\nWHERE user_id = $1 AND game_id = $2\n        ",
     "describe": {
@@ -220,6 +263,28 @@
         false,
         false,
         false,
+        false
+      ]
+    }
+  },
+  "ed109259d76ce139f7afb76c1a0c848c0ccaf4ae1d8976ac5962d9cbb881dadf": {
+    "query": "\nSELECT visitor\nFROM public.secret_meetings\nWHERE day = $1 AND game_id = $2 AND host = $3 \n    ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "visitor",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int8",
+          "Int8"
+        ]
+      },
+      "nullable": [
         false
       ]
     }
