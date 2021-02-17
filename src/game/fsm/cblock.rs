@@ -6,6 +6,7 @@
 
 use super::{macros::state::*, reactions::*, *};
 use crate::{
+    data::Db,
     game::{player::Player, roles::RoleName},
     helpers::{
         choose_target::build_embed_for_target_choice,
@@ -122,6 +123,14 @@ impl GameMachine<CBlock> {
         .await?;
         info!("Embed built successfuly");
 
+        let pool = ctx
+            .data
+            .read()
+            .await
+            .get::<Db>()
+            .cloned()
+            .expect("Db in data");
+
         for user_and_room in rooms {
             if !self
                 .state
@@ -152,6 +161,7 @@ impl GameMachine<CBlock> {
                 ctx.clone(),
                 msg,
                 user_and_room,
+                pool.clone(),
             ));
         }
 
@@ -159,6 +169,14 @@ impl GameMachine<CBlock> {
     }
 
     async fn announce_secret_meeting_partners(&self, ctx: &Context) -> CommandResult {
+        let pool = ctx
+            .data
+            .read()
+            .await
+            .get::<Db>()
+            .cloned()
+            .expect("A Db in data");
+
         let partners = {
             let mut res = String::new();
 
@@ -166,7 +184,12 @@ impl GameMachine<CBlock> {
                 res.push_str(&format!(
                     "{} => {}",
                     player.0.mention(),
-                    player.1.secret_meeting_partner().unwrap().mention()
+                    player
+                        .1
+                        .secret_meeting_partner_on(self.state.day, &pool)
+                        .await
+                        .unwrap()
+                        .mention()
                 ));
             }
 
@@ -196,6 +219,14 @@ impl GameMachine<CBlock> {
             })
             .await?;
 
+        let pool = ctx
+            .data
+            .read()
+            .await
+            .get::<Db>()
+            .cloned()
+            .expect("A Db in data");
+
         let mut players_mapped_to_secret_rooms: HashMap<UserId, ChannelId> = Default::default();
 
         for player in self.state.players().iter() {
@@ -221,7 +252,8 @@ impl GameMachine<CBlock> {
             let guest_name = get_suitable_name(guest, ctx, self.metadata.guild).await;
             let host = player
                 .1
-                .secret_meeting_partner()
+                .secret_meeting_partner_on(self.state.day, &pool)
+                .await
                 .unwrap()
                 .to_user(ctx)
                 .await?;
@@ -252,12 +284,6 @@ impl GameMachine<CBlock> {
             channel.create_permission(ctx, &guest_perms).await?;
             channel.create_permission(ctx, &host_perms).await?;
             channel.create_permission(ctx, &at_everyone_perms).await?;
-        }
-
-        let day = self.state.day();
-        for player in &mut self.state.players_mut().iter_mut() {
-            let room = players_mapped_to_secret_rooms.get(player.0).unwrap();
-            player.1.add_secret_meeting(day, *room);
         }
 
         Ok(())

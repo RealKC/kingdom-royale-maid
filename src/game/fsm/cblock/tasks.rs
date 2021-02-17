@@ -5,7 +5,8 @@ use serenity::{
         id::{ChannelId, UserId},
     },
 };
-use tracing::{error, warn};
+use sqlx::PgPool;
+use tracing::{error, info, warn};
 
 use crate::game::fsm::{macros::tasks::expect_game, reactions::*};
 
@@ -13,6 +14,7 @@ pub async fn handle_secret_meeting_selection(
     ctx: Context,
     msg: Message,
     user_and_room: (UserId, ChannelId),
+    pool: PgPool,
 ) {
     if let Some(reaction) = msg
         .await_reaction(&ctx)
@@ -24,7 +26,7 @@ pub async fn handle_secret_meeting_selection(
         let emoji = reaction.as_inner_ref().emoji.to_string();
         if let Ok(idx) = NUMBER_EMOJIS_ONE_TO_SIX.binary_search(&emoji.as_str()) {
             let game = expect_game!(ctx, "handle_secret_meeting_selection");
-            let mut game = game.write().await;
+            let game = game.write().await;
 
             // Panic safety: The only GameState that's not a TimeBlock is NotStarted, and this can never wake up then
             let id = game
@@ -36,13 +38,11 @@ pub async fn handle_secret_meeting_selection(
             match id {
                 Some(id) => {
                     // Panic safety: The only GameState that's not a TimeBlock is NotStarted, and this can never wake up then
-                    game.players_mut()
-                        .expect(
-                            "handle_secret_meeting_selection should only be called by a TimeBlock",
-                        )
-                        .get_mut(&user_and_room.0)
-                        .unwrap()
-                        .set_secret_meeting_partner(id);
+                    let res = game
+                        .add_secret_meeting(user_and_room.0, id, user_and_room.1, &pool)
+                        .await;
+
+                    info!("{:?}", res);
                 }
                 None => {
                     error!("Got a wrong reaction somehow");

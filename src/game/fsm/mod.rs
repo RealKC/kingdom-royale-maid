@@ -256,6 +256,31 @@ WHERE guild_id = $1
         Ok(())
     }
 
+    pub async fn add_secret_meeting(
+        &self,
+        host: UserId,
+        visitor: UserId,
+        channel: ChannelId,
+        pool: &PgPool,
+    ) -> CommandResult {
+        sqlx::query!(
+            r#"
+INSERT INTO public.secret_meetings (game_id, host, visitor, channel_id, day)
+VALUES ($1, $2, $3, $4, $5)
+        "#,
+            self.metadata().guild.0 as i64,
+            host.0 as i64,
+            visitor.0 as i64,
+            channel.0 as i64,
+            self.day()
+                .expect("add_secret_meeting called on a non-TimeBlock") as i32
+        )
+        .execute(pool)
+        .await?;
+
+        Ok(())
+    }
+
     pub fn join(&mut self, id: UserId) -> JoinResult {
         if let Wrapper::NotStarted(s) = &mut self.0 {
             s.join(id)

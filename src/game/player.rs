@@ -15,6 +15,7 @@ use serenity::{
     prelude::*,
 };
 use sqlx::PgPool;
+use tracing::{info, instrument};
 
 pub type SecretMeeting = Option<(UserId, ChannelId)>;
 
@@ -70,20 +71,59 @@ impl Player {
         self.room
     }
 
-    pub fn secret_meeting_partner(&self) -> Option<UserId> {
-        unimplemented!()
+    #[instrument]
+    pub async fn secret_meeting_partner_on(&self, day: u8, pool: &PgPool) -> Option<UserId> {
+        sqlx::query!(
+            r#"
+SELECT visitor
+FROM public.secret_meetings
+WHERE day = $1 AND game_id = $2 AND host = $3 
+    "#,
+            day as i32,
+            self.guild_id.0 as i64,
+            self.id.0 as i64
+        )
+        .fetch_optional(pool)
+        .await
+        .map_err(|e| {
+            info!("secret_meeting_partner_on: {:?}", e);
+            e
+        })
+        .ok()?
+        .map(|row| UserId(row.visitor as u64))
     }
 
-    pub fn set_secret_meeting_partner(&mut self, partner: UserId) {
-        unimplemented!()
-    }
+    pub async fn get_secret_meetings_for_day(
+        &self,
+        day: u8,
+        pool: &PgPool,
+    ) -> Option<(SecretMeeting, SecretMeeting)> {
+        let mut results = sqlx::query!(
+            r#"
+SELECT visitor, channel_id
+FROM public.secret_meetings
+WHERE day = $1 AND host = $2
+        "#,
+            day as i32,
+            self.id.0 as i64
+        )
+        .fetch(pool);
 
-    pub fn add_secret_meeting(&mut self, day: u8, channel: ChannelId) {
-        unimplemented!()
-    }
+        let mut meetings = vec![];
+        while let Ok(Some(result)) = results.try_next().await {
+            meetings.push((
+                UserId(result.visitor as u64),
+                ChannelId(result.channel_id as u64),
+            ));
+        }
 
-    pub fn get_secret_meetings_for_day(&self, day: u8) -> Option<&(SecretMeeting, SecretMeeting)> {
-        unimplemented!()
+        debug_assert!(meetings.len() == 2);
+
+        if meetings.is_empty() {
+            None
+        } else {
+            Some((meetings.get(0).copied(), meetings.get(1).copied()))
+        }
     }
 
     pub fn is_alive(&self) -> bool {
@@ -109,12 +149,8 @@ impl Player {
         self.alive = false;
     }
 
-    fn items(&self) -> &Items {
-        unimplemented!()
-    }
-
     pub async fn add_item(&mut self, item: Item, pool: &PgPool) -> CommandResult {
-        self._items(pool).await?.add_item(item, pool).await
+        self.items(pool).await?.add_item(item, pool).await
     }
 
     /// This method adds more one of `item_name` to this player's inventory
@@ -141,10 +177,6 @@ impl Player {
 
     pub async fn get_inventory_string(&self, _pool: &PgPool) -> CommandResult<String> {
         todo!()
-    }
-
-    fn items_mut(&mut self) -> &mut Items {
-        unimplemented!()
     }
 
     pub async fn add_note(&self, _text: &str, _when: &str, _pool: &PgPool) -> CommandResult {
@@ -185,7 +217,7 @@ impl Player {
         self.role.name()
     }
 
-    async fn _items(&self, pool: &PgPool) -> CommandResult<Items> {
+    async fn items(&self, pool: &PgPool) -> CommandResult<Items> {
         let mut res = sqlx::query!(
             r#"
 SELECT count, name
