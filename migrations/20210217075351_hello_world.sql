@@ -108,3 +108,12 @@ CREATE TABLE IF NOT EXISTS public.notes (
     is_ripped boolean NOT NULL,
     FOREIGN KEY (game_id, user_id) REFERENCES public.players (game_id, user_id)
 );
+
+CREATE TABLE IF NOT EXISTS public.secret_meetings (
+    id serial PRIMARY KEY,
+    game_id bigint NOT NULL,
+    host bigint NOT NULL,
+    visitor bigint NOT NULL,
+    channel_id bigint NOT NULL,
+    day int NOT NULL
+);
