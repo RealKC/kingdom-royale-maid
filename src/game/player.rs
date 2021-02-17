@@ -192,7 +192,6 @@ WHERE day = $1 AND host = $2
     }
 
     pub async fn get_note(&self, _idx: usize, _pool: &PgPool) -> CommandResult<Option<Note>> {
-        // TODO: The database needs to hold the number of notes a player has somewhere
         todo!()
     }
 
