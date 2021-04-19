@@ -13,7 +13,7 @@ publish = false
 deterministic = []
 
 [dependencies]
-tokio = { version = "1.4.0", features = ["macros", "signal", "rt-multi-thread"] }
+tokio = { version = "1.5.0", features = ["macros", "signal", "rt-multi-thread"] }
 futures = "0.3.14"
 
 tracing = "0.1.25"
