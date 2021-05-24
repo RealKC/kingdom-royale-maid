@@ -34,7 +34,7 @@ libwebp-image = "0.2.0"
 chrono = "0.4.19"
 
 [target.'cfg(target_os = "linux")'.dependencies]
-humansize = "1.1.0"
+humansize = "1.1.1"
 procfs = "0.9.1"
 
 [dependencies.serenity]
