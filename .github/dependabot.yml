@@ -6,6 +6,7 @@ updates:
       interval: "weekly"
     commit-message:
       prefix: "Chore(ga): "
+    open-pull-requests-limit: 0
 
   - package-ecosystem: "cargo"
     directory: "/"
@@ -13,3 +14,4 @@ updates:
       interval: "weekly"
     commit-message:
       prefix: "Chore(rs): "
+    open-pull-requests-limit: 0
