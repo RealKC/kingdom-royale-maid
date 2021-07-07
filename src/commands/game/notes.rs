@@ -1,12 +1,8 @@
 use super::prelude::*;
-use crate::{
-    data::Prefix,
-    game::item::{MemoBook, Note},
-    helpers::react::react_with,
-};
+use crate::{data::Prefix, game::item::Note, helpers::react::react_with};
 
 use futures::StreamExt;
-use serenity::{builder::CreateEmbed, model::id::UserId};
+use serenity::model::id::UserId;
 use std::time::Duration;
 
 #[command]
@@ -18,44 +14,30 @@ pub async fn notes(ctx: &Context, msg: &Message) -> CommandResult {
     let game_guard = get_game_guard(ctx).await?;
     let game = game_guard.read().await;
 
-    let player = game.player(msg.author.id).expect("notes: UserIsPlaying broke its contract");
+    let pool = ctx
+        .data
+        .read()
+        .await
+        .get::<Db>()
+        .cloned()
+        .expect("Have a pool in ctx.data");
+
+    let player = game
+        .player(msg.author.id)
+        .expect("notes: UserIsPlaying broke its contract");
     let channel = player.room();
-    let memo_book = player.items().memo_book();
 
-    fn make_note_embed(memo: &MemoBook, start: usize, end: usize) -> Option<CreateEmbed> {
-        if end >= memo.number_of_written_notes() {
-            return None;
-        }
-
-        let mut embed = CreateEmbed::default();
-
-        for i in start..end {
-            let note = memo.get_note(i);
-            if note.is_none() {
-                break;
-            }
-            let note = note.unwrap();
-
-            embed.field(note.when.clone(), format! {"{}. {}", i, note.text}, false);
-        }
-
-        Some(embed)
-    }
+    let embed = player.get_notes_between_as_embed(0, 3, &pool).await?;
 
     let mut sent_msg = channel
         .send_message(ctx, |m| {
-            if let Some(embed) = make_note_embed(memo_book, 0, 3) {
-                m.set_embed(embed);
+            if let Some(embed) = embed {
+                m.set_embed(embed)
             } else {
-                m.content("You haven't written any notes yet");
+                m.content("You haven't written any notes yet")
             }
-            m
         })
         .await?;
-
-    if memo_book.number_of_written_notes() == 0 {
-        return Ok(());
-    }
 
     static REACTIONS: [&str; 2] = ["⏮️", "⏭️"];
     react_with(ctx, &sent_msg, &REACTIONS).await?;
@@ -71,11 +53,13 @@ pub async fn notes(ctx: &Context, msg: &Message) -> CommandResult {
     let mut current_start_note = 3;
     while let Some(reaction) = reactions_collector.next().await {
         if reaction.as_inner_ref().emoji.to_string() == REACTIONS[0] {
+            let embed = player
+                .get_notes_between_as_embed(current_start_note, current_start_note + 3, &pool)
+                .await?;
+
             sent_msg
                 .edit(ctx, |em| {
-                    if let Some(embed) =
-                        make_note_embed(memo_book, current_start_note, current_start_note + 3)
-                    {
+                    if let Some(embed) = embed {
                         em.embed(|e| {
                             *e = embed;
                             e
@@ -86,11 +70,13 @@ pub async fn notes(ctx: &Context, msg: &Message) -> CommandResult {
                 })
                 .await?;
         } else if reaction.as_inner_ref().emoji.to_string() == REACTIONS[1] {
+            let embed = player
+                .get_notes_between_as_embed(current_start_note - 3, current_start_note, &pool)
+                .await?;
+
             sent_msg
                 .edit(ctx, |em| {
-                    if let Some(embed) =
-                        make_note_embed(memo_book, current_start_note - 3, current_start_note)
-                    {
+                    if let Some(embed) = embed {
                         em.embed(|e| {
                             *e = embed;
                             e
@@ -122,7 +108,17 @@ pub async fn write_note(ctx: &Context, msg: &Message, args: Args) -> CommandResu
     let game_guard = get_game_guard(ctx).await?;
     let mut game = game_guard.write().await;
 
-    let time_range = game.time_range().expect("write_note: StandardGameCheck broke its contract").to_string();
+    let pool = ctx
+        .data
+        .read()
+        .await
+        .get::<Db>()
+        .cloned()
+        .expect("Have a pool in ctx.data");
+
+    let time_range = game
+        .time_range()
+        .expect("write_note: StandardGameCheck broke its contract");
     let player = game.player_mut(msg.author.id);
 
     if player.is_none() {
@@ -135,10 +131,7 @@ pub async fn write_note(ctx: &Context, msg: &Message, args: Args) -> CommandResu
     }
     let player = player.unwrap();
 
-    let res = player
-        .items_mut()
-        .memo_book_mut()
-        .add_note(note.into(), time_range);
+    let res = player.add_note(note, time_range, &pool).await;
 
     match res {
         Ok(_) => (),
@@ -164,6 +157,14 @@ pub async fn show_note(ctx: &Context, msg: &Message, args: Args) -> CommandResul
     let game_guard = get_game_guard(ctx).await?;
     let game = game_guard.write().await;
 
+    let pool = ctx
+        .data
+        .read()
+        .await
+        .get::<Db>()
+        .cloned()
+        .expect("Have a pool in ctx.data");
+
     let player = game.player(msg.author.id);
 
     if player.is_none() {
@@ -183,7 +184,7 @@ pub async fn show_note(ctx: &Context, msg: &Message, args: Args) -> CommandResul
     }
     let page = page.unwrap();
 
-    let note = player.items().memo_book().get_note(page);
+    let note = player.get_note(page, &pool).await?;
 
     if note.is_none() {
         msg.channel_id
@@ -214,6 +215,14 @@ pub async fn rip_note(ctx: &Context, msg: &Message, mut args: Args) -> CommandRe
 
     let game_guard = get_game_guard(ctx).await?;
     let mut game = game_guard.write().await;
+
+    let pool = ctx
+        .data
+        .read()
+        .await
+        .get::<Db>()
+        .cloned()
+        .expect("Have a pool in ctx.data");
 
     let page = page.unwrap();
 
@@ -259,10 +268,13 @@ pub async fn rip_note(ctx: &Context, msg: &Message, mut args: Args) -> CommandRe
             return Ok(());
         }
 
-        myself.unwrap().items_mut().memo_book_mut().rip_note(page)
+        myself.unwrap().rip_note(page, &pool).await?
     };
 
-    let time_range = game.time_range().expect("rip_note: StandardGameCheck broke its contract").to_string();
+    let time_range = game
+        .time_range()
+        .expect("rip_note: StandardGameCheck broke its contract")
+        .to_string();
     {
         let them = game.player_mut(target).unwrap();
         let note = note.unwrap_or(Note {
@@ -282,7 +294,7 @@ pub async fn rip_note(ctx: &Context, msg: &Message, mut args: Args) -> CommandRe
             )
             .await?;
 
-        them.items_mut().memo_book_mut().add_ripped_note(note);
+        them.add_ripped_note(note, &pool).await?;
     }
 
     Ok(())

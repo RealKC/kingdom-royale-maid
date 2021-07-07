@@ -1,42 +1,65 @@
-use std::fmt::Debug;
+use std::{fmt::Debug, unimplemented};
 
 use super::{
+    db,
     fsm::TimeBlock,
-    item::{Item, Items},
+    item::{Count, Item, Items, Note},
     roles::{RoleHolder, RoleName},
     DeathCause,
 };
+use futures::TryStreamExt;
 use serenity::{
+    builder::CreateEmbed,
     framework::standard::CommandResult,
-    model::id::{ChannelId, UserId},
+    model::id::{ChannelId, GuildId, UserId},
     prelude::*,
 };
+use sqlx::PgPool;
+use tracing::{info, instrument};
 
 pub type SecretMeeting = Option<(UserId, ChannelId)>;
 
 #[derive(Clone)]
 pub struct Player {
     id: UserId,
+    guild_id: GuildId,
     role: RoleHolder,
     alive: bool,
     room: ChannelId,
-    secret_meeting_partner: Option<UserId>,
-    secret_meeting_channels: Vec<(SecretMeeting, SecretMeeting)>,
-    items: Items,
 }
 
 impl Player {
-    pub fn new(id: UserId, role: RoleHolder, room: ChannelId, watch_colour: String) -> Self {
+    pub fn new(
+        id: UserId,
+        guild_id: GuildId,
+        role: RoleHolder,
+        room: ChannelId,
+        _watch_colour: String,
+    ) -> Self {
         // PONDER: We may want to allow disabling certain items
         //         If we do, how should that be handled? Should we just pass a reference to the Game and ask it for enabled items?
         Self {
             id,
+            guild_id,
             role,
             room,
             alive: true,
-            secret_meeting_partner: None,
-            secret_meeting_channels: vec![],
-            items: Items::new(watch_colour),
+        }
+    }
+
+    pub fn from_db(
+        id: UserId,
+        guild_id: GuildId,
+        role: db::Role,
+        room: ChannelId,
+        alive: bool,
+    ) -> Self {
+        Self {
+            id,
+            guild_id,
+            role: role.into(),
+            alive,
+            room,
         }
     }
 
@@ -48,32 +71,59 @@ impl Player {
         self.room
     }
 
-    pub fn secret_meeting_partner(&self) -> Option<UserId> {
-        self.secret_meeting_partner
+    #[instrument]
+    pub async fn secret_meeting_partner_on(&self, day: u8, pool: &PgPool) -> Option<UserId> {
+        sqlx::query!(
+            r#"
+SELECT visitor
+FROM public.secret_meetings
+WHERE day = $1 AND game_id = $2 AND host = $3 
+    "#,
+            day as i32,
+            self.guild_id.0 as i64,
+            self.id.0 as i64
+        )
+        .fetch_optional(pool)
+        .await
+        .map_err(|e| {
+            info!("secret_meeting_partner_on: {:?}", e);
+            e
+        })
+        .ok()?
+        .map(|row| UserId(row.visitor as u64))
     }
 
-    pub fn set_secret_meeting_partner(&mut self, partner: UserId) {
-        self.secret_meeting_partner = Some(partner);
-    }
+    pub async fn get_secret_meetings_for_day(
+        &self,
+        day: u8,
+        pool: &PgPool,
+    ) -> Option<(SecretMeeting, SecretMeeting)> {
+        let mut results = sqlx::query!(
+            r#"
+SELECT visitor, channel_id
+FROM public.secret_meetings
+WHERE day = $1 AND host = $2
+        "#,
+            day as i32,
+            self.id.0 as i64
+        )
+        .fetch(pool);
 
-    pub fn add_secret_meeting(&mut self, day: u8, channel: ChannelId) {
-        let day = day as usize;
-        self.secret_meeting_channels.resize(day, (None, None));
-        let secret_meetings_for_day = self
-            .secret_meeting_channels
-            .get_mut(day)
-            .expect("yeah we done goofed it seems");
-
-        if secret_meetings_for_day.0.is_none() {
-            secret_meetings_for_day.0 = Some((self.secret_meeting_partner.expect("We should have a secret_meeting_partner when we're adding secret rooms to players"), channel));
-        } else {
-            debug_assert!(secret_meetings_for_day.1.is_none());
-            secret_meetings_for_day.1 = Some((self.secret_meeting_partner.expect("We should have a secret_meeting_partner when we're adding secret rooms to players"), channel));
+        let mut meetings = vec![];
+        while let Ok(Some(result)) = results.try_next().await {
+            meetings.push((
+                UserId(result.visitor as u64),
+                ChannelId(result.channel_id as u64),
+            ));
         }
-    }
 
-    pub fn get_secret_meetings_for_day(&self, day: u8) -> Option<&(SecretMeeting, SecretMeeting)> {
-        self.secret_meeting_channels.get(day as usize)
+        debug_assert!(meetings.len() == 2);
+
+        if meetings.is_empty() {
+            None
+        } else {
+            Some((meetings.get(0).copied(), meetings.get(1).copied()))
+        }
     }
 
     pub fn is_alive(&self) -> bool {
@@ -99,16 +149,63 @@ impl Player {
         self.alive = false;
     }
 
-    pub fn items(&self) -> &Items {
-        &self.items
+    pub async fn add_item(&mut self, item: Item, pool: &PgPool) -> CommandResult {
+        self.items(pool).await?.add_item(item, pool).await
     }
 
-    pub fn add_item(&mut self, item: Item) {
-        self.items.add_item(item)
+    /// This method adds more one of `item_name` to this player's inventory
+    pub async fn add_one_more_item(&self, _item_name: &str, _pool: &PgPool) -> CommandResult {
+        todo!()
     }
 
-    pub fn items_mut(&mut self) -> &mut Items {
-        &mut self.items
+    pub async fn get_item(
+        &self,
+        _item_name: &str,
+        _pool: &PgPool,
+    ) -> CommandResult<Option<(Count, Item)>> {
+        todo!()
+    }
+
+    /// Same as `get_item` but it devreases the count of the item by one
+    pub async fn take_item(
+        &self,
+        _item_name: &str,
+        _pool: &PgPool,
+    ) -> CommandResult<Option<(Count, Item)>> {
+        todo!()
+    }
+
+    pub async fn get_inventory_string(&self, _pool: &PgPool) -> CommandResult<String> {
+        todo!()
+    }
+
+    pub async fn add_note(&self, _text: &str, _when: &str, _pool: &PgPool) -> CommandResult {
+        todo!()
+    }
+
+    pub async fn add_ripped_note(&self, _note: Note, _pool: &PgPool) -> CommandResult {
+        todo!()
+    }
+
+    pub async fn rip_note(&self, _idx: usize, _pool: &PgPool) -> CommandResult<Option<Note>> {
+        todo!()
+    }
+
+    pub async fn get_note(&self, _idx: usize, _pool: &PgPool) -> CommandResult<Option<Note>> {
+        todo!()
+    }
+
+    pub async fn get_notes_between_as_embed(
+        &self,
+        _start: usize,
+        _end: usize,
+        _pool: &PgPool,
+    ) -> CommandResult<Option<CreateEmbed>> {
+        todo!()
+    }
+
+    pub async fn eat_or_starve(&self, _ctx: &Context, _pool: &PgPool) -> CommandResult {
+        todo!()
     }
 
     pub fn win_condition_achieved(&self, block: &dyn TimeBlock) -> bool {
@@ -117,6 +214,27 @@ impl Player {
 
     pub fn role_name(&self) -> RoleName {
         self.role.name()
+    }
+
+    async fn items(&self, pool: &PgPool) -> CommandResult<Items> {
+        let mut res = sqlx::query!(
+            r#"
+SELECT count, name
+FROM public.items
+WHERE user_id = $1 AND game_id = $2
+        "#,
+            self.id.0 as i64,
+            self.guild_id.0 as i64
+        )
+        .fetch(pool);
+
+        let mut raw_items: Vec<(u8, String)> = Vec::with_capacity(6);
+
+        while let Ok(Some(raw_item)) = res.try_next().await {
+            raw_items.push((raw_item.count as u8, raw_item.name));
+        }
+
+        todo!()
     }
 }
 
@@ -127,9 +245,6 @@ impl Debug for Player {
             .field("role", &self.role.name())
             .field("alive", &self.alive)
             .field("room", &self.room)
-            .field("secret_meeting_partner", &self.secret_meeting_partner)
-            .field("secret_meeting_channels", &self.secret_meeting_channels)
-            .field("items", &self.items)
             .finish()
     }
 }

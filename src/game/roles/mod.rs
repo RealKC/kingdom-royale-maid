@@ -16,6 +16,8 @@ pub use prince::Prince;
 pub use revolutionary::Revolutionary;
 pub use sorcerer::Sorcerer;
 
+use super::db;
+
 #[derive(Clone)]
 pub enum RoleHolder {
     King(King),
@@ -46,6 +48,19 @@ impl RoleHolder {
             RoleHolder::Sorcerer(r) => r.win_condition_achieved(block),
             RoleHolder::Knight(r) => r.win_condition_achieved(block),
             RoleHolder::Revolutionary(r) => r.win_condition_achieved(block),
+        }
+    }
+}
+
+impl From<db::Role> for RoleHolder {
+    fn from(role: db::Role) -> Self {
+        match role {
+            db::Role::King => Self::King(King),
+            db::Role::Price => Self::Prince(Prince),
+            db::Role::TheDouble => Self::Double(TheDouble),
+            db::Role::Knight => Self::Knight(Knight),
+            db::Role::Sorcerer => Self::Sorcerer(Sorcerer),
+            db::Role::Revolutionary => Self::Revolutionary(Revolutionary),
         }
     }
 }

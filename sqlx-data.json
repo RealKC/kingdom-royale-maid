@@ -1,0 +1,292 @@
+{
+  "db": "PostgreSQL",
+  "2a65bae0cdea908912827d6eb7809319627030625ebee6566208600ecf3e1b53": {
+    "query": "\nSELECT \n    gstate as \"gstate: db::GameState\",\n    day,\n    meeting_room,\n    announcement_channel,\n    host,\n    player_role,\n    delete_rooms_category_on_game_end,\n    kss as \"kss: SubstitutionStatus\"\nFROM public.running_games\nWHERE guild_id = $1\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "gstate: db::GameState",
+          "type_info": {
+            "Custom": {
+              "name": "game_state",
+              "kind": {
+                "Enum": [
+                  "notstarted",
+                  "ablock",
+                  "bblock",
+                  "cblock",
+                  "dblock",
+                  "eblock",
+                  "fblock",
+                  "gameended"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "ordinal": 1,
+          "name": "day",
+          "type_info": "Int4"
+        },
+        {
+          "ordinal": 2,
+          "name": "meeting_room",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 3,
+          "name": "announcement_channel",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 4,
+          "name": "host",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 5,
+          "name": "player_role",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 6,
+          "name": "delete_rooms_category_on_game_end",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 7,
+          "name": "kss: SubstitutionStatus",
+          "type_info": {
+            "Custom": {
+              "name": "king_substitution_status",
+              "kind": {
+                "Enum": [
+                  "hasnot",
+                  "currentlyis",
+                  "has"
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  },
+  "3bdb7548959dc1f9ff7572ffd17b18a2725772490992ebb8080e91d7e2926c56": {
+    "query": "\nSELECT visitor, channel_id\nFROM public.secret_meetings\nWHERE day = $1 AND host = $2\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "visitor",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "channel_id",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        false
+      ]
+    }
+  },
+  "81df8fa6cff492cec42bc77f5d3d01942e607db5c73ae20a83b319f9137275d0": {
+    "query": "\nINSERT INTO public.secret_meetings (game_id, host, visitor, channel_id, day)\nVALUES ($1, $2, $3, $4, $5)\n        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8",
+          "Int8",
+          "Int8",
+          "Int4"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "899fcbff1977dc10e5de976ca1f732fcb5dfd25dea48c6f2ac1ed7ec16ed74f9": {
+    "query": "\nSELECT count, name\nFROM public.items\nWHERE user_id = $1 AND game_id = $2\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "count",
+          "type_info": "Int4"
+        },
+        {
+          "ordinal": 1,
+          "name": "name",
+          "type_info": "Varchar"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        false
+      ]
+    }
+  },
+  "a740dbd07a4700ef9643f71b94ed1b23750524da0fba14af1c51ca405f9a2694": {
+    "query": "\nSELECT * FROM public.lobbies\nWHERE guild_id = $1\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "guild_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "players",
+          "type_info": "Int8Array"
+        },
+        {
+          "ordinal": 2,
+          "name": "meeting_room",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 3,
+          "name": "announcement_channel",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 4,
+          "name": "host",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 5,
+          "name": "player_role",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 6,
+          "name": "delete_rooms_category_on_game_end",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  },
+  "b30368979bf0bf3a15182bc1182e159fc38b96ece9279bed32d2f6c6d60d8cec": {
+    "query": "\nSELECT user_id, channel_id, alive, prole as \"prole: db::Role\"\nFROM public.players\nWHERE game_id = $1\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "user_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "channel_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "alive",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 3,
+          "name": "prole: db::Role",
+          "type_info": {
+            "Custom": {
+              "name": "player_role",
+              "kind": {
+                "Enum": [
+                  "king",
+                  "prince",
+                  "the_double",
+                  "knight",
+                  "sorcerer",
+                  "revolutionary"
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  },
+  "ed109259d76ce139f7afb76c1a0c848c0ccaf4ae1d8976ac5962d9cbb881dadf": {
+    "query": "\nSELECT visitor\nFROM public.secret_meetings\nWHERE day = $1 AND game_id = $2 AND host = $3 \n    ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "visitor",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int8",
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  }
+}

@@ -1,6 +1,6 @@
 use crate::{
     commands::{help::*, *},
-    data::{stats, Cdn, Prefix, Reqwest, ReqwestClient},
+    data::{stats, Cdn, Db, Prefix, Reqwest, ReqwestClient},
     hooks::*,
 };
 use serenity::{
@@ -17,6 +17,7 @@ use serenity::{
     },
     prelude::*,
 };
+use sqlx::PgPool;
 use std::{collections::HashSet, fs::File, io::Read, sync::Arc, time};
 use tokio::sync::Mutex;
 use tracing::info;
@@ -45,6 +46,7 @@ impl Bot {
         token: String,
         prefix: String,
         cdn_channel_id: ChannelId,
+        database_url: &str,
         startup_time: time::Instant,
     ) -> Self {
         let http = Http::new_with_token(&token);
@@ -53,7 +55,7 @@ impl Bot {
         let client = Self::new_client(&token, http, framework).await;
 
         let mut bot = Self { client };
-        bot.initialise_data(cdn_channel_id, prefix, startup_time)
+        bot.initialise_data(cdn_channel_id, prefix, startup_time, database_url)
             .await;
 
         bot
@@ -139,6 +141,7 @@ impl Bot {
         cdn_channel_id: ChannelId,
         prefix: String,
         startup_time: time::Instant,
+        database_url: &str,
     ) {
         let reqwest_client = Reqwest::builder()
             .user_agent("Mozilla/5.0 (X11; Linux x86_64; rv:81.0) Gecko/20100101 Firefox/81.0")
@@ -147,6 +150,10 @@ impl Bot {
                 "Could not create a Reqwest client, which is necessary for the bot to function.",
             );
 
+        let pool = PgPool::connect(database_url)
+            .await
+            .expect("Could not connect to database");
+
         let mut data = self.client.data.write().await;
 
         #[cfg(target_os = "linux")]
@@ -154,6 +161,7 @@ impl Bot {
             data.insert::<stats::SystemVersion>(version);
         }
 
+        data.insert::<Db>(pool);
         data.insert::<stats::CommandStatisticsContainer>(Default::default());
         data.insert::<stats::StartupTime>(startup_time);
         data.insert::<ShardManagerContainer>(Arc::clone(&self.client.shard_manager));

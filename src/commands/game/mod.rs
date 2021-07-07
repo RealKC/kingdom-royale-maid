@@ -52,7 +52,7 @@ impl TypeMapKey for GameContainer {
 
 mod prelude {
     pub use super::{checks::*, GameContainer};
-    pub use crate::{commands::prelude::*, game::Game};
+    pub use crate::{commands::prelude::*, data::Db, game::Game};
 
     /// Gets a `Arc<RwLock<Game>>` from `ctx.data`
     pub async fn get_game_guard(ctx: &Context) -> CommandResult<Arc<RwLock<Game>>> {

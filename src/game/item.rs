@@ -1,3 +1,5 @@
+use serenity::framework::standard::CommandResult;
+use sqlx::PgPool;
 use tracing::{error, instrument};
 
 #[derive(Debug, Clone)]
@@ -59,7 +61,7 @@ impl Item {
     }
 }
 
-type Count = u8;
+pub type Count = u8;
 
 #[derive(Debug, Clone)]
 pub struct Items {
@@ -118,8 +120,8 @@ impl Items {
         &mut self.memo_book
     }
 
-    pub fn add_item(&mut self, item: Item) {
-        self.items.push((1, item))
+    pub async fn add_item(&mut self, item: Item, pool: &PgPool) -> CommandResult {
+        todo!()
     }
 }
 

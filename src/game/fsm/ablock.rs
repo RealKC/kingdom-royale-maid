@@ -3,6 +3,7 @@
 //! During this block the meeting room gets opened.
 
 use super::{macros::state::*, *};
+use crate::game::db;
 
 use serenity::{model::id::UserId, prelude::*};
 use std::collections::BTreeMap;

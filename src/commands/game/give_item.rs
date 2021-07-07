@@ -21,6 +21,14 @@ pub async fn give_item(ctx: &Context, msg: &Message, mut args: Args) -> CommandR
     let game_guard = get_game_guard(ctx).await?;
     let mut game = game_guard.write().await;
 
+    let pool = ctx
+        .data
+        .read()
+        .await
+        .get::<Db>()
+        .cloned()
+        .expect("Have a pool in ctx.data");
+
     let giver = game.player_mut(msg.author.id).expect("needed");
 
     let target = args.single::<UserId>();
@@ -47,23 +55,23 @@ Note that the syntax of this command is `!give <TARGET> <WHAT>`, you'd use it li
         return Ok(());
     }
     let what_as_str = what.unwrap();
-    let watch_name = giver.items().get_item("watch").1.name.clone();
+    let watch_name = giver
+        .get_item("watch", &pool)
+        .await?
+        .unwrap()
+        .1
+        .name
+        .clone();
 
     let what = parse_item(what_as_str, watch_name.as_ref());
     if what.is_err() {
         msg.reply(ctx, what.unwrap_err()).await?;
         return Ok(());
     }
-    let giver_item = giver.items_mut().get_item_mut(what.unwrap().as_ref());
-    if giver_item.0 == 0 {
-        msg.reply(ctx, "You can't give away items you don't have")
-            .await?;
-        return Ok(());
-    }
-
-    giver_item.0 -= 1;
-    // };/
-    // drop(giver); // stop borrowing `game` as mut here
+    let _giver_item = giver
+        .take_item(what.unwrap().as_ref(), &pool)
+        .await?
+        .unwrap();
 
     match game.player_mut(target) {
         Some(target) => {
@@ -74,15 +82,20 @@ Note that the syntax of this command is `!give <TARGET> <WHAT>`, you'd use it li
             }
 
             if !what.as_ref().unwrap().contains("watch") {
-                let target_item = target.items_mut().get_item_mut(what.unwrap().as_ref());
-
-                target_item.0 += 1;
+                target
+                    .add_one_more_item(what.unwrap().as_ref(), &pool)
+                    .await?
             } else {
-                target.add_item(Item {
-                    name: what.unwrap(),
-                    edible: false,
-                    weapon: false,
-                });
+                target
+                    .add_item(
+                        Item {
+                            name: what.unwrap(),
+                            edible: false,
+                            weapon: false,
+                        },
+                        &pool,
+                    )
+                    .await?;
             }
         }
         None => {

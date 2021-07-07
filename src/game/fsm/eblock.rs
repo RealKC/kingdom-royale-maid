@@ -11,7 +11,8 @@ use super::{
     *,
 };
 use crate::{
-    game::{item, DeathCause},
+    data::Db,
+    game::DeathCause,
     helpers::{choose_target::build_embed_for_target_choice, react::react_with},
 };
 
@@ -79,19 +80,16 @@ impl GameMachine<EBlock> {
     }
 
     async fn make_players_eat_or_starve(&mut self, ctx: &Context) -> CommandResult {
+        let pool = ctx
+            .data
+            .read()
+            .await
+            .get::<Db>()
+            .cloned()
+            .expect("Have a pool in ctx.data");
+
         for player in self.state.players_mut().iter_mut() {
-            let items = player.1.items_mut();
-
-            let food = items.get_item_mut(item::Item::FOOD_NAME);
-
-            if food.0 > 0 {
-                food.0 -= 1;
-            } else {
-                player
-                    .1
-                    .set_dead(DeathCause::Starvation, ctx, self.metadata.meeting_room)
-                    .await?;
-            }
+            player.1.eat_or_starve(ctx, &pool).await?;
         }
 
         Ok(())

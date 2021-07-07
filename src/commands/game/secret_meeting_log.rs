@@ -38,6 +38,14 @@ pub async fn show_meeting_log(ctx: &Context, msg: &Message, mut args: Args) -> C
         .expect("Prefix should always be in ctx.data")
         .clone();
 
+    let pool = ctx
+        .data
+        .read()
+        .await
+        .get::<Db>()
+        .cloned()
+        .expect("Db in data");
+
     let day = match args.single::<u8>() {
         Ok(day) => day,
         Err(err) => {
@@ -74,7 +82,9 @@ pub async fn show_meeting_log(ctx: &Context, msg: &Message, mut args: Args) -> C
         }
     };
 
-    let player = game.player(msg.author.id).expect("show_meeting_log: UserIsPlaying broke its contract");
+    let player = game
+        .player(msg.author.id)
+        .expect("show_meeting_log: UserIsPlaying broke its contract");
 
     static EXPECT_ERR_MSG: &str = "show_meeting_log: StandardGameCheck broke its contract";
     if day > game.day().expect(EXPECT_ERR_MSG)
@@ -89,34 +99,30 @@ pub async fn show_meeting_log(ctx: &Context, msg: &Message, mut args: Args) -> C
     }
 
     // PANIC SAFETY: Unwrapping here should be safe as we check above that the `day` is within bounds
-    let secret_meetings = player.get_secret_meetings_for_day(day).unwrap();
+    let secret_meetings = player
+        .get_secret_meetings_for_day(day, &pool)
+        .await
+        .unwrap();
     let which_meeting = args.single::<u8>().ok();
 
-    let (partner, room) = match choose_secret_meeting(
-        ctx,
-        msg,
-        partner,
-        day,
-        which_meeting,
-        secret_meetings,
-    )
-    .await?
-    {
-        Some((partner, room)) => (partner, room),
-        None => {
-            let partner_name = partner_id.to_user(ctx).await?.name;
-            warn!(
-                "No secret meeting between {author} and {partner} on day={day}",
-                author = msg.author.name,
-                partner = partner_name,
-                day = day
-            );
-            msg.reply(ctx, "There wasn't actually a secret meeting! Huh...")
-                .await?;
-            // Not actually an "Ok" state I believe, but I do my own logging and I don't want serenity to log here
-            return Ok(());
-        }
-    };
+    let (partner, room) =
+        match choose_secret_meeting(ctx, msg, partner, day, which_meeting, &secret_meetings).await?
+        {
+            Some((partner, room)) => (partner, room),
+            None => {
+                let partner_name = partner_id.to_user(ctx).await?.name;
+                warn!(
+                    "No secret meeting between {author} and {partner} on day={day}",
+                    author = msg.author.name,
+                    partner = partner_name,
+                    day = day
+                );
+                msg.reply(ctx, "There wasn't actually a secret meeting! Huh...")
+                    .await?;
+                // Not actually an "Ok" state I believe, but I do my own logging and I don't want serenity to log here
+                return Ok(());
+            }
+        };
 
     let mut messages = room.messages_iter(&ctx).boxed();
     let mut message_fields: Vec<(String, String, bool)> = vec![];
